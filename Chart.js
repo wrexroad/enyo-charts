@@ -2,16 +2,18 @@ enyo.kind({
   name: "Chart",
   kind: "Component",
   
-  height: 0,
-  width: 0,
-  plotRegion: 0,
-  bgImg: "", //id of <img> tag to be used as a background
-  bgColor: '#CCCCCC',
-  borderColor: '#000000',
-  gridColor: "gray",
-  textColor: "black",
-  cssFont: '14px "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace',
-  dataCache: null,
+  published: {  
+    height: 0,
+    width: 0,
+    plotRegion: 0,
+    bgImg: "", //id of <img> tag to be used as a background
+    bgColor: '#CCCCCC',
+    borderColor: '#000000',
+    gridColor: "gray",
+    textColor: "black",
+    cssFont: '14px "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace',
+    dataCache: null
+  },
   observers: [
     {method: "resize", path: ["height", "width"]},
     {method: "calculateSpacing", path: ["dataCache"]}
@@ -36,9 +38,6 @@ enyo.kind({
     //default x and y origins for the canvas coordinate system   
     this.origin = {x : 60, y : 20};
 
-    //store the datapoints that have been drawn most recently
-    this.dataCache = {};
-
     this.resize();
   },
   resize: function(){
@@ -58,10 +57,20 @@ enyo.kind({
     this.$.dataCanvas.update();
     
     //redraw
-    this.drawData(this.dataCache);
+    if (this.dataCache) {
+      this.drawData();
+      this.drawDecor();
+    }
+  },
+  draw: function(chartData) {
+    this.set("dataCache", chartData);
+    this.drawData();
+    this.drawDecor();
   },
 
   //abstract functions to be defined by the chart subkind
-  drawData: function(){},
-  calculateSpacing: function(){}
+  drawData: function() {},
+  drawDecor: function() {},
+  calculateSpacing: function() {},
+  invertCoordinates: function() {}
 });
