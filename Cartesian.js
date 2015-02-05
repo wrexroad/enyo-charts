@@ -6,14 +6,13 @@ enyo.kind({
     xSpacingFactor: 1,
     ySpacingFactor: 1
   },
-  
-  rendered: function() {
+
+  constructor: function() {
     this.inherited(arguments);
-  
-    //initalize the range for each axis
-    this._setAxisRange("x", {});
-    this._setAxisRange("y", {});
-    this.set("autoRange", {x: true, y: true});
+
+    this.formatters = {x: this.defaultFormatter, y: this.defaultFormatter};
+    this.axisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
+    this.autoRange = {x: true, y: true};
   },
   setAxisRange: function(axis, newRange) {
     var autoRange = this.autoRange;
@@ -23,8 +22,7 @@ enyo.kind({
     this._setAxisRange(axis, newRange);
   },
   _setAxisRange: function(axis, newRange) {
-    var range =
-      this.axisRange || {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
+    var range = this.axisRange;
 
     axis = (axis || "").toLowerCase();
     newRange = newRange || {};
@@ -41,10 +39,12 @@ enyo.kind({
       canvasAttributes = this.$.dataCanvas.attributes;
 
     this.set(
-      "xSpacingFactor", canvasAttributes.width / (xRange.max - xRange.min)
+      "xSpacingFactor",
+      canvasAttributes.width / (+xRange.max || 0 - +xRange.min || 0)
     );
     this.set(
-      "ySpacingFactor", canvasAttributes.height / (yRange.max - yRange.min)
+      "ySpacingFactor",
+      canvasAttributes.height / (+yRange.max || 0 - +yRange.min || 0)
     );
   },
   calculateMargins: function() {
@@ -66,10 +66,9 @@ enyo.kind({
     var
       ctx = this.decorCtx,
       margin = this.decorMargin,
-      labels = this.labels || {},
-      formatters = this.formatters || {},
-      yFormat = formatters.y || this.defaultFormatter,
-      xFormat = formatters.x || this.defaultFormatter,
+      formatters = this.formatters,
+      yFormat = formatters.y,
+      xFormat = formatters.x,
       axisRange = this.axisRange,
       yRange = axisRange.y,
       xRange = axisRange.x,

@@ -28,7 +28,12 @@ enyo.kind({
     {name: "decorCanvas", kind: "enyo.Canvas"},
     {name: "dataCanvas", kind: "enyo.Canvas"}
   ],
+  constructor: function() {
+    this.inherited(arguments);
 
+    this.dataCache = [];
+    this.decorMargin = {top: 10, bottom: 10, left: 10, right: 10};
+  },
   //functions directly related to generating the plot
   rendered: function() {
     this.inherited(arguments);
@@ -87,14 +92,6 @@ enyo.kind({
   drawData: function() {},
   decorate: function() {},
   calculateSpacing: function() {},
-  calculateMargins: function() {
-    //this should be overridden, but just incase provide some default function
-    this.set("decorMargin", {
-      top: 10,
-      bottom: 10,
-      left: 10,
-      right: 10
-    });
-  },
+  calculateMargins: function() {},
   invertCoordinates: function() {}
 });
