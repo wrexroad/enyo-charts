@@ -197,6 +197,11 @@ enyo.kind({
       }
     }
 
+    //configure the size and color of the brush
+    ctx.save();
+    ctx.lineWidth = style.brushWidth;
+    ctx.strokeStyle = ctx.fillStyle = style.color
+
     if (style.lines) {  
       for (pnt_i = 0; pnt_i < numPts; pnt_i++) {
         //get the value of each point
@@ -225,6 +230,8 @@ enyo.kind({
 
       ctx.stroke();
     }
+
+    ctx.restore();
   },
   findRange: function(numbers){
     var min, max;
