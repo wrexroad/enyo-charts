@@ -15,28 +15,24 @@ enyo.kind({
       x: {min: NaN, max: NaN},
       y: {min: NaN, max: NaN}
     });
+    this.set("autoRange" {x: true, y: true});
   },
-  setAxisRange: function(newRange) {
+  setAxisRange: function(axis, newRange) {
+    var autoRange = this.autoRange;
+
+    autoRange[(axis || "").toLowercase()] = false;
     this.set("autoRange", false);
     this._setAxisRange(newRange);
   },
-  _setAxisRange: function(newRange) {
-    var
-      newXRange = newRange.x,
-      newYRange = newRange.y,
-      oldXRange = this.axisRange.x,
-      oldXRange = this.axisRange.y;
+  _setAxisRange: function(axis, newRange) {
+    var range = this.axisRange;
 
-    this.set("axisRange", {
-      x: {
-        min: isNaN(+newXRange.min) ? xRange.min : +newXRange.min,
-        max: isNaN(+newXRange.max) ? xRange.max : +newXRange.max,
-      },
-      y: {
-        min: isNaN(+newYRange.min) ? yRange.min : +newYRange.min,
-        max: isNaN(+newYRange.max) ? yRange.max : +newYRange.max,
-      }
-    });
+    axis = (axis || "").toLowercase()
+
+    range[axis].min: isNaN(+newRange.min) ? range.min : +newRange.min;
+    range[axis].max: isNaN(+newRange.max) ? range.max : +newRange.max;
+
+    this.set("axisRange", range);
   },
   calculateSpacing: function() {
     var
