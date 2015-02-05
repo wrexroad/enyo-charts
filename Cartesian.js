@@ -236,7 +236,7 @@ enyo.kind({
     var min, max;
 
     //filter out anything that is not a number
-    numbers = number.filter(
+    numbers = numbers.filter(
       function(value){
           return (isNaN(+value) ? false : true);
       }
