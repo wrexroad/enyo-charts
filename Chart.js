@@ -3,7 +3,6 @@ enyo.kind({
   kind: "Control",
   
   published: {
-    origin: null,
     width: 0,
     height: 0,
     bgImg: "", //id of <img> tag to be used as a background
@@ -36,9 +35,6 @@ enyo.kind({
 
     this.decorCtx = this.$.decorCanvas.node.getContext('2d');
     this.dataCtx  = this.$.dataCanvas.node.getContext('2d');
-
-    //default x and y origins for the canvas coordinate system   
-    this.origin = {x : 60, y : 20};
   },
   redraw: function() {
     var data_i;
