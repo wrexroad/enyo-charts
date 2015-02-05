@@ -20,17 +20,17 @@ enyo.kind({
   setAxisRange: function(axis, newRange) {
     var autoRange = this.autoRange;
 
-    autoRange[(axis || "").toLowercase()] = false;
+    autoRange[(axis || "").toLowerCase()] = false;
     this.set("autoRange", false);
     this._setAxisRange(newRange);
   },
   _setAxisRange: function(axis, newRange) {
     var range = this.axisRange;
 
-    axis = (axis || "").toLowercase()
+    axis = (axis || "").toLowerCase();
 
-    range[axis].min: isNaN(+newRange.min) ? range.min : +newRange.min;
-    range[axis].max: isNaN(+newRange.max) ? range.max : +newRange.max;
+    range[axis].min = isNaN(+newRange.min) ? range.min : +newRange.min;
+    range[axis].max = isNaN(+newRange.max) ? range.max : +newRange.max;
 
     this.set("axisRange", range);
   },
