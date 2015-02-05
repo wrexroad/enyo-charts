@@ -2,7 +2,8 @@ enyo.kind({
   name: "Chart",
   kind: "Control",
   
-  published: {  
+  published: {
+    origin: null,
     width: 0,
     height: 0,
     bgImg: "", //id of <img> tag to be used as a background
@@ -14,12 +15,14 @@ enyo.kind({
     fontSize: 14,
     decorCtx: null,
     dataCtx: null,
+    formatters: null,
+    axisRange: null,
     dataCache: null,
-    dataRegion: null
+    decorMargin: null,
+    autoRange: true,
   },
   observers: [
-    {method: "resize", path: ["height", "width", "fontSize"]},
-    {method: "calculateSpacing", path: ["dataCache"]}
+    {method: "redraw", path: ["height", "width", "fontSize", "axisRange"]},
   ],
 
   components: [
@@ -30,87 +33,72 @@ enyo.kind({
   //functions directly related to generating the plot
   rendered: function() {
     this.inherited(arguments);
-    
+
     this.decorCtx = this.$.decorCanvas.node.getContext('2d');
     this.dataCtx  = this.$.dataCanvas.node.getContext('2d');
 
     //default x and y origins for the canvas coordinate system   
     this.origin = {x : 60, y : 20};
-
-    this.resize();
   },
-  resize: function(){
-    
-    //figure out where the data region is
+  redraw: function() {
+    var data_i;
+
     this.calculateMargins();
-    if (!this.dataRegion) {
-      return false;
-    }
 
     //adjust the size of each canvas
     this.$.decorCanvas.attributes.height = this.height;
     this.$.decorCanvas.attributes.width = this.width;
     this.$.dataCanvas.attributes.height =
-      this.height - this.dataRegion.top - this.dataRegion.bottom;
+      this.height - this.decorMargin.top - this.decorMargin.bottom;
     this.$.dataCanvas.attributes.width =
-      this.width - this.dataRegion.left - this.dataRegion.right;
+      this.width - this.decorMargin.left - this.decorMargin.right;
 
-    //clear the canvases
-    this.$.decorCanvas.destroyClientControls();
-    this.$.decorCanvas.update();
-    this.$.dataCanvas.destroyClientControls();
-    this.$.dataCanvas.update();
-    
-    //redraw
+    this.wipePlot();
+
+    //redraw everything
+    this.calculateSpacing();
+    this.decorate();
     if (this.dataCache) {
-      this.drawData();
-      this.drawDecor();
+      for (data_i = 0; data_i < this.dataCache.length; data_i++) {
+        this.drawData(this.dataCache[data_i]);
+      }
     }
 
     return true;
   },
-  draw: function(chartData) {
-    this.set("dataCache", chartData);
-    this.drawData();
-    this.drawDecor();
+  resetPlot: function() {
+    //reset all of the plotting parameters
+    this.labels = null;
+    this.axisRange = null;
+    this.dataCache = null;
+    this.autoRange = true;
+
+    //clear the canvases
+    this.wipePlot()
   },
-
-  //utility functions
-  createLabels: function (min, max, varData) {
-    var
-      label_i, stepSize, converter, sigFigs, range, labels = [], numLabels = 10;
-
-    varData = varData || {};
-    converter = varData.converter || Dave_js.Converters.default;
-    sigFigs = varData.sigFigs;
-    min = new Big(min || 0);
-    max = new Big(max || 0);
-
-    //get the range of values
-    range = max.minus(min);
-    
-    //make sure there is a range
-    if(max.eq(min)){
-      console.error('Dave_js: Cannot create labels when min == max:');
-      console.error('\t(' + min + ' == ' + max + ')');
-      return [];
-    }
-
-    stepSize = range.div(numLabels);
-    for (label_i = min; label_i.lte(max); label_i = label_i.plus(stepSize)) {
-      labels.push({
-        text: converter(+label_i, sigFigs),
-        coord: +label_i.minus(min)
-      });
-    }
-
-    return labels;
+  wipePlot: function() {
+    this.$.decorCanvas.destroyClientControls();
+    this.$.decorCanvas.update();
+    this.$.dataCanvas.destroyClientControls();
+    this.$.dataCanvas.update();
+  },
+  defaultFormatter: function(val) {
+    return val;
   },
 
   //abstract functions to be defined by the chart subkind
+  addDataset: function() {},
   drawData: function() {},
-  drawDecor: function() {},
-  calculateMargins: function() {},
+  decorate: function() {},
   calculateSpacing: function() {},
+  calculateMargins: function() {
+    //this should be overridden, but just incase provide some default function
+    this.set("decorMargin", {
+      top: 10,
+      bottom: 10,
+      left: 10,
+      right: 10
+    });
+  },
   invertCoordinates: function() {}
 });
