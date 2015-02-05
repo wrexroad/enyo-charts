@@ -19,7 +19,7 @@ enyo.kind({
     axisRange: null,
     dataCache: null,
     decorMargin: null,
-    autoRange: true,
+    autoRange: null,
   },
   observers: [
     {method: "redraw", path: ["height", "width", "fontSize", "axisRange"]},
