@@ -42,18 +42,23 @@ enyo.kind({
     this.dataCtx  = this.$.dataCanvas.node.getContext('2d');
   },
   redraw: function() {
-    var data_i;
+    var data_i, attributes;
 
     this.calculateMargins();
 
     //adjust the size of each canvas
-    this.$.decorCanvas.attributes.height = this.height;
-    this.$.decorCanvas.attributes.width = this.width;
-    this.$.dataCanvas.attributes.height =
-      this.height - this.decorMargin.top - this.decorMargin.bottom;
-    this.$.dataCanvas.attributes.width =
-      this.width - this.decorMargin.left - this.decorMargin.right;
-
+    attributes = this.$.decorCanvas.attributes;
+    attributes.height = this.height;
+    attributes.width = this.width;
+    this.$.decorCanvas.set("attributes", attributes);
+    
+    attributes = this.$.dataCanvas.attributes;
+    attributes.height =
+      this.height - this.decorMargin.top - this.decorMargin.bottom;;
+    attributes.width =
+      this.width - this.decorMargin.left - this.decorMargin.right;;
+    this.$.dataCanvas.set("attributes", attributes);
+      
     this.wipePlot();
 
     //redraw everything
