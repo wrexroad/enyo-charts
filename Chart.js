@@ -27,7 +27,7 @@ enyo.kind({
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"},
     {name: "dataCanvas", kind: "enyo.Canvas"}
-  },
+  ],
 
   //functions directly related to generating the plot
   rendered: function() {

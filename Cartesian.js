@@ -15,7 +15,7 @@ enyo.kind({
       x: {min: NaN, max: NaN},
       y: {min: NaN, max: NaN}
     });
-    this.set("autoRange" {x: true, y: true});
+    this.set("autoRange", {x: true, y: true});
   },
   setAxisRange: function(axis, newRange) {
     var autoRange = this.autoRange;
