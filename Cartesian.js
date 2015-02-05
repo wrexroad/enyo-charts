@@ -10,27 +10,27 @@ enyo.kind({
   rendered: function() {
     this.inherited(arguments);
   
-    //default range if none is set and there are no datasets
-    this._setAxisRange({
-      x: {min: NaN, max: NaN},
-      y: {min: NaN, max: NaN}
-    });
+    //initalize the range for each axis
+    this._setAxisRange("x", {});
+    this._setAxisRange("y", {});
     this.set("autoRange", {x: true, y: true});
   },
   setAxisRange: function(axis, newRange) {
     var autoRange = this.autoRange;
 
     autoRange[(axis || "").toLowerCase()] = false;
-    this.set("autoRange", false);
-    this._setAxisRange(newRange);
+    this.set("autoRange", autoRange);
+    this._setAxisRange(axis, newRange);
   },
   _setAxisRange: function(axis, newRange) {
-    var range = this.axisRange;
+    var range =
+      this.axisRange || {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
 
     axis = (axis || "").toLowerCase();
+    newRange = newRange || {};
 
-    range[axis].min = isNaN(+newRange.min) ? range.min : +newRange.min;
-    range[axis].max = isNaN(+newRange.max) ? range.max : +newRange.max;
+    range[axis].min = isNaN(+newRange.min) ? range[axis].min : +newRange.min;
+    range[axis].max = isNaN(+newRange.max) ? range[axis].max : +newRange.max;
 
     this.set("axisRange", range);
   },
