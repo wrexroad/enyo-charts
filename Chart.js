@@ -68,6 +68,11 @@ enyo.kind({
     dataCanvas.setAttribute("width", 
       this.width - this.decorMargin.left - this.decorMargin.right
     );
+    dataCanvas.setAttribute("style",  
+        "position: absolute;" + 
+        "left:" + this.decorMargin.left + "px; " +
+        "top:" + this.decorMargin.top + "px;"
+    );
     dataCanvas.update();
     //dataCanvas.render();
 
