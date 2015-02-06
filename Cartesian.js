@@ -59,7 +59,7 @@ enyo.kind({
       left: this.decorCtx.measureText((new Array(10)).join('W')).width,
 
       //meh
-      right: 0
+      right: 5
     });
   },
   decorate: function() {
@@ -72,6 +72,9 @@ enyo.kind({
       axisRange = this.axisRange,
       yRange = axisRange.y,
       xRange = axisRange.x,
+      dataCanvas = this.$.dataCanvas.attributes,
+      dataHeight = dataCanvas.height,
+      dataWidth = dataCanvas.width,
       numTics, ticValue, ticLocation, tic_i, labelWidth;
 
     //configure the drawing context
@@ -82,14 +85,14 @@ enyo.kind({
 
     //outline the grid
     ctx.translate(margin.left, margin.top);
-    ctx.strokeRect(0, 0, this.width, this.height);
+    ctx.strokeRect(0, 0, dataWidth, dataHeight);
 
     //figure out how many labels will fit on the y axis
-    numTics = (this.height / (this.fontSize << 1)) << 0;
+    numTics = (dataHeight / (this.fontSize << 1)) << 0;
     ticStep = (yRange.max || 0 - yRange.min || 0) / numTics;
 
     //draw the y axis tics and labels
-    ctx.translate(0, this.height);
+    ctx.translate(0, dataHeight);
     for (tic_i = 0; tic_i < numTics; tic_i ++) {
       ticValue += ticStep;
       ticLocation = -ticValue * this.ySpacingFactor;
