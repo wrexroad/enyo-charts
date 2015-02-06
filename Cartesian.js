@@ -70,7 +70,11 @@ enyo.kind({
       xFormat = formatters.x,
       axisRange = this.axisRange,
       yRange = axisRange.y,
+      yMin = yRange.min || 0,
+      yMax = yRange.max || 0,
       xRange = axisRange.x,
+      xMin = xRange.min || 0,
+      xMax = xRange.max || 0,
       dataCanvas = this.$.dataCanvas.attributes,
       dataHeight = dataCanvas.height,
       dataWidth = dataCanvas.width,
@@ -87,14 +91,18 @@ enyo.kind({
 
     //figure out how many labels will fit on the y axis
     numTics = (dataHeight / (this.fontSize << 1));
-    ticStep = ((yRange.max || 0) - (yRange.min || 0)) / numTics;
+    ticStep = (yMax - yMin) / numTics;
 
+    //draw the y axis tics and labels
     if (ticStep > 0) {
-      //draw the y axis tics and labels
+      ctx.save();
+
+      //move to the bottom left corner of the dataCanvas
       ctx.translate(margin.left, this.height - margin.bottom);
+
       //use a for loop to draw all tic execpt the last one
-      for (ticValue = yRange.min; ticValue < yRange.max;ticValue += ticStep) {
-        ticLocation = -(ticValue - yRange.min) * this.ySpacingFactor;
+      for (ticValue = yMin; ticValue < yMax; ticValue += ticStep) {
+        ticLocation = -(ticValue - yMin) * this.ySpacingFactor;
 
         ctx.fillText(yFormat(ticValue), -5, ticLocation + 5);
         ctx.beginPath();
@@ -104,12 +112,13 @@ enyo.kind({
       }
 
       //print the last tic at the top of the chart
-      ticLocation = -(yRange.max - yRange.min) * this.ySpacingFactor;
-      ctx.fillText(yFormat(yRange.max), -5, ticLocation + 5);
+      ticLocation = -(yMax - yMin) * this.ySpacingFactor;
+      ctx.fillText(yFormat(yMax), -5, ticLocation + 5);
       ctx.beginPath();
       ctx.moveTo(0, ticLocation);
       ctx.lineTo(5, ticLocation);
       ctx.stroke();
+      ctx.restore();
     }
 
     //figure out the x label width. Assume that no labels will be longer than 
@@ -118,26 +127,25 @@ enyo.kind({
     labelWidth =
       ctx.measureText(
         (new Array(
-          Math.max(xFormat(xRange.min).length, xFormat(xRange.min).length) || 20
+          Math.max(xFormat(xMin).length, xFormat(xMax).length) || 20
         )).join('W')
       ).width;
 
-    //figure out how many labels will fit on the x axis
-    numTics = (this.width / (this.labelWidth << 1)) << 0;
-    ticStep = (xRange.max || 0 - xRange.min || 0) / numTics;
+    numTics = dataWidth / (labelWidth);
+    ticStep = (xMax - xMin) / numTics;
 
-    if (ticStep) {
+    if (ticStep > 0) {
+      ctx.save();
+      ctx.translate(margin.left, this.height - margin.bottom);
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
 
-      for (tic_i = 0, ticValue = xRange.min; tic_i < numTics; tic_i ++) {
-        ticValue += ticStep;
-        ticLocation = ticValue * this.xSpacingFactor;
-
+      for (ticValue = xMin; ticValue < xMax; ticValue += ticStep) {
+        ticLocation = (ticValue - xMin) * this.xSpacingFactor;
         ctx.fillText(xFormat(ticValue), ticLocation, this.fontSize);
         ctx.beginPath();
         ctx.moveTo(ticLocation, 0);
-        ctx.lineTo(ticLocation, ticLength);
+        ctx.lineTo(ticLocation, 5);
         ctx.stroke();
       }
     }
