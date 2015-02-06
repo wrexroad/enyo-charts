@@ -109,6 +109,61 @@ enyo.kind({
     return (+val).toPrecision(5);
   },
 
+  //functions for some floating point arithmetic
+  calculateDecimalScale: function(numbers) {
+    var
+      decimalPlaces = 0,
+      number, exp, num_i;
+
+    //figure out how many decimal places need to be preserved
+    for (num_i = 0; num_i < numbers.length; num_i++) {
+      //force the number into exponential string
+      number = (+numbers[num_i] || 0).toExponential();
+
+      //split off the exponent part of the string and parse it as a number
+      exp = +(number.split("e")[1]) || 0;
+
+      //if there is a negative exponent adjust the number we need to preserve
+      if (exp < 0) {
+        decimalPlaces = exp < decimalPlaces ? exp : decimalPlaces;
+      }
+    }
+
+    //converter the number of decimal places to a scale factor that will
+    //turn all floats into ints
+    return Math.pow(10, decimalPlaces);
+  },
+  add: function() {
+    var
+      scale = this.calculateDecimalScale(arguments),
+      result = 0,
+      num_i;
+
+    //scale all the numbers up by the amount need to make the ints and add them 
+    // to the result
+    for (num_i = 0; num_i < numbers.length; num_i++) {
+      result += arguments[num_i] * scale;
+    }
+
+    //scale the result back down
+    return result / scale;
+  },
+  multiply: function() {
+    var
+      scale = this.calculateDecimalScale(arguments),
+      result = 0,
+      num_i;
+
+    //scale all the numbers up by the amount need to make the ints and add them 
+    // to the result
+    for (num_i = 0; num_i < numbers.length; num_i++) {
+      result *= arguments[num_i] * scale;
+    }
+
+    //scale the result back down
+    return result / scale;
+  },
+
   //abstract functions to be defined by the chart subkind
   addDataset: function() {},
   drawData: function() {},
