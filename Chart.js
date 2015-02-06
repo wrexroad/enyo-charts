@@ -106,7 +106,7 @@ enyo.kind({
     );
   },
   defaultFormatter: function(val) {
-    return (+val).toPrecision(5);
+    return val;
   },
 
   //functions for some floating point arithmetic
@@ -129,6 +129,10 @@ enyo.kind({
       }
     }
 
+    //decimal places were represented as negative powers of 10,
+    //chage to a positive power of 10
+    decimalPlaces = -decimalPlaces;    
+
     //converter the number of decimal places to a scale factor that will
     //turn all floats into ints
     return Math.pow(10, decimalPlaces);
@@ -141,7 +145,7 @@ enyo.kind({
 
     //scale all the numbers up by the amount need to make the ints and add them 
     // to the result
-    for (num_i = 0; num_i < numbers.length; num_i++) {
+    for (num_i = 0; num_i < arguments.length; num_i++) {
       result += arguments[num_i] * scale;
     }
 
@@ -153,14 +157,9 @@ enyo.kind({
       scale = this.calculateDecimalScale(arguments),
       result = 0,
       num_i;
-
-    //scale all the numbers up by the amount need to make the ints and add them 
-    // to the result
-    for (num_i = 0; num_i < numbers.length; num_i++) {
+    for (num_i = 0; num_i < arguments.length; num_i++) {
       result *= arguments[num_i] * scale;
     }
-
-    //scale the result back down
     return result / scale;
   },
 
