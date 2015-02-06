@@ -38,28 +38,38 @@ enyo.kind({
   rendered: function() {
     this.inherited(arguments);
 
-    this.decorCtx = this.$.decorCanvas.node.getContext('2d');
-    this.dataCtx  = this.$.dataCanvas.node.getContext('2d');
+    var
+      decorCanvas = this.$.decorCanvas,
+      dataCanvas = this.$.dataCanvas;
+
+    this.decorCtx = decorCanvas.node.getContext('2d');
+    this.dataCtx  = dataCanvas.node.getContext('2d');
+
+    decorCanvas.render();
+    dataCanvas.render();
   },
   redraw: function() {
-    var data_i, attributes;
+    var
+      decorCanvas = this.$.decorCanvas,
+      dataCanvas = this.$.dataCanvas,
+      data_i;
 
     this.calculateMargins();
 
     //adjust the size of each canvas
-    attributes = this.$.decorCanvas.attributes;
-    attributes.height = this.height;
-    attributes.width = this.width;
-    this.$.decorCanvas.set("attributes", attributes);
-    
-    attributes = this.$.dataCanvas.attributes;
-    attributes.height =
-      this.height - this.decorMargin.top - this.decorMargin.bottom;;
-    attributes.width =
-      this.width - this.decorMargin.left - this.decorMargin.right;;
-    this.$.dataCanvas.set("attributes", attributes);
-      
-    this.wipePlot();
+    decorCanvas.setAttribute("height", this.height);
+    decorCanvas.setAttribute("width", this.width);
+    decorCanvas.update();
+    //decorCanvas.render();
+
+    dataCanvas.setAttribute("height", 
+      this.height - this.decorMargin.top - this.decorMargin.bottom
+    );
+    dataCanvas.setAttribute("width", 
+      this.width - this.decorMargin.left - this.decorMargin.right
+    );
+    dataCanvas.update();
+    //dataCanvas.render();
 
     //redraw everything
     this.calculateSpacing();
@@ -69,7 +79,7 @@ enyo.kind({
         this.drawData(this.dataCache[data_i]);
       }
     }
-
+    
     return true;
   },
   resetPlot: function() {
@@ -83,10 +93,12 @@ enyo.kind({
     this.wipePlot()
   },
   wipePlot: function() {
-    this.$.decorCanvas.destroyClientControls();
-    this.$.decorCanvas.update();
-    this.$.dataCanvas.destroyClientControls();
-    this.$.dataCanvas.update();
+    this.dataCtx.clearRect(
+      0,
+      0,
+      (this.height - this.decorMargin.top - this.decorMargin.bottom),
+      (this.width - this.decorMargin.left - this.decorMargin.right)
+    );
   },
   defaultFormatter: function(val) {
     return val;
