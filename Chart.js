@@ -146,7 +146,7 @@ enyo.kind({
     //scale all the numbers up by the amount need to make the ints and add them 
     // to the result
     for (num_i = 0; num_i < arguments.length; num_i++) {
-      result += arguments[num_i] * scale;
+      result += (arguments[num_i] || 0) * scale;
     }
 
     //scale the result back down
@@ -155,10 +155,10 @@ enyo.kind({
   multiply: function() {
     var
       scale = this.calculateDecimalScale(arguments),
-      result = 0,
+      result = +arguments[0] || 0,
       num_i;
-    for (num_i = 0; num_i < arguments.length; num_i++) {
-      result *= arguments[num_i] * scale;
+    for (num_i = 1; num_i < arguments.length; num_i++) {
+      result *= (+arguments[num_i] || 0) * scale;
     }
     return result / scale;
   },
