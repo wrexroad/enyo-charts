@@ -78,7 +78,7 @@ enyo.kind({
       dataCanvas = this.$.dataCanvas.attributes,
       dataHeight = dataCanvas.height,
       dataWidth = dataCanvas.width,
-      numTics, ticValue, ticLocation, tic_i, labelWidth;
+      numTics, value, step, offset, tic_i, labelWidth;
 
     //configure the drawing context
     ctx.save();
@@ -90,33 +90,33 @@ enyo.kind({
     ctx.strokeRect(margin.left, margin.top, dataWidth, dataHeight);
 
     //figure out how many labels will fit on the y axis
-    numTics = (dataHeight / (this.fontSize << 1));
-    ticStep = (yMax - yMin) / numTics;
+    numTics = dataHeight / (this.fontSize << 1) << 0;
+    step = this.multiply((this.add(yMax, -yMin)), (1/numTics));
 
     //draw the y axis tics and labels
-    if (ticStep > 0) {
+    if (step > 0) {
       ctx.save();
 
       //move to the bottom left corner of the dataCanvas
       ctx.translate(margin.left, this.height - margin.bottom);
 
       //use a for loop to draw all tic execpt the last one
-      for (ticValue = yMin; ticValue < yMax; ticValue += ticStep) {
-        ticLocation = -(ticValue - yMin) * this.ySpacingFactor;
+      for (value = yMin; value < yMax; value = this.add(value, step)) {
+        offset = -(value - yMin) * this.ySpacingFactor;
 
-        ctx.fillText(yFormat(ticValue), -5, ticLocation + 5);
+        ctx.fillText(yFormat(value), -5, offset + 5);
         ctx.beginPath();
-        ctx.moveTo(0, ticLocation);
-        ctx.lineTo(5, ticLocation);
+        ctx.moveTo(0, offset);
+        ctx.lineTo(5, offset);
         ctx.stroke();
       }
 
       //print the last tic at the top of the chart
-      ticLocation = -(yMax - yMin) * this.ySpacingFactor;
-      ctx.fillText(yFormat(yMax), -5, ticLocation + 5);
+      offset = -(yMax - yMin) * this.ySpacingFactor;
+      ctx.fillText(yFormat(yMax), -5, offset + 5);
       ctx.beginPath();
-      ctx.moveTo(0, ticLocation);
-      ctx.lineTo(5, ticLocation);
+      ctx.moveTo(0, offset);
+      ctx.lineTo(5, offset);
       ctx.stroke();
       ctx.restore();
     }
@@ -131,21 +131,21 @@ enyo.kind({
         )).join('W')
       ).width;
 
-    numTics = dataWidth / (labelWidth);
-    ticStep = (xMax - xMin) / numTics;
+    numTics = Math.ceil(dataWidth / (labelWidth)) >> 0;
+    step = this.multiply((this.add(xMax, -xMin)), (1/numTics));
 
-    if (ticStep > 0) {
+    if (step > 0) {
       ctx.save();
       ctx.translate(margin.left, this.height - margin.bottom);
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
 
-      for (ticValue = xMin; ticValue < xMax; ticValue += ticStep) {
-        ticLocation = (ticValue - xMin) * this.xSpacingFactor;
-        ctx.fillText(xFormat(ticValue), ticLocation, this.fontSize);
+      for (value = xMin; value < xMax; value = this.add(value, step)) {
+        offset = (value - xMin) * this.xSpacingFactor;
+        ctx.fillText(xFormat(value), offset, this.fontSize);
         ctx.beginPath();
-        ctx.moveTo(ticLocation, 0);
-        ctx.lineTo(ticLocation, 5);
+        ctx.moveTo(offset, 0);
+        ctx.lineTo(offset, 5);
         ctx.stroke();
       }
     }
