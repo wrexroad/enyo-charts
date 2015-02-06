@@ -92,16 +92,17 @@ enyo.kind({
 
     if (ticStep) {
       //draw the y axis tics and labels
-      ctx.translate(0, dataHeight);
+      ctx.translate(0, this.height);
       for (tic_i = 0, ticValue = yRange.min; tic_i < numTics; tic_i++) {
-        ticValue += ticStep;
-        ticLocation = -ticValue * this.ySpacingFactor;
+        ticLocation = -(ticValue * this.ySpacingFactor - yRange.min);
 
         ctx.fillText(yFormat(ticValue), -5, ticLocation + 5);
         ctx.beginPath();
         ctx.moveTo(0, ticLocation);
         ctx.lineTo(5, ticLocation);
         ctx.stroke();
+
+        ticValue += ticStep;
       }
     }
 

@@ -11,7 +11,7 @@ enyo.kind({
     gridColor: "gray",
     textColor: "black",
     fontName: '"Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace',
-    fontSize: 14,
+    fontSize: 10,
     decorCtx: null,
     dataCtx: null,
     formatters: null,
