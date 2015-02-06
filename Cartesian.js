@@ -90,17 +90,19 @@ enyo.kind({
     numTics = (dataHeight / (this.fontSize << 1)) << 0;
     ticStep = (yRange.max || 0 - yRange.min || 0) / numTics;
 
-    //draw the y axis tics and labels
-    ctx.translate(0, dataHeight);
-    for (tic_i = 0; tic_i < numTics; tic_i ++) {
-      ticValue += ticStep;
-      ticLocation = -ticValue * this.ySpacingFactor;
+    if (ticStep) {
+      //draw the y axis tics and labels
+      ctx.translate(0, dataHeight);
+      for (tic_i = 0, ticValue = yRange.min; tic_i < numTics; tic_i++) {
+        ticValue += ticStep;
+        ticLocation = -ticValue * this.ySpacingFactor;
 
-      ctx.fillText(yFormat(ticValue), -5, ticLocation + 5);
-      ctx.beginPath();
-      ctx.moveTo(0, ticLocation);
-      ctx.lineTo(5, ticLocation);
-      ctx.stroke();
+        ctx.fillText(yFormat(ticValue), -5, ticLocation + 5);
+        ctx.beginPath();
+        ctx.moveTo(0, ticLocation);
+        ctx.lineTo(5, ticLocation);
+        ctx.stroke();
+      }
     }
 
     //figure out the x label width. Assume that no labels will be longer than 
@@ -117,19 +119,22 @@ enyo.kind({
     numTics = (this.width / (this.labelWidth << 1)) << 0;
     ticStep = (xRange.max || 0 - xRange.min || 0) / numTics;
 
-    ctx.textAlign = "center";
-    ctx.textBaseline = "top";
+    if (ticStep) {
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
 
-    for (tic_i = 0; tic_i < numTics; tic_i ++) {
-      ticValue += ticStep;
-      ticLocation = ticValue * this.xSpacingFactor;
+      for (tic_i = 0, ticValue = xRange.min; tic_i < numTics; tic_i ++) {
+        ticValue += ticStep;
+        ticLocation = ticValue * this.xSpacingFactor;
 
-      ctx.fillText(xFormat(ticValue), ticLocation, this.fontSize);
-      ctx.beginPath();
-      ctx.moveTo(ticLocation, 0);
-      ctx.lineTo(ticLocation, ticLength);
-      ctx.stroke();
+        ctx.fillText(xFormat(ticValue), ticLocation, this.fontSize);
+        ctx.beginPath();
+        ctx.moveTo(ticLocation, 0);
+        ctx.lineTo(ticLocation, ticLength);
+        ctx.stroke();
+      }
     }
+
     ctx.restore();
   },
   invertCoodinates: function(x, y) {
