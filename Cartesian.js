@@ -40,11 +40,11 @@ enyo.kind({
 
     this.set(
       "xSpacingFactor",
-      canvasAttributes.width / (+xRange.max || 0 - +xRange.min || 0)
+      canvasAttributes.width / ((+xRange.max || 0) - (+xRange.min || 0))
     );
     this.set(
       "ySpacingFactor",
-      canvasAttributes.height / (+yRange.max || 0 - +yRange.min || 0)
+      canvasAttributes.height / ((+yRange.max || 0) - (+yRange.min || 0))
     );
   },
   calculateMargins: function() {
@@ -88,7 +88,7 @@ enyo.kind({
 
     //figure out how many labels will fit on the y axis
     numTics = (dataHeight / (this.fontSize << 1)) << 0;
-    ticStep = (yRange.max || 0 - yRange.min || 0) / numTics;
+    ticStep = ((yRange.max || 0) - (yRange.min || 0)) / numTics;
 
     if (ticStep) {
       //draw the y axis tics and labels
