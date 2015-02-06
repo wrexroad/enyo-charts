@@ -86,17 +86,14 @@ enyo.kind({
     ctx.strokeRect(margin.left, margin.top, dataWidth, dataHeight);
 
     //figure out how many labels will fit on the y axis
-    numTics = (dataHeight / (this.fontSize << 1)) << 0;
+    numTics = (dataHeight / (this.fontSize << 1));
     ticStep = ((yRange.max || 0) - (yRange.min || 0)) / numTics;
 
-    if (ticStep) {
+    if (ticStep > 0) {
       //draw the y axis tics and labels
       ctx.translate(margin.left, this.height - margin.bottom);
-      for (
-        tic_i = 0, ticValue = yRange.min;
-        tic_i < numTics;
-        tic_i++, ticValue += ticStep
-      ) {
+      //use a for loop to draw all tic execpt the last one
+      for (ticValue = yRange.min; ticValue < yRange.max;ticValue += ticStep) {
         ticLocation = -(ticValue - yRange.min) * this.ySpacingFactor;
 
         ctx.fillText(yFormat(ticValue), -5, ticLocation + 5);
@@ -105,6 +102,14 @@ enyo.kind({
         ctx.lineTo(5, ticLocation);
         ctx.stroke();
       }
+
+      //print the last tic at the top of the chart
+      ticLocation = -(yRange.max - yRange.min) * this.ySpacingFactor;
+      ctx.fillText(yFormat(yRange.max), -5, ticLocation + 5);
+      ctx.beginPath();
+      ctx.moveTo(0, ticLocation);
+      ctx.lineTo(5, ticLocation);
+      ctx.stroke();
     }
 
     //figure out the x label width. Assume that no labels will be longer than 
