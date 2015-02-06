@@ -58,7 +58,6 @@ enyo.kind({
       //y axis lables can be 10 charcters wide
       left: this.decorCtx.measureText((new Array(10)).join('W')).width,
 
-      //meh
       right: 5
     });
   },
