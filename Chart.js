@@ -106,7 +106,7 @@ enyo.kind({
     );
   },
   defaultFormatter: function(val) {
-    return val;
+    return (+val).toPrecision(5);
   },
 
   //abstract functions to be defined by the chart subkind
