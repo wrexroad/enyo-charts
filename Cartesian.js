@@ -83,8 +83,7 @@ enyo.kind({
     ctx.font = "bold " + this.fontSize + "px " + this.font;
 
     //outline the grid
-    ctx.translate(margin.left, margin.top);
-    ctx.strokeRect(0, 0, dataWidth, dataHeight);
+    ctx.strokeRect(margin.left, margin.top, dataWidth, dataHeight);
 
     //figure out how many labels will fit on the y axis
     numTics = (dataHeight / (this.fontSize << 1)) << 0;
@@ -92,17 +91,19 @@ enyo.kind({
 
     if (ticStep) {
       //draw the y axis tics and labels
-      ctx.translate(0, this.height);
-      for (tic_i = 0, ticValue = yRange.min; tic_i < numTics; tic_i++) {
-        ticLocation = -(ticValue * this.ySpacingFactor - yRange.min);
+      ctx.translate(margin.left, this.height - margin.bottom);
+      for (
+        tic_i = 0, ticValue = yRange.min;
+        tic_i < numTics;
+        tic_i++, ticValue += ticStep
+      ) {
+        ticLocation = -(ticValue - yRange.min) * this.ySpacingFactor;
 
         ctx.fillText(yFormat(ticValue), -5, ticLocation + 5);
         ctx.beginPath();
         ctx.moveTo(0, ticLocation);
         ctx.lineTo(5, ticLocation);
         ctx.stroke();
-
-        ticValue += ticStep;
       }
     }
 
