@@ -89,13 +89,12 @@ enyo.kind({
   },
   resetPlot: function() {
     //reset all of the plotting parameters
-    this.labels = null;
-    this.axisRange = null;
-    this.dataCache = null;
-    this.autoRange = true;
+    this.initValues()
 
     //clear the canvases
     this.wipePlot()
+
+    this.redraw();
   },
   wipePlot: function() {
     this.dataCtx.clearRect(
@@ -164,6 +163,12 @@ enyo.kind({
   },
 
   //abstract functions to be defined by the chart subkind
+  initValues: function() {
+    this.labels = null;
+    this.axisRange = null;
+    this.dataCache = null;
+    this.autoRange = true;
+  },
   addDataset: function() {},
   drawData: function() {},
   decorate: function() {},
