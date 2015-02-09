@@ -27,14 +27,27 @@ enyo.kind({
     this._setAxisRange(axis, newRange);
   },
   _setAxisRange: function(axis, newRange) {
-    var range = this.axisRange;
+    var
+      range = this.axisRange,
+      min, max, offset;
 
     axis = (axis || "").toLowerCase();
     newRange = newRange || {};
 
-    range[axis].min = isNaN(+newRange.min) ? range[axis].min : +newRange.min;
-    range[axis].max = isNaN(+newRange.max) ? range[axis].max : +newRange.max;
+    min = isNaN(+newRange.min) ? range[axis].min : +newRange.min;
+    max = isNaN(+newRange.max) ? range[axis].max : +newRange.max;
+    
+    //make sure min != max
+    if (min == max) {
+      //get a number that is the same order of magnitude as the number
+      //of decimal places
+      offset = 1 / this.calculateDecimalScale([range[axis].min]);
+      min -= offset;
+      max += offset;
+    }
 
+    range[axis].min = min;
+    range[axis].max = max;
     this.set("axisRange", range);
   },
   calculateSpacing: function() {
