@@ -41,7 +41,7 @@ enyo.kind({
     if (min == max) {
       //get a number that is the same order of magnitude as the number
       //of decimal places
-      offset = 1 / this.calculateDecimalScale([min]);
+      offset = Math.pow(10, -this.calculatePrecision([min]));
       min -= offset;
       max += offset;
     }
@@ -109,7 +109,7 @@ enyo.kind({
       dataCanvas = this.$.dataCanvas.attributes,
       dataHeight = dataCanvas.height,
       dataWidth = dataCanvas.width,
-      numTics, value, step, offset, tic_i, labelWidth;
+      numTics, value, step, offset, tic_i, labelWidth, precision;
 
     //configure the drawing context
     ctx.save();
@@ -120,9 +120,10 @@ enyo.kind({
     //outline the grid
     ctx.strokeRect(margin.left, margin.top, dataWidth, dataHeight);
 
-    //figure out how many labels will fit on the y axis
+    //figure out how many labels will fit on the y axistt
+    precision = this.calculatePrecision(yMax, yMin) + 1;
     numTics = dataHeight / (this.fontSize << 1) << 0;
-    step = this.multiply((this.add(yMax, -yMin)), (1/numTics));
+    step = (yMax - yMin) / numTics;
 
     //draw the y axis tics and labels
     if (step > 0) {
@@ -132,24 +133,16 @@ enyo.kind({
       ctx.translate(margin.left, this.height - margin.bottom);
 
       //use a for loop to draw all tic execpt the last one
-      for (value = yMin; value < yMax; value = this.add(value, step)) {
+      for (value = yMin; value <= yMax; value = this.add(value, step)) {
         offset = -(value - yMin) * this.ySpacingFactor;
 
-        ctx.fillText(yFormat(value), -5, offset + 5);
+        ctx.fillText(yFormat(value, precision), -5, offset + 5);
         ctx.beginPath();
         ctx.moveTo(0, offset);
         ctx.lineTo(5, offset);
         ctx.stroke();
       }
-
-      //print the last tic at the top of the chart
-      offset = -(yMax - yMin) * this.ySpacingFactor;
-      ctx.fillText(yFormat(yMax), -5, offset + 5);
-      ctx.beginPath();
-      ctx.moveTo(0, offset);
-      ctx.lineTo(5, offset);
-      ctx.stroke();
-      ctx.restore();
+      ctx.restore();t
     }
 
     //figure out the x label width. Assume that no labels will be longer than 
@@ -162,8 +155,9 @@ enyo.kind({
         )).join('W')
       ).width;
 
+    precision = this.calculatePrecision(xMax, xMin);
     numTics = Math.ceil(dataWidth / (labelWidth)) >> 0;
-    step = this.multiply((this.add(xMax, -xMin)), (1/numTics));
+    step = (xMax - xMin) / numTics;
 
     if (step > 0) {
       ctx.save();
@@ -173,7 +167,7 @@ enyo.kind({
 
       for (value = xMin; value < xMax; value = this.add(value, step)) {
         offset = (value - xMin) * this.xSpacingFactor;
-        ctx.fillText(xFormat(value), offset, this.fontSize);
+        ctx.fillText(xFormat(value, precision), offset, this.fontSize);
         ctx.beginPath();
         ctx.moveTo(offset, 0);
         ctx.lineTo(offset, 5);

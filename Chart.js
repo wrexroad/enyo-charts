@@ -104,15 +104,19 @@ enyo.kind({
       (this.width - this.decorMargin.left - this.decorMargin.right)
     );
   },
-  defaultFormatter: function(val) {
-    return val;
+  defaultFormatter: function(val, precision) {
+    precision = +precision || 1;
+    
+    return (+val).toFixed(precision);
   },
-
+  
   //functions for some floating point arithmetic
-  calculateDecimalScale: function(numbers) {
+  calculatePrecision: function(numbers) {
     var
       decimalPlaces = 0,
       number, exp, num_i;
+    
+    numbers = [].concat(numbers);
 
     //figure out how many decimal places need to be preserved
     for (num_i = 0; num_i < numbers.length; num_i++) {
@@ -130,15 +134,11 @@ enyo.kind({
 
     //decimal places were represented as negative powers of 10,
     //chage to a positive power of 10
-    decimalPlaces = -decimalPlaces;    
-
-    //converter the number of decimal places to a scale factor that will
-    //turn all floats into ints
-    return Math.pow(10, decimalPlaces);
+    return (-decimalPlaces);
   },
   add: function() {
     var
-      scale = this.calculateDecimalScale(arguments),
+      scale = Math.pow(10, this.calculatePrecision(arguments)),
       result = 0,
       num_i;
 
@@ -153,7 +153,7 @@ enyo.kind({
   },
   multiply: function() {
     var
-      scale = this.calculateDecimalScale(arguments),
+      scale = Math.pow(10, this.calculatePrecision(arguments)),
       result = +arguments[0] || 0,
       num_i;
     for (num_i = 1; num_i < arguments.length; num_i++) {
