@@ -52,8 +52,8 @@ enyo.kind({
   },
   calculateSpacing: function() {
     var
-      yRange = this.axisRange.x,
-      xRange = this.axisRange.y,
+      yRange = this.axisRange.y,
+      xRange = this.axisRange.x,
       canvasAttributes = this.$.dataCanvas.attributes;
 
     this.set(
