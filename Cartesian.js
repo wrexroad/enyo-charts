@@ -68,7 +68,7 @@ enyo.kind({
       yRange = this.axisRange.y,
       xRange = this.axisRange.x,
       canvasAttributes = this.$.dataCanvas.attributes;
-console.log(yRange, xRange);
+
     this.set(
       "xSpacingFactor",
       canvasAttributes.width / ((+xRange.max || 0) - (+xRange.min || 0))
@@ -77,7 +77,6 @@ console.log(yRange, xRange);
       "ySpacingFactor",
       canvasAttributes.height / ((+yRange.max || 0) - (+yRange.min || 0))
     );
-    console.log(this.xSpacingFactor, this.ySpacingFactor);
   },
   calculateMargins: function() {
     this.set("decorMargin", {
@@ -207,7 +206,7 @@ console.log(yRange, xRange);
     if (this.autoRange) {
       xRange = this.findRange(xCoords.concat(xMin, xMax));
       yRange = this.findRange(yCoords.concat(yMin, yMax));
-console.log(xRange, yRange, "auto");
+
       this._setAxisRange("x", xRange.min, xRange.max);
       this._setAxisRange("y", yRange.min, yRange.max);
     }
