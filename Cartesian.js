@@ -19,43 +19,56 @@ enyo.kind({
     this.axisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
     this.autoRange = {x: true, y: true};
   },
-  setAxisRange: function(axis, newRange) {
+  setAxisRange: function(axis, min, max) {
     var autoRange = this.autoRange;
 
     autoRange[(axis || "").toLowerCase()] = false;
     this.set("autoRange", autoRange);
-    this._setAxisRange(axis, newRange);
+    this._setAxisRange(axis, min, max);
   },
-  _setAxisRange: function(axis, newRange) {
+  _setAxisRange: function(axis, min, max) {
     var
-      range = this.axisRange,
-      min, max, offset;
+      oldRange = this.axisRange,
+      newRange = {},
+      offset, axis_i;
 
     axis = (axis || "").toLowerCase();
-    newRange = newRange || {};
 
-    min = isNaN(+newRange.min) ? range[axis].min : +newRange.min;
-    max = isNaN(+newRange.max) ? range[axis].max : +newRange.max;
+    min = isNaN(+min) ? oldRange[axis].min : +min;
+    max = isNaN(+max) ? oldRange[axis].max : +max;
     
     //make sure min != max
     if (min == max) {
       //get a number that is the same order of magnitude as the number
       //of decimal places
-      offset = 1 / this.calculateDecimalScale([range[axis].min]);
+      offset = 1 / this.calculateDecimalScale([min]);
       min -= offset;
       max += offset;
     }
 
-    range[axis].min = min;
-    range[axis].max = max;
-    this.set("axisRange", range);
+    //build the new range from these min and max values and the other axes
+    for (axis_i in oldRange) {
+      if (oldRange.hasOwnProperty(axis_i)) {
+        if (axis_i == axis) {
+          newRange[axis_i] = {
+            min: min, max: max
+          };
+        } else {
+          newRange[axis_i] = {
+            min: oldRange[axis_i].min, max: oldRange[axis_i].max
+          };
+        }
+      }
+    }
+
+    this.set("axisRange", newRange);
   },
   calculateSpacing: function() {
     var
       yRange = this.axisRange.y,
       xRange = this.axisRange.x,
       canvasAttributes = this.$.dataCanvas.attributes;
-
+console.log(yRange, xRange);
     this.set(
       "xSpacingFactor",
       canvasAttributes.width / ((+xRange.max || 0) - (+xRange.min || 0))
@@ -64,6 +77,7 @@ enyo.kind({
       "ySpacingFactor",
       canvasAttributes.height / ((+yRange.max || 0) - (+yRange.min || 0))
     );
+    console.log(this.xSpacingFactor, this.ySpacingFactor);
   },
   calculateMargins: function() {
     this.set("decorMargin", {
@@ -193,8 +207,9 @@ enyo.kind({
     if (this.autoRange) {
       xRange = this.findRange(xCoords.concat(xMin, xMax));
       yRange = this.findRange(yCoords.concat(yMin, yMax));
-
-      this.set("axisRange", {x: xRange, y: yRange});
+console.log(xRange, yRange, "auto");
+      this._setAxisRange("x", xRange.min, xRange.max);
+      this._setAxisRange("y", yRange.min, yRange.max);
     }
 
     //draw this dataset
