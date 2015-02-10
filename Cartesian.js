@@ -142,7 +142,7 @@ enyo.kind({
         ctx.lineTo(5, offset);
         ctx.stroke();
       }
-      ctx.restore();t
+      ctx.restore();
     }
 
     //figure out the x label width. Assume that no labels will be longer than 
