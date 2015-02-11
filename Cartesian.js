@@ -116,7 +116,7 @@ enyo.kind({
     ctx.save();
     ctx.strokeStyle = this.borderColor;
     ctx.textAlign = "end";
-    ctx.font = "bold " + this.fontSize + "px " + this.font;
+    ctx.font = this.fontSize + "px " + this.font;
 
     //outline the grid
     ctx.strokeRect(margin.left, margin.top, dataWidth, dataHeight);
