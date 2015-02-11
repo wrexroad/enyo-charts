@@ -10,12 +10,13 @@ enyo.kind({
   constructor: function() {
     this.inherited(arguments);
 
+    this.formatters = {x: this.defaultFormatter, y: this.defaultFormatter};
+
     this.initValues();
   },
   initValues: function() {
     this.inherited(arguments);
 
-    this.formatters = {x: this.defaultFormatter, y: this.defaultFormatter};
     this.axisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
     this.autoRange = {x: true, y: true};
   },
