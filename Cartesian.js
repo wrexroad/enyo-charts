@@ -178,7 +178,7 @@ enyo.kind({
 
     ctx.restore();
   },
-  invertCoodinates: function(x, y) {
+  invertCoordinates: function(x, y) {
     return {
       x: this.axisRange.x.min + x / this.xSpacingFactor,
       y: this.axisRange.y.max - y / this.ySpacingFactor
