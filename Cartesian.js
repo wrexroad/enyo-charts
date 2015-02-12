@@ -178,10 +178,10 @@ enyo.kind({
 
     ctx.restore();
   },
-  invertCoordinates: function(x, y) {
+  invertCoordinates: function(coords) {
     return {
-      x: this.axisRange.x.min + x / this.xSpacingFactor,
-      y: this.axisRange.y.max - y / this.ySpacingFactor
+      x: this.axisRange.x.min + coords.x / this.xSpacingFactor,
+      y: this.axisRange.y.max - coords.y / this.ySpacingFactor
     };
   },
   addDataset: function(data) {
