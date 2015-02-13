@@ -23,7 +23,12 @@ enyo.kind({
   setAxisRange: function(axis, min, max) {
     var autoRange = this.autoRange;
 
+    if (isNaN(min) || isNaN(max)) {
+      return;
+    }
+
     autoRange[(axis || "").toLowerCase()] = false;
+
     this.set("autoRange", autoRange);
     this._setAxisRange(axis, min, max);
   },
@@ -198,11 +203,12 @@ enyo.kind({
       yMax = yRange.max;
 
     //if we are in autorange mode, check if the axis ranges need to be updated
-    if (this.autoRange) {
+    if (isNaN(xMin) || isNaN(xMax) || this.autoRange.x) {
       xRange = this.findRange(xCoords.concat(xMin, xMax));
-      yRange = this.findRange(yCoords.concat(yMin, yMax));
-
       this._setAxisRange("x", xRange.min, xRange.max);
+    }
+    if (isNaN(yMin) || isNaN(yMax) || this.autoRange.y) {
+      yRange = this.findRange(yCoords.concat(yMin, yMax));
       this._setAxisRange("y", yRange.min, yRange.max);
     }
 
