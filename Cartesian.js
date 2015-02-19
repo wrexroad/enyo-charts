@@ -202,6 +202,11 @@ enyo.kind({
       yMin = yRange.min,
       yMax = yRange.max;
 
+    if (!xCoords.length || !yCoords.length) {
+      //no data
+      return;
+    }
+
     //if we are in autorange mode, check if the axis ranges need to be updated
     if (isNaN(xMin) || isNaN(xMax) || this.autoRange.x) {
       xRange = this.findRange(xCoords.concat(xMin, xMax));
