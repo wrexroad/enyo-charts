@@ -220,6 +220,8 @@ enyo.kind({
       this.dataCache = [];
     }
     this.dataCache.push(data);
+
+    this.printTitle();
   },
   drawData: function(data) {
     var

@@ -48,6 +48,29 @@ enyo.kind({
     decorCanvas.render();
     dataCanvas.render();
   },
+  printTitle: function() {
+    var
+      ctx = this.decorCtx,
+      cache = this.dataCache,
+      offset = 0,
+      dataset, set_i;
+
+    ctx.save();
+    ctx.translate(this.decorMargin.left, 0);
+    ctx.textAlign = "start";
+    ctx.textBaseline = "top";
+
+    for (set_i in cache) {
+      if (cache.hasOwnProperty(set_i)) {
+        dataset = cache[set_i];
+        ctx.fillStyle = dataset.style.color;
+        ctx.fillText(dataset.name, offset, 0);
+        offset += ctx.measureText(dataset.name + ' ').width;
+      }
+    }
+   
+    ctx.restore();
+  },
   redraw: function() {
     var
       decorCanvas = this.$.decorCanvas,
