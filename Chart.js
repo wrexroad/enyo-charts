@@ -18,7 +18,7 @@ enyo.kind({
     axisRange: null,
     dataCache: null,
     decorMargin: null,
-    autoRange: null,
+    autoRange: null
   },
   observers: [
     {method: "redraw", path: ["height", "width", "fontSize", "axisRange"]},
@@ -53,20 +53,26 @@ enyo.kind({
       ctx = this.decorCtx,
       cache = this.dataCache,
       offset = 0,
-      dataset, set_i;
+      printed = {},
+      dataset, set_i, name;
 
     ctx.save();
     ctx.translate(this.decorMargin.left, 0);
     ctx.textAlign = "start";
     ctx.textBaseline = "top";
 
-    for (set_i in cache) {
-      if (cache.hasOwnProperty(set_i)) {
+    for (set_i = 0; set_i < cache.length; set_i++) {
         dataset = cache[set_i];
-        ctx.fillStyle = dataset.style.color;
-        ctx.fillText(dataset.name, offset, 0);
-        offset += ctx.measureText(dataset.name + ' ').width;
-      }
+        name = dataset.name;
+
+        if(!printed[name]) {
+          console.log(name);
+          ctx.fillStyle = dataset.style.color;
+          ctx.fillText(name, offset, 0);
+          offset += ctx.measureText(name + ' ').width;
+          printed[name] = true;
+          console.log(offset);
+        }
     }
    
     ctx.restore();
