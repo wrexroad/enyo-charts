@@ -66,12 +66,10 @@ enyo.kind({
         name = dataset.name;
 
         if(!printed[name]) {
-          console.log(name);
           ctx.fillStyle = dataset.style.color;
           ctx.fillText(name, offset, 0);
           offset += ctx.measureText(name + ' ').width;
           printed[name] = true;
-          console.log(offset);
         }
     }
    
