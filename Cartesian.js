@@ -270,7 +270,7 @@ enyo.kind({
     //configure the size and color of the brush
     ctx.save();
     ctx.lineWidth = style.brushWidth;
-    ctx.strokeStyle = ctx.fillStyle = style.color
+    ctx.strokeStyle = ctx.fillStyle = style.color;
 
     //move to the bottom left corner of the dataCanvas
     ctx.translate(0, this.$.dataCanvas.attributes.height);
