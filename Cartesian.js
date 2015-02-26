@@ -115,7 +115,8 @@ enyo.kind({
       dataCanvas = this.$.dataCanvas.attributes,
       dataHeight = dataCanvas.height,
       dataWidth = dataCanvas.width,
-      numTics, value, step, offset, tic_i, labelWidth, precision;
+      numTics, value, step, offset, tic_i,
+      old_text, text_i, labelWidth, precision;
 
     //configure the drawing context
     ctx.save();
@@ -140,9 +141,16 @@ enyo.kind({
 
       //use a for loop to draw all tic execpt the last one
       for (value = yMin; value <= yMax; value = this.add(value, step)) {
-        offset = -(value - yMin) * this.ySpacingFactor;
+        //get the formatted label and make sure it doesnt isnt a duplicate
+        text_i = yFormat(value, precision);
+        if (text_i === old_text) {
+          continue;
+        }
+        old_text = text_i;
 
-        ctx.fillText(yFormat(value, precision), -5, offset + 5);
+        offset = -(text_i - yMin) * this.ySpacingFactor;
+        
+        ctx.fillText(text_i, -5, offset + 5);
         ctx.beginPath();
         ctx.moveTo(0, offset);
         ctx.lineTo(5, offset);
