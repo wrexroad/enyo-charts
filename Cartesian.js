@@ -128,7 +128,7 @@ enyo.kind({
     ctx.strokeRect(margin.left, margin.top, dataWidth, dataHeight);
 
     //figure out how many labels will fit on the y axistt
-    precision = this.calculatePrecision(yMax, yMin) + 1;
+    precision = this.calculatePrecision(this.add(yMax, -yMin));
     numTics = dataHeight / (this.fontSize << 1) << 0;
     step = (yMax - yMin) / numTics;
 
