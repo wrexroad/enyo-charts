@@ -120,11 +120,16 @@ enyo.kind({
 
     //configure the drawing context
     ctx.save();
-    ctx.strokeStyle = this.borderColor;
     ctx.textAlign = "end";
     ctx.font = this.fontSize + "px " + this.font;
 
+    //fill background
+    ctx.fillStyle = this.bgColor;
+    ctx.fillRect(margin.left, margin.top, dataWidth, dataHeight);
+
     //outline the grid
+    ctx.strokeStyle = this.borderColor;
+    ctx.fillStyle = this.borderColor;
     ctx.strokeRect(margin.left, margin.top, dataWidth, dataHeight);
 
     //figure out how many labels will fit on the y axistt
