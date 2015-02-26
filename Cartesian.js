@@ -137,7 +137,7 @@ enyo.kind({
       ctx.save();
 
       //move to the bottom left corner of the dataCanvas
-      ctx.translate(margin.left, this.height - margin.bottom);
+      ctx.translate(margin.left, dataHeight + margin.top);
 
       //use a for loop to draw all tic execpt the last one
       for (value = yMin; value <= yMax; value = this.add(value, step)) {
@@ -254,6 +254,7 @@ enyo.kind({
       yRange = range.y || {},
       yMin = yRange.min,
       yMax = yRange.max,
+      margin = this.decorMargin,
       pnt_i, x, y;
 
     //bail out if there are no data to plot
@@ -271,6 +272,9 @@ enyo.kind({
     ctx.lineWidth = style.brushWidth;
     ctx.strokeStyle = ctx.fillStyle = style.color
 
+    //move to the bottom left corner of the dataCanvas
+    ctx.translate(0, this.$.dataCanvas.attributes.height);
+
     if (style.lines) {  
       for (pnt_i = 0; pnt_i < numPts; pnt_i++) {
         //get the value of each point
@@ -279,7 +283,7 @@ enyo.kind({
 
         //convert the value to a pixel coordinate
         x = (x - xMin) * xSpacingFactor;
-        y = (y - yMin) * ySpacingFactor;
+        y = -(y - yMin) * ySpacingFactor;
 
         //if we hit a data gap, end the current path
         if (isNaN(y)) {
