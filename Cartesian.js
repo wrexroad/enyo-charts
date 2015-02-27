@@ -115,8 +115,8 @@ enyo.kind({
       dataCanvas = this.$.dataCanvas.attributes,
       dataHeight = dataCanvas.height,
       dataWidth = dataCanvas.width,
-      numTics, value, step, offset, tic_i,
-      old_text, text_i, labelWidth, decimalPlaces;
+      diff, scale, value, step, offset, tic_i,
+      old_text, text_i, labelWidth, decimalPlaces, firstTic, lastTic;
 
     //configure the drawing context
     ctx.save();
@@ -132,11 +132,28 @@ enyo.kind({
     ctx.fillStyle = this.borderColor;
     ctx.strokeRect(margin.left, margin.top, dataWidth, dataHeight);
 
-    //figure out how many labels will fit on the y axistt
-    decimalPlaces = this.getDecimalPlaces(this.add(yMax, -yMin));
-    numTics = dataHeight / (this.fontSize << 1) << 0;
-    step = (yMax - yMin) / numTics;
+  diff = (yMax - yMin) / 10; 
 
+  // get the integer and fractional part of the scale's magnitude
+  scale = Math.log10(diff);
+  scale -= scale >> 0;
+  
+  // pick a canonical scale
+  if (scale < 0.3010299956639812) { // scale < Math.log10(2)
+    step = 1.0;
+  }
+  else if (scale < 0.6989700043360189) { // scale < Math.log10(5)
+    step = 2.0;
+  }
+  else {
+    step = 5.0;
+  }
+
+  // get the step size with the proper exponent
+  step *= Math.pow(10, (Math.log10(diff)) >> 0);
+
+  decimalPlaces = this.getDecimalPlaces(step);
+  
     //draw the y axis tics and labels
     if (step > 0) {
       ctx.save();
@@ -145,7 +162,9 @@ enyo.kind({
       ctx.translate(margin.left, dataHeight + margin.top);
 
       //use a for loop to draw all tic execpt the last one
-      for (value = yMin; value <= yMax; value = this.add(value, step)) {
+      firstTic = Math.ceil(yMin / step) * step;
+      lastTic = ((yMax / step) >> 0) * step;
+      for (value = firstTic; value <= lastTic; value = this.add(value, step)) {
         //get the formatted label and make sure it doesnt isnt a duplicate
         text_i = yFormat(value, decimalPlaces);
         if (text_i === old_text) {
@@ -174,7 +193,7 @@ enyo.kind({
         )).join('W')
       ).width;
 
-    decimalPlaces = this.getDecimalPlaces(xMax, xMin);
+    //decimalPlaces = this.getDecimalPlaces(xMax, xMin);
     numTics = Math.ceil(dataWidth / (labelWidth)) >> 0;
     step = (xMax - xMin) / numTics;
 
