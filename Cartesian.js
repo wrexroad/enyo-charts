@@ -115,7 +115,7 @@ enyo.kind({
       dataCanvas = this.$.dataCanvas.attributes,
       dataHeight = dataCanvas.height,
       dataWidth = dataCanvas.width,
-      diff, scale, value, step, offset, tic_i,
+      diff, scale, value, step, offset, tic_i, minor_i,
       old_text, text_i, labelWidth, decimalPlaces, firstTic, lastTic;
 
     //configure the drawing context
@@ -140,13 +140,13 @@ enyo.kind({
   
   // pick a canonical scale
   if (scale < 0.3010299956639812) { // scale < Math.log10(2)
-    step = 1.0;
+    step = 0.1;
   }
   else if (scale < 0.6989700043360189) { // scale < Math.log10(5)
-    step = 2.0;
+    step = 0.2;
   }
   else {
-    step = 5.0;
+    step = 0.5;
   }
 
   // get the step size with the proper exponent
@@ -164,21 +164,35 @@ enyo.kind({
       //use a for loop to draw all tic execpt the last one
       firstTic = Math.ceil(yMin / step) * step;
       lastTic = ((yMax / step) >> 0) * step;
-      for (value = firstTic; value <= lastTic; value = this.add(value, step)) {
-        //get the formatted label and make sure it doesnt isnt a duplicate
-        text_i = yFormat(value, decimalPlaces);
-        if (text_i === old_text) {
-          continue;
-        }
-        old_text = text_i;
+      for (
+        value = firstTic, minor_i = 0;
+        value <= lastTic;
+        value = this.add(value, step), minor_i++
+      ) {
+        //if we have drawn 10 minor tics, include a major
+        if ((minor_i % 10) === 0) {
+          //get the formatted label and make sure it doesnt isnt a duplicate
+          text_i = yFormat(value, decimalPlaces);
+          if (text_i === old_text) {
+            //continue;
+          }
+          old_text = text_i;
 
-        offset = -(text_i - yMin) * this.ySpacingFactor;
-        
-        ctx.fillText(text_i, -5, offset + 5);
-        ctx.beginPath();
-        ctx.moveTo(0, offset);
-        ctx.lineTo(5, offset);
-        ctx.stroke();
+          offset = -(text_i - yMin) * this.ySpacingFactor;
+          
+          ctx.fillText(text_i, -5, offset + 5);
+          ctx.beginPath();
+          ctx.moveTo(0, offset);
+          ctx.lineTo(10, offset);
+          ctx.stroke();
+        } else {
+          //draw the minor tic mark
+          offset = -(value - yMin) * this.ySpacingFactor;
+          ctx.beginPath();
+          ctx.moveTo(0, offset);
+          ctx.lineTo(5, offset);
+          ctx.stroke(); 
+        }
       }
       ctx.restore();
     }
