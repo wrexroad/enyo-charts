@@ -47,7 +47,7 @@ enyo.kind({
     if (min == max) {
       //get a number that is the same order of magnitude as the number
       //of decimal places
-      offset = Math.pow(10, -this.calculatePrecision([min]));
+      offset = Math.pow(10, -this.getDecimalPlaces([min]));
       min -= offset;
       max += offset;
     }
@@ -116,7 +116,7 @@ enyo.kind({
       dataHeight = dataCanvas.height,
       dataWidth = dataCanvas.width,
       numTics, value, step, offset, tic_i,
-      old_text, text_i, labelWidth, precision;
+      old_text, text_i, labelWidth, decimalPlaces;
 
     //configure the drawing context
     ctx.save();
@@ -133,7 +133,7 @@ enyo.kind({
     ctx.strokeRect(margin.left, margin.top, dataWidth, dataHeight);
 
     //figure out how many labels will fit on the y axistt
-    precision = this.calculatePrecision(this.add(yMax, -yMin));
+    decimalPlaces = this.getDecimalPlaces(this.add(yMax, -yMin));
     numTics = dataHeight / (this.fontSize << 1) << 0;
     step = (yMax - yMin) / numTics;
 
@@ -147,7 +147,7 @@ enyo.kind({
       //use a for loop to draw all tic execpt the last one
       for (value = yMin; value <= yMax; value = this.add(value, step)) {
         //get the formatted label and make sure it doesnt isnt a duplicate
-        text_i = yFormat(value, precision);
+        text_i = yFormat(value, decimalPlaces);
         if (text_i === old_text) {
           continue;
         }
@@ -174,7 +174,7 @@ enyo.kind({
         )).join('W')
       ).width;
 
-    precision = this.calculatePrecision(xMax, xMin);
+    decimalPlaces = this.getDecimalPlaces(xMax, xMin);
     numTics = Math.ceil(dataWidth / (labelWidth)) >> 0;
     step = (xMax - xMin) / numTics;
 
@@ -186,7 +186,7 @@ enyo.kind({
 
       for (value = xMin; value < xMax; value = this.add(value, step)) {
         offset = (value - xMin) * this.xSpacingFactor;
-        ctx.fillText(xFormat(value, precision), offset, this.fontSize);
+        ctx.fillText(xFormat(value, decimalPlaces), offset, this.fontSize);
         ctx.beginPath();
         ctx.moveTo(offset, 0);
         ctx.lineTo(offset, 5);

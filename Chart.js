@@ -131,14 +131,14 @@ enyo.kind({
       (this.width - this.decorMargin.left - this.decorMargin.right)
     );
   },
-  defaultFormatter: function(val, precision) {
-    precision = +precision || 1;
+  defaultFormatter: function(val, decimalPlaces) {
+    decimalPlaces = +decimalPlaces || 1;
     
-    return (+val).toFixed(precision);
+    return (+val).toFixed(decimalPlaces);
   },
   
   //functions for some floating point arithmetic
-  calculatePrecision: function(numbers) {
+  getDecimalPlaces: function(numbers) {
     var
       decimalPlaces = 0,
       number, exp, num_i;
@@ -165,7 +165,7 @@ enyo.kind({
   },
   add: function() {
     var
-      scale = Math.pow(10, this.calculatePrecision(arguments)),
+      scale = Math.pow(10, this.getDecimalPlaces(arguments)),
       result = 0,
       num_i;
 
@@ -180,7 +180,7 @@ enyo.kind({
   },
   multiply: function() {
     var
-      scale = Math.pow(10, this.calculatePrecision(arguments)),
+      scale = Math.pow(10, this.getDecimalPlaces(arguments)),
       result = +arguments[0] || 0,
       num_i;
     for (num_i = 1; num_i < arguments.length; num_i++) {
