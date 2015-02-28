@@ -116,7 +116,7 @@ enyo.kind({
       dataHeight = dataCanvas.height,
       dataWidth = dataCanvas.width,
       diff, scale, value, step, offset, tic_i, minor_i,
-      old_text, text_i, labelWidth, decimalPlaces, firstTic, lastTic;
+      text_i, labelWidth, decimalPlaces, firstTic, lastTic;
 
     //configure the drawing context
     ctx.save();
@@ -173,10 +173,6 @@ enyo.kind({
         if ((minor_i % 10) === 0) {
           //get the formatted label and make sure it doesnt isnt a duplicate
           text_i = yFormat(value, decimalPlaces);
-          if (text_i === old_text) {
-            //continue;
-          }
-          old_text = text_i;
 
           offset = -(text_i - yMin) * this.ySpacingFactor;
           
