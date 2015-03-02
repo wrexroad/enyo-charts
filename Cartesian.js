@@ -179,7 +179,7 @@ enyo.kind({
           ctx.fillText(text_i, -5, offset + 5);
           ctx.beginPath();
           ctx.moveTo(0, offset);
-          ctx.lineTo(10, offset);
+          ctx.lineTo(15, offset);
           ctx.stroke();
         } else {
           //draw the minor tic mark
@@ -222,7 +222,7 @@ enyo.kind({
           offset = (value - xMin) * this.xSpacingFactor;
           ctx.fillText(xFormat(value, decimalPlaces), offset, this.fontSize);
           ctx.beginPath();
-          ctx.moveTo(offset, -10);
+          ctx.moveTo(offset, -15);
           ctx.lineTo(offset, 0);
           ctx.stroke();
         } else {
