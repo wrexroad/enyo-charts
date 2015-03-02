@@ -217,8 +217,8 @@ enyo.kind({
         offset = (value - xMin) * this.xSpacingFactor;
         ctx.fillText(xFormat(value, decimalPlaces), offset, this.fontSize);
         ctx.beginPath();
-        ctx.moveTo(offset, 0);
-        ctx.lineTo(offset, 5);
+        ctx.moveTo(offset, -5);
+        ctx.lineTo(offset, 0);
         ctx.stroke();
       }
     }
