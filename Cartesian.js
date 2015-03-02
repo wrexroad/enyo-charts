@@ -205,7 +205,7 @@ enyo.kind({
 
     //decimalPlaces = this.getDecimalPlaces(xMax, xMin);
     numTics = Math.ceil(dataWidth / (labelWidth)) >> 0;
-    step = (xMax - xMin) / numTics;
+    step = (xMax - xMin) / numTics / 10;
 
     if (step > 0) {
       ctx.save();
@@ -213,13 +213,26 @@ enyo.kind({
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
 
-      for (value = xMin; value < xMax; value = this.add(value, step)) {
-        offset = (value - xMin) * this.xSpacingFactor;
-        ctx.fillText(xFormat(value, decimalPlaces), offset, this.fontSize);
-        ctx.beginPath();
-        ctx.moveTo(offset, -5);
-        ctx.lineTo(offset, 0);
-        ctx.stroke();
+      for (
+        value = xMin, minor_i = 0;
+        value < xMax;
+        value = this.add(value, step), minor_i++
+      ) {
+        if ((minor_i % 10) === 0) {
+          offset = (value - xMin) * this.xSpacingFactor;
+          ctx.fillText(xFormat(value, decimalPlaces), offset, this.fontSize);
+          ctx.beginPath();
+          ctx.moveTo(offset, -10);
+          ctx.lineTo(offset, 0);
+          ctx.stroke();
+        } else {
+          //draw the minor tic mark
+          offset = (value - xMin) * this.xSpacingFactor;
+          ctx.beginPath();
+          ctx.moveTo(offset, -5);
+          ctx.lineTo(offset, 0);
+          ctx.stroke(); 
+        }
       }
     }
 
