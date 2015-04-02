@@ -1,7 +1,7 @@
 enyo.kind({
   name: "Chart",
   kind: "Control",
-  
+
   published: {
     width: 0,
     height: 0,
@@ -33,6 +33,13 @@ enyo.kind({
 
     this.dataCache = [];
     this.decorMargin = {top: 10, bottom: 10, left: 10, right: 10};
+
+    //make sure log10 is defined
+    if (!Math.log10) {
+      Math.log10 = function(x) {
+        return Math.log(x) / Math.log(10);
+      }
+    }
   },
   //functions directly related to generating the plot
   rendered: function() {
@@ -72,7 +79,7 @@ enyo.kind({
           printed[name] = true;
         }
     }
-   
+
     ctx.restore();
   },
   redraw: function() {
@@ -89,14 +96,14 @@ enyo.kind({
     decorCanvas.update();
     //decorCanvas.render();
 
-    dataCanvas.setAttribute("height", 
+    dataCanvas.setAttribute("height",
       this.height - this.decorMargin.top - this.decorMargin.bottom
     );
-    dataCanvas.setAttribute("width", 
+    dataCanvas.setAttribute("width",
       this.width - this.decorMargin.left - this.decorMargin.right
     );
-    dataCanvas.setAttribute("style",  
-        "position: absolute;" + 
+    dataCanvas.setAttribute("style",
+        "position: absolute;" +
         "left:" + this.decorMargin.left + "px; " +
         "top:" + this.decorMargin.top + "px;"
     );
@@ -111,7 +118,7 @@ enyo.kind({
         this.drawData(this.dataCache[data_i]);
       }
     }
-    
+
     return true;
   },
   resetPlot: function() {
@@ -133,16 +140,16 @@ enyo.kind({
   },
   defaultFormatter: function(val, decimalPlaces) {
     decimalPlaces = +decimalPlaces || 1;
-    
+
     return (+val).toFixed(decimalPlaces);
   },
-  
+
   //functions for some floating point arithmetic
   getDecimalPlaces: function(numbers) {
     var
       decimalPlaces = 0,
       number, exp, num_i;
-    
+
     numbers = [].concat(numbers);
 
     //figure out how many decimal places need to be preserved
@@ -169,7 +176,7 @@ enyo.kind({
       result = 0,
       num_i;
 
-    //scale all the numbers up by the amount need to make the ints and add them 
+    //scale all the numbers up by the amount need to make the ints and add them
     // to the result
     for (num_i = 0; num_i < arguments.length; num_i++) {
       result += (arguments[num_i] || 0) * scale;
