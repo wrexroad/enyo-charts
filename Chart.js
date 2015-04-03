@@ -21,7 +21,7 @@ enyo.kind({
     autoRange: null
   },
   observers: [
-    {method: "redraw", path: ["height", "width", "fontSize", "axisRange"]},
+    {method: "redraw", path: ["height", "width", "fontSize", "axisRange"]}
   ],
 
   components: [
@@ -38,7 +38,7 @@ enyo.kind({
     if (!Math.log10) {
       Math.log10 = function(x) {
         return Math.log(x) / Math.log(10);
-      }
+      };
     }
   },
   //functions directly related to generating the plot
@@ -123,10 +123,10 @@ enyo.kind({
   },
   resetPlot: function() {
     //reset all of the plotting parameters
-    this.initValues()
+    this.initValues();
 
     //clear the canvases
-    this.wipePlot()
+    this.wipePlot();
 
     this.redraw();
   },
