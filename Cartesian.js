@@ -115,8 +115,8 @@ enyo.kind({
       dataCanvas = this.$.dataCanvas.attributes,
       dataHeight = dataCanvas.height,
       dataWidth = dataCanvas.width,
-      diff, scale, value, step, offset, tic_i, minor_i,
-      text_i, labelWidth, decimalPlaces, firstTic, lastTic;
+      diff, scale, value, step, offset, minor_i,
+      text_i, labelWidth, decimalPlaces, firstTic, lastTic, numTics;
 
     //configure the drawing context
     ctx.save();
@@ -296,12 +296,7 @@ enyo.kind({
       onPath = false,
       range = this.axisRange || {},
       xRange = range.x || {},
-      xMin = xRange.min,
-      xMax = xRange.max,
       yRange = range.y || {},
-      yMin = yRange.min,
-      yMax = yRange.max,
-      margin = this.decorMargin,
       pnt_i, x, y;
 
     //bail out if there are no data to plot
@@ -329,8 +324,8 @@ enyo.kind({
         y = yCoords[pnt_i];
 
         //convert the value to a pixel coordinate
-        x = (x - xMin) * xSpacingFactor;
-        y = -(y - yMin) * ySpacingFactor;
+        x = (x - xRange.Min) * xSpacingFactor;
+        y = -(y - yRange.Min) * ySpacingFactor;
 
         //if we hit a data gap, end the current path
         if (isNaN(y)) {
