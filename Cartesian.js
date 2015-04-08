@@ -324,8 +324,8 @@ enyo.kind({
         y = yCoords[pnt_i];
 
         //convert the value to a pixel coordinate
-        x = (x - xRange.Min) * xSpacingFactor;
-        y = -(y - yRange.Min) * ySpacingFactor;
+        x = (x - xRange.min) * xSpacingFactor;
+        y = -(y - yRange.min) * ySpacingFactor;
 
         //if we hit a data gap, end the current path
         if (isNaN(y)) {
