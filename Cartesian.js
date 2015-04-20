@@ -234,6 +234,7 @@ enyo.kind({
           ctx.stroke(); 
         }
       }
+      ctx.restore();
     }
 
     ctx.restore();
