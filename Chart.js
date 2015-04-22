@@ -135,10 +135,11 @@ enyo.kind({
       canvasName = (varName || "") + "_canvas",
       layer = this.$.dataLayers[canvasName],
       dataCanvas = layer.canvas,
-      top = this.decorMargin.top,
-      left = this.decorMargin.left,
-      width = this.width - this.decorMargin.left - this.decorMargin.right,
-      height = this.height - this.decorMargin.top - this.decorMargin.bottom;
+      margin = this.decorMargin,
+      top = margin.top,
+      left = margin.left,
+      width = this.width - margin.left - margin.right,
+      height = this.height - margin.top - margin.bottom;
     
     //make sure the canvas is the right size
     dataCanvas.setAttribute("height", height);
