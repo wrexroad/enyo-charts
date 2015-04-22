@@ -123,13 +123,16 @@ enyo.kind({
       decorCanvas = this.$.decorCanvas,
       data_i;
 
+
+    //clear the canvases
+    this.wipePlot();
+
     this.calculateMargins();
 
     //adjust the size of each canvas
     decorCanvas.setAttribute("height", this.height);
     decorCanvas.setAttribute("width", this.width);
     decorCanvas.update();
-    //decorCanvas.render();
 
     //redraw everything
     this.calculateSpacing();
@@ -145,9 +148,6 @@ enyo.kind({
   resetPlot: function() {
     //reset all of the plotting parameters
     this.initValues();
-
-    //clear the canvases
-    this.wipePlot();
 
     this.redraw();
   },
