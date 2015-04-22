@@ -57,7 +57,7 @@ enyo.kind({
     var canvasName, dataCanvas;
 
     //make sure the canvas has a name
-    canvasName = (varName || "") + "_canvas";
+    canvasName = (varName || "") + "_layer";
 
     //create the enyo component
     dataCanvas = this.createComponent({name: canvasName, kind: "enyo.Canvas"});
@@ -134,7 +134,7 @@ enyo.kind({
   },
   resetLayer: function(varName) {
     var
-      canvasName = (varName || "") + "_canvas",
+      canvasName = (varName || "") + "_layer",
       layer = this.$.dataLayers[canvasName],
       dataCanvas = layer.canvas,
       margin = this.decorMargin,

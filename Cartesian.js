@@ -274,7 +274,7 @@ enyo.kind({
     }
 
     //make sure there is a canvas for this variable
-    if (!this.dataLayers[data.name + "_canvas"]) {
+    if (!this.dataLayers[data.name + "_layer"]) {
       this.createDataCanvas(data.name);
     }
 
@@ -298,7 +298,7 @@ enyo.kind({
       numPts = yCoords.length,
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
-      ctx = this.dataLayers[data.name + "_canvas"].ctx,
+      ctx = this.dataLayers[data.name + "_layer"].ctx,
       onPath = false,
       range = this.axisRange || {},
       xRange = range.x || {},
