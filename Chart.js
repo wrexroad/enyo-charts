@@ -88,8 +88,6 @@ enyo.kind({
     
     //make sure the canvas is rendered
     this.dataLayers[canvasName].canvas.render();
-
-    //wipe the canvas
     dataCanvas.update();
 
   },
@@ -162,7 +160,7 @@ enyo.kind({
   },
   wipePlot: function() {
     var margin = this.decorMargin;
-    
+    console.log("wipe");
     for (var layer_i in this.dataLayers) {
       this.dataLayers[layer_i].ctx.clearRect(
         0, 0, this.width, this.height
