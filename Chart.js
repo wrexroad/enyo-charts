@@ -30,7 +30,7 @@ enyo.kind({
   constructor: function() {
     this.inherited(arguments);
 
-    this.dataCache = [];
+    this.dataCache = {};
     this.decorMargin = {top: 10, bottom: 10, left: 10, right: 10};
 
     //make sure log10 is defined
@@ -96,7 +96,6 @@ enyo.kind({
       ctx = this.decorCtx,
       cache = this.dataCache,
       offset = 0,
-      printed = {},
       dataset, set_i, name;
 
     ctx.save();
@@ -104,16 +103,11 @@ enyo.kind({
     ctx.textAlign = "start";
     ctx.textBaseline = "top";
 
-    for (set_i = 0; set_i < cache.length; set_i++) {
+    for (set_i in cache) {
         dataset = cache[set_i];
-        name = dataset.name;
-
-        if(!printed[name]) {
-          ctx.fillStyle = dataset.style.color;
-          ctx.fillText(name, offset, 0);
-          offset += ctx.measureText(name + ' ').width;
-          printed[name] = true;
-        }
+        ctx.fillStyle = dataset.style.color;
+        ctx.fillText(dataset.name, offset, 0);
+        offset += ctx.measureText(name + ' ').width;
     }
 
     ctx.restore();
@@ -138,7 +132,7 @@ enyo.kind({
     this.calculateSpacing();
     this.decorate();
     if (this.dataCache) {
-      for (data_i = 0; data_i < this.dataCache.length; data_i++) {
+      for (data_i in this.dataCache) {
         this.drawData(this.dataCache[data_i]);
       }
     }
