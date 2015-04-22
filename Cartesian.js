@@ -131,27 +131,27 @@ enyo.kind({
     ctx.fillStyle = this.borderColor;
     ctx.strokeRect(margin.left, margin.top, dataWidth, dataHeight);
 
-  diff = (yMax - yMin) / 10; 
+    diff = (yMax - yMin) / 10; 
 
-  // get the integer and fractional part of the scale's magnitude
-  scale = Math.log10(diff);
-  scale -= scale >> 0;
-  
-  // pick a canonical scale
-  if (scale < 0.3010299956639812) { // scale < Math.log10(2)
-    step = 0.1;
-  }
-  else if (scale < 0.6989700043360189) { // scale < Math.log10(5)
-    step = 0.2;
-  }
-  else {
-    step = 0.5;
-  }
+    // get the integer and fractional part of the scale's magnitude
+    scale = Math.log10(diff);
+    scale -= scale >> 0;
+    
+    // pick a canonical scale
+    if (scale < 0.3010299956639812) { // scale < Math.log10(2)
+      step = 0.1;
+    }
+    else if (scale < 0.6989700043360189) { // scale < Math.log10(5)
+      step = 0.2;
+    }
+    else {
+      step = 0.5;
+    }
 
-  // get the step size with the proper exponent
-  step *= Math.pow(10, (Math.log10(diff)) >> 0);
+    // get the step size with the proper exponent
+    step *= Math.pow(10, (Math.log10(diff)) >> 0);
 
-  decimalPlaces = this.getDecimalPlaces(step);
+    decimalPlaces = this.getDecimalPlaces(step);
   
     //draw the y axis tics and labels
     if (step > 0) {
