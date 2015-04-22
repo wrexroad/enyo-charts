@@ -112,9 +112,8 @@ enyo.kind({
       xRange = axisRange.x,
       xMin = xRange.min || 0,
       xMax = xRange.max || 0,
-      dataCanvas = this.$.dataCanvas.attributes,
-      dataHeight = dataCanvas.height,
-      dataWidth = dataCanvas.width,
+      dataHeight = this.height - margin.top - margin.bottom,
+      dataWidth  = this.width - margin.left - margin.right,
       diff, scale, value, step, offset, minor_i,
       text_i, labelWidth, decimalPlaces, firstTic, lastTic, numTics;
 
