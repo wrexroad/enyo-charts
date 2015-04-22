@@ -154,12 +154,16 @@ enyo.kind({
     this.redraw();
   },
   resetLayer: function(varName) {
+    //debugger;
     this.dataLayers[varName + "_layer"].canvas.destroy();
+    delete this.dataLayers[varName + "_layer"];
     this.createDataCanvas(varName);
   },
   wipePlot: function() {
+    //debugger;
     for (var layer_i in this.dataLayers) {
       this.dataLayers[layer_i].canvas.destroy();
+      delete this.dataLayers[layer_i];
     }
   },
   defaultFormatter: function(val, decimalPlaces) {
