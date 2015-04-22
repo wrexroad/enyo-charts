@@ -272,6 +272,11 @@ enyo.kind({
       this._setAxisRange("y", yRange.min, yRange.max);
     }
 
+    //make sure there is a canvas for this variable
+    if (!this.dataLayers[data.name + "_canvas"]) {
+      this.createDataCanvas(data.name);
+    }
+
     //draw this dataset
     this.drawData(data);
 
