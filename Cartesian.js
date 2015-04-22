@@ -112,6 +112,7 @@ enyo.kind({
       xRange = axisRange.x,
       xMin = xRange.min || 0,
       xMax = xRange.max || 0,
+      margin = this.decorMargin,
       dataHeight = this.height - margin.top - margin.bottom,
       dataWidth  = this.width - margin.left - margin.right,
       diff, scale, value, step, offset, minor_i,
@@ -320,7 +321,9 @@ enyo.kind({
     ctx.strokeStyle = ctx.fillStyle = style.color;
 
     //move to the bottom left corner of the dataCanvas
-    ctx.translate(0, this.$.dataCanvas.attributes.height);
+    ctx.translate(
+      0, this.height - this.decorMargin.top - this.decorMargin.bottom
+    );
 
     if (style.lines) {  
       for (pnt_i = 0; pnt_i < numPts; pnt_i++) {
