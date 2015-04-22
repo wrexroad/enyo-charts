@@ -152,9 +152,13 @@ enyo.kind({
     this.redraw();
   },
   resetLayer: function(varName) {
-    this.dataLayers[varName + "_layer"].ctx.clearRect(
-      0, 0, this.width, this.height
-    );
+    var layer;
+    
+    if(layer = this.dataLayers[varName + "_layer"]) {
+      layer.ctx.clearRect(
+        0, 0, this.width, this.height
+      );
+    }
   },
   wipePlot: function() {
     for (var layer_i in this.dataLayers) {
