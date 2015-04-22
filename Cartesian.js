@@ -255,7 +255,8 @@ enyo.kind({
       xMax = xRange.max,
       yRange = range.y || {},
       yMin = yRange.min,
-      yMax = yRange.max;
+      yMax = yRange.max,
+      name = data.name;
 
     if (!xCoords.length || !yCoords.length) {
       //no data
@@ -284,8 +285,8 @@ enyo.kind({
       this.dataCache[name] = data;
     } else {
       //add to the old cache
-      this.dataCache[name].coords.x.push(data.coords.x);
-      this.dataCache[name].coords.y.push(data.coords.y);
+      (this.dataCache[name].coords.x).push(data.coords.x);
+      (this.dataCache[name].coords.y).push(data.coords.y);
     }
 
     this.printTitle();
