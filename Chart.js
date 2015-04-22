@@ -13,20 +13,19 @@ enyo.kind({
     fontName: '"Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace',
     fontSize: 10,
     decorCtx: null,
-    dataCtx: null,
     formatters: null,
     axisRange: null,
     dataCache: null,
     decorMargin: null,
-    autoRange: null
+    autoRange: null,
+    dataLayers: null
   },
   observers: [
     {method: "redraw", path: ["height", "width", "fontSize", "axisRange"]}
   ],
 
   components: [
-    {name: "decorCanvas", kind: "enyo.Canvas"},
-    {name: "dataCanvas", kind: "enyo.Canvas"}
+    {name: "decorCanvas", kind: "enyo.Canvas"}
   ],
   constructor: function() {
     this.inherited(arguments);
@@ -40,20 +39,36 @@ enyo.kind({
         return Math.log(x) / Math.log(10);
       };
     }
+
+    this.dataLayers = {};
   },
   //functions directly related to generating the plot
   rendered: function() {
     this.inherited(arguments);
 
     var
-      decorCanvas = this.$.decorCanvas,
-      dataCanvas = this.$.dataCanvas;
+      decorCanvas = this.$.decorCanvas;
 
     this.decorCtx = decorCanvas.node.getContext('2d');
-    this.dataCtx  = dataCanvas.node.getContext('2d');
 
     decorCanvas.render();
+  },
+  createDataCanvas: function(varName) {
+    var canvasName, dataCanvas;
+
+    //make sure the canvas has a name
+    canvasName = (varName || "") + "_canvas",
+
+    //create the enyo component
+    dataCanvas = this.createComponent({name: canvasName, kind: "enyo.Canvas"});
     dataCanvas.render();
+
+    //save a reference to the canvas and context
+    this.dataLayers[canvasName].canvas = dataCanvas;
+    this.dataLayers[canvasName].ctx = dataCanvas.node.getContext('2d');
+
+    //make sure the canvas is rendered
+    this.dataLayers[canvasName].canvas.render();
   },
   printTitle: function() {
     var
@@ -85,7 +100,6 @@ enyo.kind({
   redraw: function() {
     var
       decorCanvas = this.$.decorCanvas,
-      dataCanvas = this.$.dataCanvas,
       data_i;
 
     this.calculateMargins();
@@ -95,20 +109,6 @@ enyo.kind({
     decorCanvas.setAttribute("width", this.width);
     decorCanvas.update();
     //decorCanvas.render();
-
-    dataCanvas.setAttribute("height",
-      this.height - this.decorMargin.top - this.decorMargin.bottom
-    );
-    dataCanvas.setAttribute("width",
-      this.width - this.decorMargin.left - this.decorMargin.right
-    );
-    dataCanvas.setAttribute("style",
-        "position: absolute;" +
-        "left:" + this.decorMargin.left + "px; " +
-        "top:" + this.decorMargin.top + "px;"
-    );
-    dataCanvas.update();
-    //dataCanvas.render();
 
     //redraw everything
     this.calculateSpacing();
@@ -130,6 +130,30 @@ enyo.kind({
 
     this.redraw();
   },
+  resetLayer: function(varName) {
+    var
+      canvasName = (varName || "") + "_canvas",
+      layer = this.$.dataLayers[canvasName],
+      dataCanvas = layer.canvas,
+      top = this.decorMargin.top,
+      left = this.decorMargin.left,
+      width = this.width - this.decorMargin.left - this.decorMargin.right,
+      height = this.height - this.decorMargin.top - this.decorMargin.bottom;
+    
+    //make sure the canvas is the right size
+    dataCanvas.setAttribute("height", height);
+    dataCanvas.setAttribute("width", width);
+    dataCanvas.setAttribute("style",
+        "position: absolute;" +
+        "left:" + left + "px; " +
+        "top:" + top + "px;"
+    );
+
+    //wipe the canvas
+    layer.ctx.clearRect(top, left, width, height);
+    dataCanvas.update();
+
+  },
   wipePlot: function() {
     this.dataCtx.clearRect(
       0,
@@ -137,6 +161,10 @@ enyo.kind({
       (this.height - this.decorMargin.top - this.decorMargin.bottom),
       (this.width - this.decorMargin.left - this.decorMargin.right)
     );
+
+    for (var layer_i in this.dataLayers) {
+      this.dataLayers[layer_i].canvas.destroy();
+    }
   },
   defaultFormatter: function(val, decimalPlaces) {
     decimalPlaces = +decimalPlaces || 1;
