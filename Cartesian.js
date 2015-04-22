@@ -273,11 +273,6 @@ enyo.kind({
       this._setAxisRange("y", yRange.min, yRange.max);
     }
 
-    //make sure there is a canvas for this variable
-    if (!this.dataLayers[data.name + "_layer"]) {
-      this.createDataCanvas(data.name);
-    }
-
     //draw this dataset
     this.drawData(data);
 
@@ -298,15 +293,20 @@ enyo.kind({
       numPts = yCoords.length,
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
-      ctx = this.dataLayers[data.name + "_layer"].ctx,
       onPath = false,
       range = this.axisRange || {},
       xRange = range.x || {},
       yRange = range.y || {},
-      pnt_i, x, y;
+      pnt_i, x, y, ctx;
 
     //bail out if there are no data to plot
     if(!numPts) {return;}
+
+    //make sure there is a canvas for this variable and get the context
+    if (!this.dataLayers[data.name + "_layer"]) {
+      this.createDataCanvas(data.name);
+    }
+    ctx = this.dataLayers[data.name + "_layer"].ctx;
 
     //auto generate some xaxis coordinates if they are not provided
     if(!xCoords.length) {
