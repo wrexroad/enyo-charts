@@ -277,9 +277,16 @@ enyo.kind({
 
     //cache the new dataset for use in redraws
     if (!this.dataCache) {
-      this.dataCache = [];
+      this.dataCache = {};
     }
-    this.dataCache.push(data);
+    if (!data.update) {
+      //replace the old cahce
+      this.dataCache[name] = data;
+    } else {
+      //add to the old cache
+      this.dataCache[name].coords.x.push(data.coords.x);
+      this.dataCache[name].coords.y.push(data.coords.y);
+    }
 
     this.printTitle();
   },
