@@ -73,15 +73,15 @@ enyo.kind({
     var
       yRange = this.axisRange.y,
       xRange = this.axisRange.x,
-      canvasAttributes = this.$.dataCanvas.attributes;
+      margin = this.decorMargin,
+      width  = this.width - margin.left - margin.right,
+      height = this.height - margin.top - margin.bottom;
 
     this.set(
-      "xSpacingFactor",
-      canvasAttributes.width / ((+xRange.max || 0) - (+xRange.min || 0))
+      "xSpacingFactor", width / ((+xRange.max || 0) - (+xRange.min || 0))
     );
     this.set(
-      "ySpacingFactor",
-      canvasAttributes.height / ((+yRange.max || 0) - (+yRange.min || 0))
+      "ySpacingFactor", height / ((+yRange.max || 0) - (+yRange.min || 0))
     );
   },
   calculateMargins: function() {
