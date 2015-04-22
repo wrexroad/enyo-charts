@@ -298,7 +298,7 @@ enyo.kind({
       numPts = yCoords.length,
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
-      ctx = this.dataCtx,
+      ctx = this.dataLayers[data.name].ctx,
       onPath = false,
       range = this.axisRange || {},
       xRange = range.x || {},
