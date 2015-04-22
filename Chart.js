@@ -153,8 +153,8 @@ enyo.kind({
   },
   resetLayer: function(varName) {
     var layer;
-    
-    if(layer = this.dataLayers[varName + "_layer"]) {
+
+    if ((layer = this.dataLayers[varName + "_layer"])) {
       layer.ctx.clearRect(
         0, 0, this.width, this.height
       );
