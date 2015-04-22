@@ -54,13 +54,30 @@ enyo.kind({
     decorCanvas.render();
   },
   createDataCanvas: function(varName) {
-    var canvasName, dataCanvas;
+    var
+      margin = this.decorMargin,
+      top = margin.top,
+      left = margin.left,
+      width = this.width - margin.left - margin.right,
+      height = this.height - margin.top - margin.bottom,
+      canvasName, dataCanvas;
 
     //make sure the canvas has a name
     canvasName = (varName || "") + "_layer";
 
     //create the enyo component
-    dataCanvas = this.createComponent({name: canvasName, kind: "enyo.Canvas"});
+    dataCanvas = this.createComponent({
+      name: canvasName, kind: "enyo.Canvas",
+      style:
+        "position: absolute;" +
+        "left:" + left + "px; " +
+        "top:" + top + "px;"
+    });
+
+    //make sure the canvas is the right size
+    dataCanvas.setAttribute("height", height);
+    dataCanvas.setAttribute("width", width);
+
     dataCanvas.render();
 
     //save a reference to the canvas and context
@@ -71,6 +88,10 @@ enyo.kind({
     
     //make sure the canvas is rendered
     this.dataLayers[canvasName].canvas.render();
+
+    //wipe the canvas
+    dataCanvas.update();
+
   },
   printTitle: function() {
     var
@@ -133,29 +154,8 @@ enyo.kind({
     this.redraw();
   },
   resetLayer: function(varName) {
-    var
-      canvasName = (varName || "") + "_layer",
-      layer = this.$.dataLayers[canvasName],
-      dataCanvas = layer.canvas,
-      margin = this.decorMargin,
-      top = margin.top,
-      left = margin.left,
-      width = this.width - margin.left - margin.right,
-      height = this.height - margin.top - margin.bottom;
-    
-    //make sure the canvas is the right size
-    dataCanvas.setAttribute("height", height);
-    dataCanvas.setAttribute("width", width);
-    dataCanvas.setAttribute("style",
-        "position: absolute;" +
-        "left:" + left + "px; " +
-        "top:" + top + "px;"
-    );
-
-    //wipe the canvas
-    layer.ctx.clearRect(top, left, width, height);
-    dataCanvas.update();
-
+    this.dataLayers[varName + "_layer"].canvas.destroy();
+    this.createDataCanvas(varName);
   },
   wipePlot: function() {
     for (var layer_i in this.dataLayers) {
