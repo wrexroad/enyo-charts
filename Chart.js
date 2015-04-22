@@ -152,15 +152,11 @@ enyo.kind({
     this.redraw();
   },
   resetLayer: function(varName) {
-    var margin = this.decorMargin;
-
     this.dataLayers[varName + "_layer"].ctx.clearRect(
       0, 0, this.width, this.height
     );
   },
   wipePlot: function() {
-    var margin = this.decorMargin;
-
     for (var layer_i in this.dataLayers) {
       this.dataLayers[layer_i].ctx.clearRect(
         0, 0, this.width, this.height
