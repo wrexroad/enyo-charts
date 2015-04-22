@@ -154,16 +154,19 @@ enyo.kind({
     this.redraw();
   },
   resetLayer: function(varName) {
-    //debugger;
-    this.dataLayers[varName + "_layer"].canvas.destroy();
-    delete this.dataLayers[varName + "_layer"];
-    this.createDataCanvas(varName);
+    var margin = this.decorMargin;
+
+    this.dataLayers[varName + "_layer"].ctx.clearRect(
+      0, 0, this.width, this.height
+    );
   },
   wipePlot: function() {
-    //debugger;
+    var margin = this.decorMargin;
+    
     for (var layer_i in this.dataLayers) {
-      this.dataLayers[layer_i].canvas.destroy();
-      delete this.dataLayers[layer_i];
+      this.dataLayers[layer_i].ctx.clearRect(
+        0, 0, this.width, this.height
+      );
     }
   },
   defaultFormatter: function(val, decimalPlaces) {
