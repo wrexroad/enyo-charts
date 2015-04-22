@@ -156,13 +156,6 @@ enyo.kind({
 
   },
   wipePlot: function() {
-    this.dataCtx.clearRect(
-      0,
-      0,
-      (this.height - this.decorMargin.top - this.decorMargin.bottom),
-      (this.width - this.decorMargin.left - this.decorMargin.right)
-    );
-
     for (var layer_i in this.dataLayers) {
       this.dataLayers[layer_i].canvas.destroy();
     }
