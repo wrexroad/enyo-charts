@@ -57,16 +57,18 @@ enyo.kind({
     var canvasName, dataCanvas;
 
     //make sure the canvas has a name
-    canvasName = (varName || "") + "_canvas",
+    canvasName = (varName || "") + "_canvas";
 
     //create the enyo component
     dataCanvas = this.createComponent({name: canvasName, kind: "enyo.Canvas"});
     dataCanvas.render();
 
     //save a reference to the canvas and context
-    this.dataLayers[canvasName].canvas = dataCanvas;
-    this.dataLayers[canvasName].ctx = dataCanvas.node.getContext('2d');
-
+    this.dataLayers[canvasName] = {
+      canvas: dataCanvas,
+      ctx   : dataCanvas.node.getContext('2d')
+    };
+    
     //make sure the canvas is rendered
     this.dataLayers[canvasName].canvas.render();
   },
