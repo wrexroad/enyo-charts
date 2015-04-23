@@ -115,8 +115,12 @@ enyo.kind({
   },
   redraw: function() {
     var
-      decorCanvas = this.$.decorCanvas,
-      data_i;
+      decorWidth = this.width,
+      decorHeight = this.height,
+      margin = this.decorMargin,
+      dataWidth = decorWidth - margin.left - margin.right,
+      dataHeight = decorHeight - margin.top - margin.bottom,
+      data_i, layer_i, canvas;
 
 
     //clear the canvases
@@ -125,9 +129,17 @@ enyo.kind({
     this.calculateMargins();
 
     //adjust the size of each canvas
-    decorCanvas.setAttribute("height", this.height);
-    decorCanvas.setAttribute("width", this.width);
-    decorCanvas.update();
+    canvas = this.$.decorCanvas;
+    canvas.setAttribute("height", this.height);
+    canvas.setAttribute("width", this.width);
+    canvas.update();
+
+    for (layer_i in this.dataLayers) {
+      canvas = this.dataLayers[layer_i].canvas;
+      canvas.setAttribute("height", dataHeight);
+      canvas.setAttribute("width", dataWidth);
+      canvas.update();
+    }
 
     //redraw everything
     this.calculateSpacing();
