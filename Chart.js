@@ -105,8 +105,9 @@ enyo.kind({
 
     for (set_i in cache) {
         dataset = cache[set_i];
+        name = dataset.name;
         ctx.fillStyle = dataset.style.color;
-        ctx.fillText(dataset.name, offset, 0);
+        ctx.fillText(name, offset, 0);
         offset += ctx.measureText(name + ' ').width;
     }
 
