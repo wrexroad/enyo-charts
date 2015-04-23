@@ -273,6 +273,11 @@ enyo.kind({
       this._setAxisRange("y", yRange.min, yRange.max);
     }
 
+    //clear this layer if this is not an update
+    if (!data.update) {
+      this.resetLayer(name);
+    }
+
     //draw this dataset
     this.drawData(data);
 
@@ -280,13 +285,13 @@ enyo.kind({
     if (!this.dataCache) {
       this.dataCache = {};
     }
-    if (!data.update) {
-      //replace the old cahce
-      this.dataCache[name] = data;
-    } else {
+    if (data.update) {
       //add to the old cache
       (this.dataCache[name].coords.x).push(data.coords.x);
       (this.dataCache[name].coords.y).push(data.coords.y);
+    } else {
+      //replace the old cahce
+      this.dataCache[name] = data;
     }
 
     this.printTitle();
