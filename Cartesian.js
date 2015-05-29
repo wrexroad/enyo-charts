@@ -244,6 +244,12 @@ enyo.kind({
       y: this.axisRange.y.max - coords.y / this.ySpacingFactor
     };
   },
+  invertValue: function (pointValue) {
+    return {
+      x: (pointValue.x  - this.axisRange.x.min) * this.xSpacingFactor,
+      y: -(pointValue.y - this.axisRange.y.max) * this.ySpacingFactor
+    };
+  },
   addDataset: function(data) {
     var
       coords = data.coords || {},

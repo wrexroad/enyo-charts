@@ -244,5 +244,6 @@ enyo.kind({
   decorate: function() {},
   calculateSpacing: function() {},
   calculateMargins: function() {},
-  invertCoordinates: function() {}
+  invertCoordinates: function() {},
+  invertValue: function() {}
 });
