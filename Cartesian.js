@@ -285,7 +285,7 @@ enyo.kind({
     }
 
     //draw this dataset
-    this.drawData(data);
+    //this.drawData(data);
 
     //cache the new dataset for use in redraws
     if (!this.dataCache) {

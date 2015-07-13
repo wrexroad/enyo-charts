@@ -20,9 +20,9 @@ enyo.kind({
     autoRange: null,
     dataLayers: null
   },
-  observers: [
-    {method: "redraw", path: ["height", "width", "fontSize", "axisRange"]}
-  ],
+  //observers: [
+  //  {method: "redraw", path: ["height", "width", "fontSize", "axisRange"]}
+  //],
 
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"}
@@ -50,6 +50,8 @@ enyo.kind({
       decorCanvas = this.$.decorCanvas;
 
     this.decorCtx = decorCanvas.node.getContext('2d');
+
+    this.initValues();
 
     decorCanvas.render();
   },
@@ -121,7 +123,6 @@ enyo.kind({
       dataWidth = decorWidth - margin.left - margin.right,
       dataHeight = decorHeight - margin.top - margin.bottom,
       data_i, layer_i, canvas;
-
 
     //clear the canvases
     this.wipePlot();
