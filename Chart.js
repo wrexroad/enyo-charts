@@ -148,6 +148,8 @@ enyo.kind({
       }
     }
 
+    this.printTitle();
+
     return true;
   },
   resetPlot: function() {

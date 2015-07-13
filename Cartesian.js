@@ -291,8 +291,6 @@ enyo.kind({
       //replace the old cahce
       this.dataCache[name] = data;
     }
-
-    this.printTitle();
   },
   drawData: function(data) {
     var
