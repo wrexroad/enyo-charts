@@ -279,14 +279,6 @@ enyo.kind({
       this._setAxisRange("y", yRange.min, yRange.max);
     }
 
-    //clear this layer if this is not an update
-    if (!data.update) {
-      this.resetLayer(name);
-    }
-
-    //draw this dataset
-    //this.drawData(data);
-
     //cache the new dataset for use in redraws
     if (!this.dataCache) {
       this.dataCache = {};

@@ -20,9 +20,6 @@ enyo.kind({
     autoRange: null,
     dataLayers: null
   },
-  //observers: [
-  //  {method: "redraw", path: ["height", "width", "fontSize", "axisRange"]}
-  //],
 
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"}
