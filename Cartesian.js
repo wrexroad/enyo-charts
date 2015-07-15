@@ -78,7 +78,7 @@ enyo.kind({
         min: NaN,
         max: NaN
       },
-      data_i, range;
+      data_i;
     
     if (current == false) {
       return;
