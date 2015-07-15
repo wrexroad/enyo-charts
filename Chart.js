@@ -240,6 +240,7 @@ enyo.kind({
     this.autoRange = true;
   },
   addDataset: function() {},
+  removeDataset: function() {},
   drawData: function() {},
   decorate: function() {},
   calculateSpacing: function() {},

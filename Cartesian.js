@@ -294,6 +294,11 @@ enyo.kind({
       this.dataCache[name] = data;
     }
   },
+  removeDataset: function(name) {
+    if (this.dataCache[name]) {
+      delete this.dataCache[name];
+    }
+  },
   drawData: function(data) {
     var
       style = data.style || {},
