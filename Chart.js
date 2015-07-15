@@ -17,10 +17,12 @@ enyo.kind({
     axisRange: null,
     dataCache: null,
     decorMargin: null,
-    autoRange: null,
+    autoRange: false,
     dataLayers: null
   },
-
+  observers: [
+    {method: "autoScaleData", path: ["autoRange"]}
+  ],
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"}
   ],
@@ -243,6 +245,7 @@ enyo.kind({
   removeDataset: function() {},
   drawData: function() {},
   decorate: function() {},
+  autoScaleData: function() {},
   calculateSpacing: function() {},
   calculateMargins: function() {},
   invertCoordinates: function() {},

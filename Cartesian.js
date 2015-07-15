@@ -71,6 +71,25 @@ enyo.kind({
 
     this.set("axisRange", newRange);
   },
+  autoScaleData: function(previous, current, property) {
+    var
+      cache = this.dataCache,
+      range = {
+        min: NaN,
+        max: NaN
+      },
+      data_i, range;
+    
+    if (current == false) {
+      return;
+    }
+
+    for (data_i in cache) {
+      range =
+        this.findRange(cache[data_i].coords.y.concat(range.min, range.max));
+    }
+    this._setAxisRange("y", range.min, range.max);
+  },
   calculateSpacing: function() {
     var
       yRange = this.axisRange.y,
@@ -273,11 +292,11 @@ enyo.kind({
 
     //if we are in autorange mode, check if the axis ranges need to be updated
     if (isNaN(xMin) || isNaN(xMax) || this.autoRange.x) {
-      xRange = this.findRange(xCoords);
+      xRange = this.findRange(xCoords.concat(xMin, xMax));
       this._setAxisRange("x", xRange.min, xRange.max);
     }
     if (isNaN(yMin) || isNaN(yMax) || this.autoRange.y) {
-      yRange = this.findRange(yCoords);
+      yRange = this.findRange(yCoords.concat(yMin, yMax));
       this._setAxisRange("y", yRange.min, yRange.max);
     }
 
