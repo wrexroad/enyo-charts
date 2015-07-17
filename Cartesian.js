@@ -318,6 +318,11 @@ enyo.kind({
       delete this.dataCache[name];
     }
   },
+  clearCache: function() {
+    this.dataCache = {};
+    this.axisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
+    this.autoRange = {x: true, y: true};
+  },
   drawData: function(data) {
     var
       style = data.style || {},

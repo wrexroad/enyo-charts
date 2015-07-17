@@ -243,6 +243,7 @@ enyo.kind({
   },
   addDataset: function() {},
   removeDataset: function() {},
+  clearCache: function() {},
   drawData: function() {},
   decorate: function() {},
   autoScaleData: function() {},
