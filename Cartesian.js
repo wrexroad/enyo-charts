@@ -80,7 +80,7 @@ enyo.kind({
       },
       data_i;
     
-    if (current == false) {
+    if (!current) {
       return;
     }
 
