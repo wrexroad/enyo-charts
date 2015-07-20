@@ -329,14 +329,12 @@ enyo.kind({
       m = params.m || 0,
       b = params.b || 0,
       name = params.name,
+      anchors = params.anchorPoints,
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
       range = this.axisRange || {},
       xRange = range.x || {},
       yRange = range.y || {},
-      oldMidpoint = params.midpointTime,
-      timeOffset =
-        oldMidpoint - (((xRange.max - xRange.min) / 2) + xRange.min) || 0,
       x1, x2, y1, y2, ctx;
 
     //make sure there is a canvas for this variable and get the context
@@ -355,16 +353,16 @@ enyo.kind({
     ctx.translate(
       0, this.height - this.decorMargin.top - this.decorMargin.bottom
     );
-      
-    //get the value of the end points
-    x1 = -timeOffset;
-    x2 = xRange.max - xRange.min;
-    y1 = (x1 * m) + b - yRange.min;
-    y2 = (x2 * m) + b - yRange.min;
-
+    
     ctx.beginPath();
-    ctx.moveTo((x1 + timeOffset) * xSpacingFactor, -y1 * ySpacingFactor);
-    ctx.lineTo((x2 + timeOffset) * xSpacingFactor, -y2 * ySpacingFactor);
+    ctx.moveTo(
+      (anchors[0][0] - xRange.min) * xSpacingFactor,
+      -(anchors[0][1] - yRange.min) * ySpacingFactor
+    );
+    ctx.lineTo(
+      (anchors[1][0] - xRange.min) * xSpacingFactor,
+      -(anchors[1][1] - yRange.min) * ySpacingFactor
+    );
     ctx.stroke();
   
     ctx.restore();
