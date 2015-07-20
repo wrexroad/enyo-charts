@@ -182,6 +182,22 @@ enyo.kind({
     return (+val).toFixed(decimalPlaces);
   },
 
+  drawPolynomial: function(name, coeff) {
+    var numCoeff = coeff.length;
+
+    if (typeof name !== "string" || ! numCoeff) {
+      return;
+    } else if (numCoeff === 1) {
+      this.drawLinear(name, 0, coeff[0]);
+    } else if (numCoeff === 2) {
+      this.drawLinear(name, (coeff[0]||0), (coeff[1]||0));
+    } else if (numCoeff === 3) {
+      this.drawParabola(name, (coeff[0]||0), (coeff[1]||0), (coeff[2]||0));
+    } else {
+      return;
+    }
+  },
+
   //functions for some floating point arithmetic
   getDecimalPlaces: function(numbers) {
     var
@@ -244,6 +260,8 @@ enyo.kind({
   addDataset: function() {},
   removeDataset: function() {},
   clearCache: function() {},
+  drawLinear: function() {},
+  drawParabola: function() {},
   drawData: function() {},
   decorate: function() {},
   autoScaleData: function() {},

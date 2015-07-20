@@ -323,6 +323,49 @@ enyo.kind({
     this.axisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
     this.autoRange = {x: true, y: true};
   },
+  drawLinear: function(name, m, b) {
+    var
+      style = "black",
+      xSpacingFactor = this.xSpacingFactor,
+      ySpacingFactor = this.ySpacingFactor,
+      range = this.axisRange || {},
+      xRange = range.x || {},
+      yRange = range.y || {},
+      x1, x2, y1, y2, ctx;
+
+    //make sure there is a canvas for this variable and get the context
+    if (!this.dataLayers[name + "_layer"]) {
+      this.createDataCanvas(name);
+    }
+    ctx = this.dataLayers[name + "_layer"].ctx;
+
+    //configure the size and color of the brush
+    ctx.save();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "black";
+    ctx.setLineDash([10, 10]);
+
+    //move to the bottom left corner of the dataCanvas
+    ctx.translate(
+      0, this.height - this.decorMargin.top - this.decorMargin.bottom
+    );
+      
+    //get the value of the end points
+    x1 = 0;
+    x2 = xRange.max - xRange.min;
+    y1 = (x1 * m) + b - yRange.min;
+    y2 = (x2 * m) + b - yRange.min;
+
+    ctx.beginPath();
+    ctx.moveTo(x1 * xSpacingFactor, -y1 * ySpacingFactor);
+    ctx.lineTo(x2 * xSpacingFactor, -y2 * ySpacingFactor);
+    ctx.stroke();
+  
+    ctx.restore();
+  },
+  drawParabola: function(name, a, b, c) {
+
+  },
   drawData: function(data) {
     var
       style = data.style || {},
