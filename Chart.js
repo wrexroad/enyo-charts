@@ -121,7 +121,7 @@ enyo.kind({
       margin = this.decorMargin,
       dataWidth = decorWidth - margin.left - margin.right,
       dataHeight = decorHeight - margin.top - margin.bottom,
-      data_i, layer_i, canvas;
+      draw_i, layer_i, canvas;
 
     //clear the canvases
     this.wipePlot();
@@ -145,8 +145,13 @@ enyo.kind({
     this.calculateSpacing();
     this.decorate();
     if (this.dataCache) {
-      for (data_i in this.dataCache) {
-        this.drawData(this.dataCache[data_i]);
+      for (draw_i in this.dataCache) {
+        this.drawData(this.dataCache[draw_i]);
+      }
+    }
+    if (this.cachedPolynomials) {
+      for (draw_i in this.cachedPolynomials) {
+        this.drawPolynomial(this.cachedPolynomials[draw_i]);
       }
     }
 
@@ -182,19 +187,61 @@ enyo.kind({
     return (+val).toFixed(decimalPlaces);
   },
 
-  drawPolynomial: function(name, coeff) {
-    var numCoeff = coeff.length;
+  addPolynomial: function(params) {
+    var
+      coeff = params.coeff || [],
+      numCoeff = coeff.length,
+      name = params.name || "",
+      xRange = this.axisRange.x || {},
+      midpointTime = (((xRange.max - xRange.min) / 2) + xRange.min);
 
-    if (typeof name !== "string" || ! numCoeff) {
+    if (!numCoeff) {
       return;
-    } else if (numCoeff === 1) {
-      this.drawLinear(name, 0, coeff[0]);
+    }
+
+    if (!this.cachedPolynomials) {
+      this.cachedPolynomials = {};
+    }
+
+    if (numCoeff === 1) {
+      this.cachedPolynomials[name] = {
+        name: name,
+        m: 0,
+        b: coeff[0] || 0,
+        order: 1,
+        midpointTime: midpointTime,
+        color: params.color || "black"
+      };
     } else if (numCoeff === 2) {
-      this.drawLinear(name, (coeff[0]||0), (coeff[1]||0));
+      this.cachedPolynomials[name] = {
+        name: name,
+        m: coeff[0] || 0,
+        b: coeff[1] || 0,
+        order: 1,
+        midpointTime: midpointTime,
+        color: params.color || "black"
+      };
     } else if (numCoeff === 3) {
-      this.drawParabola(name, (coeff[0]||0), (coeff[1]||0), (coeff[2]||0));
+      this.cachedPolynomials[name] = {
+        name: name,
+        a: coeff[0] || 0,
+        b: coeff[1] || 0,
+        c: coeff[2] || 0,
+        order: 2,
+        midpointTime: midpointTime,
+        color: params.color || "black"
+      };
     } else {
       return;
+    }
+
+    return this;
+  },
+  drawPolynomial: function(params) {
+    if (params.order === 1) {
+      this.drawLinear(params);
+    } else if (params.order === 2) {
+      this.drawParabola(params);
     }
   },
 

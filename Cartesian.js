@@ -323,14 +323,20 @@ enyo.kind({
     this.axisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
     this.autoRange = {x: true, y: true};
   },
-  drawLinear: function(name, m, b) {
+  drawLinear: function(params) {
     var
-      style = "black",
+      color = params.color || "black",
+      m = params.m || 0,
+      b = params.b || 0,
+      name = params.name,
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
       range = this.axisRange || {},
       xRange = range.x || {},
       yRange = range.y || {},
+      oldMidpoint = params.midpointTime,
+      timeOffset =
+        oldMidpoint - (((xRange.max - xRange.min) / 2) + xRange.min) || 0,
       x1, x2, y1, y2, ctx;
 
     //make sure there is a canvas for this variable and get the context
@@ -342,7 +348,7 @@ enyo.kind({
     //configure the size and color of the brush
     ctx.save();
     ctx.lineWidth = 1;
-    ctx.strokeStyle = "black";
+    ctx.strokeStyle = color;
     ctx.setLineDash([10, 10]);
 
     //move to the bottom left corner of the dataCanvas
@@ -351,14 +357,14 @@ enyo.kind({
     );
       
     //get the value of the end points
-    x1 = 0;
+    x1 = -timeOffset;
     x2 = xRange.max - xRange.min;
     y1 = (x1 * m) + b - yRange.min;
     y2 = (x2 * m) + b - yRange.min;
 
     ctx.beginPath();
-    ctx.moveTo(x1 * xSpacingFactor, -y1 * ySpacingFactor);
-    ctx.lineTo(x2 * xSpacingFactor, -y2 * ySpacingFactor);
+    ctx.moveTo((x1 + timeOffset) * xSpacingFactor, -y1 * ySpacingFactor);
+    ctx.lineTo((x2 + timeOffset) * xSpacingFactor, -y2 * ySpacingFactor);
     ctx.stroke();
   
     ctx.restore();
