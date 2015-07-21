@@ -378,13 +378,13 @@ enyo.kind({
       c = params.c || 0,
       vertex = params.vertex || [0,0],
       x1 = xRange.min,
-      x2 = xRange.max,
       y1 = (a * Math.pow(x1, 2)) + (b * x1) + c,
-      y2 = (a * Math.pow(x2, 2)) + (b * x2) + c,
       tanM = 2 * a * x1 + b,
       tanB = y1 - (tanM * x1),
       cp1x = vertex[0],
       cp1y = (tanM * cp1x) + tanB,
+      x2 = cp1x + (cp1x - x1),
+      y2 = y1,
       ctx;
 
     //make sure there is a canvas for this variable and get the context
