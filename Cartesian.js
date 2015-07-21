@@ -355,7 +355,7 @@ enyo.kind({
     //move to the bottom left corner of the dataCanvas
     ctx.translate(
       0, this.height - this.decorMargin.top - this.decorMargin.bottom
-    );
+    );  
 
     ctx.beginPath();
     ctx.moveTo(0, -(y1 - yRange.min) * ySpacingFactor);
