@@ -377,14 +377,14 @@ enyo.kind({
       b = params.b || 0,
       c = params.c || 0,
       vertex = params.vertex || [0,0],
-      halfWidth = Math.max((vertex[0] - xRange.min), (xRange.max - vertex[0])),
-      x1 = vertex[0] - halfWidth,
+      width = xRange.max - xRange.min,
+      x1 = vertex[0] - width,
       y1 = (a * Math.pow(x1, 2)) + (b * x1) + c,
+      x2 = vertex[0] + width,
+      y2 = y1,
       tanM = 2 * a * x1 + b,
       tanB = y1 - (tanM * x1),
       cp1y = (tanM * vertex[0]) + tanB,
-      x2 = vertex[0] + halfWidth,
-      y2 = y1,
       ctx;
 
     //make sure there is a canvas for this variable and get the context
@@ -405,7 +405,10 @@ enyo.kind({
     );
     
     ctx.beginPath();
-    ctx.moveTo(x1 - xRange.min, -(y1 - yRange.min) * ySpacingFactor);
+    ctx.moveTo(
+      (x1 - xRange.min) * xSpacingFactor,
+      -(y1 - yRange.min) * ySpacingFactor
+    );
     ctx.quadraticCurveTo(
       (vertex[0] - xRange.min) * xSpacingFactor,
       -(cp1y - yRange.min) * ySpacingFactor,
