@@ -326,14 +326,14 @@ enyo.kind({
   drawLinear: function(params) {
     var
       color = params.color || "black",
-      m = params.m || 0,
-      b = params.b || 0,
       name = params.name,
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
       range = this.axisRange || {},
       xRange = range.x || {},
       yRange = range.y || {},
+      m = params.m || 0,
+      b = params.b || 0,
       x1 = xRange.min,
       x2 = xRange.max,
       y1 = x1 * m + b,
@@ -364,8 +364,57 @@ enyo.kind({
   
     ctx.restore();
   },
-  drawParabola: function(name, a, b, c) {
+  drawParabola: function(params) {
+    var
+      color = params.color || "black",
+      name = params.name,
+      xSpacingFactor = this.xSpacingFactor,
+      ySpacingFactor = this.ySpacingFactor,
+      range = this.axisRange || {},
+      xRange = range.x || {},
+      yRange = range.y || {},
+      a = params.a || 0,
+      b = params.b || 0,
+      c = params.c || 0,
+      vertex = params.vertex || [0,0],
+      x1 = xRange.min,
+      x2 = xRange.max,
+      y1 = (a * Math.pow(x1, 2)) + (b * x1) + c,
+      y2 = (a * Math.pow(x2, 2)) + (b * x2) + c,
+      tanM = 2 * a * x1 + b,
+      tanB = y1 - (tanM * x1),
+      cp1x = vertex[0],
+      cp1y = (tanM * cp1x) + tanB,
+      ctx;
 
+    //make sure there is a canvas for this variable and get the context
+    if (!this.dataLayers[name + "_layer"]) {
+      this.createDataCanvas(name);
+    }
+    ctx = this.dataLayers[name + "_layer"].ctx;
+
+    //configure the size and color of the brush
+    ctx.save();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = color;
+    ctx.setLineDash([10, 10]);
+
+    //move to the bottom left corner of the dataCanvas
+    ctx.translate(
+      0, this.height - this.decorMargin.top - this.decorMargin.bottom
+    );
+    
+    ctx.beginPath();
+    ctx.moveTo(0, -(y1 - yRange.min) * ySpacingFactor);
+    ctx.quadraticCurveTo(
+      (cp1x - x1) * xSpacingFactor,
+      -(cp1y - yRange.min) * ySpacingFactor,
+      (x2 - x1) * xSpacingFactor,
+      -(y2 - yRange.min) * ySpacingFactor
+    );
+    ctx.stroke();
+  
+    ctx.restore();
   },
   drawData: function(data) {
     var

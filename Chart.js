@@ -191,7 +191,8 @@ enyo.kind({
     var
       coeff = params.coeff || [],
       numCoeff = coeff.length,
-      name = params.name || "";
+      name = params.name || "",
+      a, b, c, x, y;
 
     if (!numCoeff) {
       return;
@@ -202,29 +203,38 @@ enyo.kind({
     }
 
     if (numCoeff === 1) {
+      //just a constant, convert to 1st order polynomial
       this.cachedPolynomials[name] = {
         name: name,
-        m: 0,
-        b: coeff[0] || 0,
         order: 1,
-        color: params.color || "black"
+        color: params.color || "black",
+        m: 0,
+        b: coeff[0] || 0
       };
     } else if (numCoeff === 2) {
       this.cachedPolynomials[name] = {
         name: name,
-        m: coeff[0] || 0,
-        b: coeff[1] || 0,
         order: 1,
-        color: params.color || "black"
+        color: params.color || "black",
+        m: coeff[0] || 0,
+        b: coeff[1] || 0
       };
     } else if (numCoeff === 3) {
+      //this is a parabola, find the vertex
+      a = coeff[0] || 0;
+      b = coeff[1] || 0;
+      c = coeff[2] || 0;
+      x = -b / (2 * a);
+      y = (a * Math.pow(x, 2)) + (b * x) + c;
+
       this.cachedPolynomials[name] = {
         name: name,
-        a: coeff[0] || 0,
-        b: coeff[1] || 0,
-        c: coeff[2] || 0,
         order: 2,
-        color: params.color || "black"
+        color: params.color || "black",
+        a: a,
+        b: b,
+        c: c,
+        vertex: [x, y]
       };
     } else {
       return;
