@@ -377,13 +377,13 @@ enyo.kind({
       b = params.b || 0,
       c = params.c || 0,
       vertex = params.vertex || [0,0],
-      x1 = xRange.min,
+      halfWidth = Math.max((vertex[0] - xRange.min), (xRange.max - vertex[0])),
+      x1 = vertex[0] - halfWidth,
       y1 = (a * Math.pow(x1, 2)) + (b * x1) + c,
       tanM = 2 * a * x1 + b,
       tanB = y1 - (tanM * x1),
-      cp1x = vertex[0],
-      cp1y = (tanM * cp1x) + tanB,
-      x2 = cp1x + (cp1x - x1),
+      cp1y = (tanM * vertex[0]) + tanB,
+      x2 = vertex[0] + halfWidth,
       y2 = y1,
       ctx;
 
@@ -405,11 +405,11 @@ enyo.kind({
     );
     
     ctx.beginPath();
-    ctx.moveTo(0, -(y1 - yRange.min) * ySpacingFactor);
+    ctx.moveTo(x1 - xRange.min, -(y1 - yRange.min) * ySpacingFactor);
     ctx.quadraticCurveTo(
-      (cp1x - x1) * xSpacingFactor,
+      (vertex[0] - xRange.min) * xSpacingFactor,
       -(cp1y - yRange.min) * ySpacingFactor,
-      (x2 - x1) * xSpacingFactor,
+      (x2 - xRange.min) * xSpacingFactor,
       -(y2 - yRange.min) * ySpacingFactor
     );
     ctx.stroke();
