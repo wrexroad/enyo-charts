@@ -329,13 +329,16 @@ enyo.kind({
       m = params.m || 0,
       b = params.b || 0,
       name = params.name,
-      anchors = params.anchorPoints,
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
       range = this.axisRange || {},
       xRange = range.x || {},
       yRange = range.y || {},
-      x1, x2, y1, y2, ctx;
+      x1 = xRange.min,
+      x2 = xRange.max,
+      y1 = x1 * m + b,
+      y2 = x2 * m + b,
+      ctx;
 
     //make sure there is a canvas for this variable and get the context
     if (!this.dataLayers[name + "_layer"]) {
@@ -353,16 +356,10 @@ enyo.kind({
     ctx.translate(
       0, this.height - this.decorMargin.top - this.decorMargin.bottom
     );
-    
+
     ctx.beginPath();
-    ctx.moveTo(
-      (anchors[0][0] - xRange.min) * xSpacingFactor,
-      -(anchors[0][1] - yRange.min) * ySpacingFactor
-    );
-    ctx.lineTo(
-      (anchors[1][0] - xRange.min) * xSpacingFactor,
-      -(anchors[1][1] - yRange.min) * ySpacingFactor
-    );
+    ctx.moveTo(0, -(y1 - yRange.min) * ySpacingFactor);
+    ctx.lineTo((x2 - x1) * xSpacingFactor, -(y2 - yRange.min) * ySpacingFactor);
     ctx.stroke();
   
     ctx.restore();

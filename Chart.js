@@ -191,10 +191,7 @@ enyo.kind({
     var
       coeff = params.coeff || [],
       numCoeff = coeff.length,
-      name = params.name || "",
-      range = this.axisRange || {},
-      xRange = range.x || {},
-      yRange = range.y || {};
+      name = params.name || "";
 
     if (!numCoeff) {
       return;
@@ -210,10 +207,6 @@ enyo.kind({
         m: 0,
         b: coeff[0] || 0,
         order: 1,
-        anchorPoints: [
-          [xRange.min, coeff[1]],
-          [xRange.max, coeff[1]]
-        ],
         color: params.color || "black"
       };
     } else if (numCoeff === 2) {
@@ -222,10 +215,6 @@ enyo.kind({
         m: coeff[0] || 0,
         b: coeff[1] || 0,
         order: 1,
-        anchorPoints: [
-          [xRange.min, (xRange.min * coeff[0]) + coeff[1]],
-          [xRange.max, (xRange.max * coeff[0]) + coeff[1]]
-        ],
         color: params.color || "black"
       };
     } else if (numCoeff === 3) {
@@ -235,7 +224,6 @@ enyo.kind({
         b: coeff[1] || 0,
         c: coeff[2] || 0,
         order: 2,
-        anchorPoints: [],
         color: params.color || "black"
       };
     } else {
