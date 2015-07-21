@@ -243,8 +243,10 @@ enyo.kind({
     return this;
   },
   removePolynomial: function(name) {
-    delete this.cachedPolynomials[name];
-    this.redraw();
+    if(this.cachedPolynomials) {
+      delete this.cachedPolynomials[name];
+      this.redraw();
+    }
   },
   drawPolynomial: function(params) {
     if (params.order === 1) {
