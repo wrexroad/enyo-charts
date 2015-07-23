@@ -52,7 +52,8 @@ enyo.kind({
   },
   updateAxisRange: function() {
     var
-      cache, range, xMin, xMax, xCoords, yMin, yMax, yCoords, filtered, data_i;
+      cache, range, filtered, data_i, buffer,
+      xMin, xMax, xCoords, yMin, yMax, yCoords;
 
     cache = this.dataCache;
 
@@ -81,7 +82,8 @@ enyo.kind({
       xMax =
         (isNaN(xMax) || this.autoRange.x) ?
         Math.max.apply(this, filtered) : xMax;
-      this.setAxisRange("x", xMin, xMax);
+      buffer = (xMax - xMin) * 0.1;
+      this.setAxisRange("x", xMin - buffer, xMax + buffer);
     }
     
     yMin = +range.y.min;
@@ -109,7 +111,8 @@ enyo.kind({
       yMax =
         (isNaN(yMax) || this.autoRange.y) ?
         Math.max.apply(this, filtered) : yMax;
-      this.setAxisRange("y", yMin, yMax);
+      buffer = (yMax - yMin) * 0.1;
+      this.setAxisRange("y", yMin - buffer, yMax + buffer);
     }
   },
   calculateSpacing: function() {
