@@ -37,8 +37,9 @@ enyo.kind({
   _setAxisRange: function(axis, min, max) {
     var
       oldRange = this.axisRange,
+      otherAxis = axis == "x" ? "y" : "x",
       newRange = {},
-      offset, axis_i;
+      offset;
 
     axis = (axis || "").toLowerCase();
 
@@ -55,20 +56,11 @@ enyo.kind({
     }
 
     //build the new range from these min and max values and the other axes
-    for (axis_i in oldRange) {
-      if (oldRange.hasOwnProperty(axis_i)) {
-        if (axis_i == axis) {
-          newRange[axis_i] = {
-            min: min, max: max
-          };
-        } else {
-          newRange[axis_i] = {
-            min: oldRange[axis_i].min, max: oldRange[axis_i].max
-          };
-        }
-      }
-    }
-
+    newRange[axis] = {
+      min: min, max: max
+    };
+    newRange[otherAxis] = oldRange[otherAxis];
+  
     this.set("axisRange", newRange);
   },
   updateAxisRange: function() {
