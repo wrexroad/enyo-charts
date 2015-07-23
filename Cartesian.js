@@ -285,16 +285,24 @@ enyo.kind({
     ctx.restore();
   },
   invertCoordinates: function(coords) {
-    return {
-      x: this.axisRange.x.min + coords.x / this.xSpacingFactor,
-      y: this.axisRange.y.max - coords.y / this.ySpacingFactor
-    };
+    if (!coords) {
+      return null;
+    } else {
+      return {
+        x: this.axisRange.x.min + coords.x / this.xSpacingFactor,
+        y: this.axisRange.y.max - coords.y / this.ySpacingFactor
+      };
+    }
   },
   invertValue: function (pointValue) {
-    return {
-      x: (pointValue.x  - this.axisRange.x.min) * this.xSpacingFactor,
-      y: -(pointValue.y - this.axisRange.y.max) * this.ySpacingFactor
-    };
+    if (!pointValue) {
+      return null;
+    } else {
+      return {
+        x: (pointValue.x  - this.axisRange.x.min) * this.xSpacingFactor,
+        y: -(pointValue.y - this.axisRange.y.max) * this.ySpacingFactor
+      };
+    }
   },
   addDataset: function(data) {
     var
