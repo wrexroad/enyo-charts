@@ -21,30 +21,20 @@ enyo.kind({
     this.autoRange = {x: true, y: true};
   },
   setAxisRange: function(axis, min, max) {
-    var autoRange = this.autoRange;
-    if (!axis) {return;}
-
-    if (isNaN(min) || isNaN(max)) {
-      autoRange[axis.toLowerCase()] = true;
-      this.set("autoRange", autoRange);
-      return;
-    }
-
-    autoRange[axis.toLowerCase()] = false;
-    this.set("autoRange", autoRange);
-    this._setAxisRange(axis, min, max);
-  },
-  _setAxisRange: function(axis, min, max) {
     var
-      oldRange = this.axisRange,
-      otherAxis = axis == "x" ? "y" : "x",
-      newRange = {},
+      range = this.axisRange,
       offset;
 
     axis = (axis || "").toLowerCase();
 
-    min = isNaN(+min) ? oldRange[axis].min : +min;
-    max = isNaN(+max) ? oldRange[axis].max : +max;
+    if (isNaN(min) || isNaN(max)) {
+      this.autoRange[axis] = true;
+    } else {
+      this.autoRange[axis] = false;
+    }
+
+    min = isNaN(+min) ? range[axis].min : +min;
+    max = isNaN(+max) ? range[axis].max : +max;
     
     //make sure min != max
     if (min == max) {
@@ -56,12 +46,9 @@ enyo.kind({
     }
 
     //build the new range from these min and max values and the other axes
-    newRange[axis] = {
+    range[axis] = {
       min: min, max: max
     };
-    newRange[otherAxis] = oldRange[otherAxis];
-  
-    this.set("axisRange", newRange);
   },
   updateAxisRange: function() {
     var
@@ -94,7 +81,7 @@ enyo.kind({
       xMax =
         (isNaN(xMax) || this.autoRange.x) ?
         Math.max.apply(this, filtered) : xMax;
-      this._setAxisRange("x", xMin, xMax);
+      this.setAxisRange("x", xMin, xMax);
     }
     
     yMin = +range.y.min;
@@ -122,7 +109,7 @@ enyo.kind({
       yMax =
         (isNaN(yMax) || this.autoRange.y) ?
         Math.max.apply(this, filtered) : yMax;
-      this._setAxisRange("y", yMin, yMax);
+      this.setAxisRange("y", yMin, yMax);
     }
   },
   calculateSpacing: function() {
