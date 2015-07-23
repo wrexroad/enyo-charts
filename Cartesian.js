@@ -71,24 +71,67 @@ enyo.kind({
 
     this.set("axisRange", newRange);
   },
-  autoScaleData: function(previous, current, property) {
+  updateAxisRange: function() {
     var
-      cache = this.dataCache,
-      range = {
-        min: NaN,
-        max: NaN
-      },
-      data_i;
-    
-    if (!current) {
-      return;
+      cache, range, xMin, xMax, xCoords, yMin, yMax, yCoords, filtered, data_i;
+
+    cache = this.dataCache;
+
+    range = this.axisRange;
+
+    //check if we already have a range for the x axis
+    xMin = +range.x.min;
+    xMax = +range.x.max;
+
+    //concatenate all x coordinate datasets
+    xCoords = [];
+    for (data_i in cache) {
+      xCoords = xCoords.concat(cache[data_i].coords.x);
     }
 
-    for (data_i in cache) {
-      range =
-        this.findRange(cache[data_i].coords.y.concat(range.min, range.max));
+    if (cache && (isNaN(xMin) || isNaN(xMax) || this.autoRange.x)) {
+      //filter out any NaNs
+      filtered = xCoords.filter(function(element, index, array){
+        return !isNaN(+element);
+      });
+
+      //get the range for whichever end was previously a NaN
+      xMin =
+        (isNaN(xMin) || this.autoRange.x) ?
+        Math.min.apply(this, filtered) : xMin;
+      xMax =
+        (isNaN(xMax) || this.autoRange.x) ?
+        Math.max.apply(this, filtered) : xMax;
+      this._setAxisRange("x", xMin, xMax);
     }
-    this._setAxisRange("y", range.min, range.max);
+    
+    yMin = +range.y.min;
+    yMax = +range.y.max;
+    
+    if (cache && (isNaN(yMin) || isNaN(yMax) || this.autoRange.y)) {
+      
+      yCoords = [];
+      for (data_i in cache) {
+
+        yCoords = yCoords.concat(cache[data_i].coords.y);
+      }
+
+      filtered = yCoords.filter(function(element, index, array){
+        return (
+          xCoords[index] > xMin &&
+          xCoords[index] < xMax &&
+          !isNaN(+element)
+        );
+      });
+
+      yMin =
+        (isNaN(yMin) || this.autoRange.y) ?
+        Math.min.apply(this, filtered) : yMin;
+      yMax =
+        (isNaN(yMax) || this.autoRange.y) ?
+        Math.max.apply(this, filtered) : yMax;
+      this._setAxisRange("y", yMin, yMax);
+    }
   },
   calculateSpacing: function() {
     var
@@ -276,28 +319,11 @@ enyo.kind({
       coords = data.coords || {},
       xCoords = coords.x || [],
       yCoords = coords.y || [],
-      range = this.axisRange || {},
-      xRange = range.x || {},
-      xMin = xRange.min,
-      xMax = xRange.max,
-      yRange = range.y || {},
-      yMin = yRange.min,
-      yMax = yRange.max,
       name = data.name;
 
     if (!xCoords.length || !yCoords.length) {
       //no data
       return;
-    }
-
-    //if we are in autorange mode, check if the axis ranges need to be updated
-    if (isNaN(xMin) || isNaN(xMax) || this.autoRange.x) {
-      xRange = this.findRange(xCoords.concat(xMin, xMax));
-      this._setAxisRange("x", xRange.min, xRange.max);
-    }
-    if (isNaN(yMin) || isNaN(yMax) || this.autoRange.y) {
-      yRange = this.findRange(yCoords.concat(yMin, yMax));
-      this._setAxisRange("y", yRange.min, yRange.max);
     }
 
     //cache the new dataset for use in redraws
@@ -490,22 +516,5 @@ enyo.kind({
     }
 
     ctx.restore();
-  },
-  findRange: function(numbers){
-    var min, max;
-
-    //filter out anything that is not a number
-    numbers = numbers.filter(
-      function(value){
-          return (isNaN(+value) ? false : true);
-      }
-    );
-
-    //get the min and max values for the x coordinates
-    min = Math.min.apply(null, numbers);
-
-    max = Math.max.apply(null, numbers);
-
-    return {min: min, max: max};
   }
 });

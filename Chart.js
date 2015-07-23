@@ -20,9 +20,6 @@ enyo.kind({
     autoRange: false,
     dataLayers: null
   },
-  observers: [
-    {method: "autoScaleData", path: ["autoRange"]}
-  ],
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"}
   ],
@@ -127,6 +124,8 @@ enyo.kind({
     this.wipePlot();
 
     this.calculateMargins();
+
+    this.updateAxisRange();
 
     //adjust the size of each canvas
     canvas = this.$.decorCanvas;
@@ -322,7 +321,7 @@ enyo.kind({
   drawParabola: function() {},
   drawData: function() {},
   decorate: function() {},
-  autoScaleData: function() {},
+  updateAxisRange: function() {},
   calculateSpacing: function() {},
   calculateMargins: function() {},
   invertCoordinates: function() {},
