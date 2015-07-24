@@ -57,6 +57,10 @@ enyo.kind({
 
     cache = this.dataCache;
 
+    if (!cache) {
+      return;
+    }
+
     range = this.axisRange;
 
     //check if we already have a range for the x axis
@@ -112,6 +116,7 @@ enyo.kind({
         (isNaN(yMax) || this.autoRange.y) ?
         Math.max.apply(this, filtered) : yMax;
       buffer = (yMax - yMin) * 0.1;
+
       this.setAxisRange("y", yMin - buffer, yMax + buffer);
     }
   },
@@ -325,7 +330,7 @@ enyo.kind({
       (this.dataCache[name].coords.x).push(data.coords.x);
       (this.dataCache[name].coords.y).push(data.coords.y);
     } else {
-      //replace the old cahce
+      //replace the old chace
       this.dataCache[name] = data;
     }
   },
@@ -335,7 +340,7 @@ enyo.kind({
     }
   },
   clearCache: function() {
-    this.dataCache = {};
+    this.dataCache = null;
     this.axisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
     this.autoRange = {x: true, y: true};
   },
