@@ -291,7 +291,6 @@ enyo.kind({
   clearCache: function() {
     this.dataCache = null;
     this.axisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
-    this.autoRange = {x: true, y: true};
   },
   drawLinear: function(params) {
     var
