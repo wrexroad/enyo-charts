@@ -15,9 +15,9 @@ enyo.kind({
     decorCtx: null,
     formatters: null,
     axisRange: null,
+    fullAxisRange: null,
     dataCache: null,
     decorMargin: null,
-    autoRange: false,
     dataLayers: null
   },
   components: [
@@ -124,8 +124,6 @@ enyo.kind({
     this.wipePlot();
 
     this.calculateMargins();
-
-    this.updateAxisRange();
 
     //adjust the size of each canvas
     canvas = this.$.decorCanvas;
@@ -312,7 +310,6 @@ enyo.kind({
     this.labels = null;
     this.axisRange = null;
     this.dataCache = null;
-    this.autoRange = true;
   },
   addDataset: function() {},
   removeDataset: function() {},
@@ -321,7 +318,7 @@ enyo.kind({
   drawParabola: function() {},
   drawData: function() {},
   decorate: function() {},
-  updateAxisRange: function() {},
+  setAxisRange: function() {},
   calculateSpacing: function() {},
   calculateMargins: function() {},
   invertCoordinates: function() {},

@@ -18,24 +18,24 @@ enyo.kind({
     this.inherited(arguments);
 
     this.axisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
-    this.autoRange = {x: true, y: true};
+    this.fullAxisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
   },
   setAxisRange: function(axis, min, max) {
     var
       range = this.axisRange,
       offset;
 
-    axis = (axis || "").toLowerCase();
-
-    if (isNaN(min) || isNaN(max)) {
-      this.autoRange[axis] = true;
-    } else {
-      this.autoRange[axis] = false;
+    if (!(axis = (axis || "").toLowerCase())) {
+      return false;
     }
 
-    min = isNaN(+min) ? range[axis].min : +min;
-    max = isNaN(+max) ? range[axis].max : +max;
-    
+    if (!isFinite(+min)) {
+      min = this.fullAxisRange[axis].min;
+    }
+    if (!isFinite(+max)) {
+      max = this.fullAxisRange[axis].max;
+    }
+
     //make sure min != max
     if (min == max) {
       //get a number that is the same order of magnitude as the number
@@ -49,76 +49,6 @@ enyo.kind({
     range[axis] = {
       min: min, max: max
     };
-  },
-  updateAxisRange: function() {
-    var
-      cache, range, filtered, data_i, buffer,
-      xMin, xMax, xCoords, yMin, yMax, yCoords;
-
-    cache = this.dataCache;
-
-    if (!cache) {
-      return;
-    }
-
-    range = this.axisRange;
-
-    //check if we already have a range for the x axis
-    xMin = +range.x.min;
-    xMax = +range.x.max;
-
-    //concatenate all x coordinate datasets
-    xCoords = [];
-    for (data_i in cache) {
-      xCoords = xCoords.concat(cache[data_i].coords.x);
-    }
-
-    if (cache && (isNaN(xMin) || isNaN(xMax) || this.autoRange.x)) {
-      //filter out any NaNs
-      filtered = xCoords.filter(function(element, index, array){
-        return !isNaN(+element);
-      });
-
-      //get the range for whichever end was previously a NaN
-      xMin =
-        (isNaN(xMin) || this.autoRange.x) ?
-        Math.min.apply(this, filtered) : xMin;
-      xMax =
-        (isNaN(xMax) || this.autoRange.x) ?
-        Math.max.apply(this, filtered) : xMax;
-      buffer = (xMax - xMin) * 0.1;
-      this.setAxisRange("x", xMin - buffer, xMax + buffer);
-    }
-    
-    yMin = +range.y.min;
-    yMax = +range.y.max;
-    
-    if (cache && (isNaN(yMin) || isNaN(yMax) || this.autoRange.y)) {
-      
-      yCoords = [];
-      for (data_i in cache) {
-
-        yCoords = yCoords.concat(cache[data_i].coords.y);
-      }
-
-      filtered = yCoords.filter(function(element, index, array){
-        return (
-          xCoords[index] > xMin &&
-          xCoords[index] < xMax &&
-          !isNaN(+element)
-        );
-      });
-
-      yMin =
-        (isNaN(yMin) || this.autoRange.y) ?
-        Math.min.apply(this, filtered) : yMin;
-      yMax =
-        (isNaN(yMax) || this.autoRange.y) ?
-        Math.max.apply(this, filtered) : yMax;
-      buffer = (yMax - yMin) * 0.1;
-
-      this.setAxisRange("y", yMin - buffer, yMax + buffer);
-    }
   },
   calculateSpacing: function() {
     var
@@ -314,12 +244,31 @@ enyo.kind({
       coords = data.coords || {},
       xCoords = coords.x || [],
       yCoords = coords.y || [],
-      name = data.name;
+      name = data.name,
+      fullRange = this.fullAxisRange || {},
+      xRange = fullRange.x || {},
+      yRange = fullRange.y || {},
+      fullXMin = xRange.min || Number.MAX_SAFE_INTEGER,
+      fullXMax = xRange.max || Number.MIN_SAFE_INTEGER,
+      fullYMin = yRange.min || Number.MAX_SAFE_INTEGER,
+      fullYMax = yRange.max || Number.MIN_SAFE_INTEGER;
 
     if (!xCoords.length || !yCoords.length) {
       //no data
-      return;
+      return false;
     }
+
+    //update the full scale axis range
+    this.fullAxisRange = {
+      x: {
+        min: Math.min.apply(this, xCoords.concat(fullXMin)),
+        max: Math.max.apply(this, xCoords.concat(fullXMax))
+      },
+      y: {
+        min: Math.min.apply(this, yCoords.concat(fullYMin)),
+        max: Math.max.apply(this, yCoords.concat(fullYMax))
+      }
+    };
 
     //cache the new dataset for use in redraws
     if (!this.dataCache) {
@@ -327,8 +276,8 @@ enyo.kind({
     }
     if (data.update) {
       //add to the old cache
-      (this.dataCache[name].coords.x).push(data.coords.x);
-      (this.dataCache[name].coords.y).push(data.coords.y);
+      (this.dataCache[name].coords.x).push(xCoords);
+      (this.dataCache[name].coords.y).push(yCoords);
     } else {
       //replace the old chace
       this.dataCache[name] = data;
