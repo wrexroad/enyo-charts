@@ -49,6 +49,8 @@ enyo.kind({
     range[axis] = {
       min: min, max: max
     };
+    
+    return range;
   },
   calculateSpacing: function() {
     var
