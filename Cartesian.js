@@ -433,49 +433,37 @@ enyo.kind({
       0, this.height - this.decorMargin.top - this.decorMargin.bottom
     );
 
-    if (style.lines) {  
-      for (pnt_i = 0; pnt_i < numPts; pnt_i++) {
-        //get the value of each point
-        x = xCoords[pnt_i];
-        y = yCoords[pnt_i];
+    for (pnt_i = 0; pnt_i < numPts; pnt_i++) {
+      //get the value of each point
+      x = xCoords[pnt_i];
+      y = yCoords[pnt_i];
 
-        //convert the value to a pixel coordinate
-        x = (x - xRange.min) * xSpacingFactor;
-        y = -(y - yRange.min) * ySpacingFactor;
+      //convert the value to a pixel coordinate
+      x = (x - xRange.min) * xSpacingFactor;
+      y = -(y - yRange.min) * ySpacingFactor;
 
-        //if we hit a data gap, end the current path
-        if (isNaN(y)) {
-          ctx.stroke();
-          onPath = false;
+      //if we hit a data gap, end the current path
+      if (isNaN(y)) {
+        ctx.stroke();
+        onPath = false;
+      } else {
+        //make sure we have a current path
+        if (!onPath) {
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          onPath = true;
         } else {
-          //make sure we have a current path
-          if (!onPath) {
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            onPath = true;
-          } else {
+          if (style.lines) {
             ctx.lineTo(x, y);
+          }
+          if (style.dots) {
+            ctx.moveTo(x, y);
+            ctx.arc(x - halfWidth, y - halfWidth, brushWidth, 0, Math.PI << 1);
           }
         }
       }
-      ctx.stroke();
     }
-    if (style.dots) {
-      for (pnt_i = 0; pnt_i < numPts; pnt_i++) {
-        x = xCoords[pnt_i];
-        y = yCoords[pnt_i];
-        
-        //skip any bad points
-        if (!isFinite(x + y)) {continue;}
-        
-        //convert the value to a pixel coordinate
-        x =  (x - xRange.min) * xSpacingFactor + halfWidth;
-        y = -(y - yRange.min) * ySpacingFactor + halfWidth;
-        
-        ctx.strokeRect(x, y, brushWidth, brushWidth);
-      }
-    }
-    
+    ctx.stroke();    
     ctx.restore();
   }
 });
