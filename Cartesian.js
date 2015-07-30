@@ -266,7 +266,7 @@ enyo.kind({
       newData = true;
     } else {
       cached = this.dataCache[data.name] || {};
-      if (cached.checksum == data.checksum) {
+      if (data.checksum && data.checksum == cached.checksum) {
         newData = false;
       } else {
         newData = true;
