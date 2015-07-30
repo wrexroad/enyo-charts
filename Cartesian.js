@@ -492,7 +492,7 @@ enyo.kind({
           }
           if (style.dots) {
             ctx.moveTo(x, y);
-            ctx.arc(x - halfDot, y - halfDot, dotWidth, 0, Math.PI << 1);
+            ctx.arc(x - halfDot, y - halfDot, dotWidth, 0, 7);
           }
         }
       }
