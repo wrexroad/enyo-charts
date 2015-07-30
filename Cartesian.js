@@ -422,8 +422,9 @@ enyo.kind({
       range = this.axisRange || {},
       xRange = range.x || {},
       yRange = range.y || {},
-      brushWidth = style.brushWidth,
-      halfWidth = brushWidth >> 1,
+      lineWidth = style.brushWidth,
+      dotWidth = lineWidth * 2,
+      halfDot = lineWidth,
       pnt_i, x, y, ctx;
 
     //bail out if there are no data to plot
@@ -444,7 +445,7 @@ enyo.kind({
 
     //configure the size and color of the brush
     ctx.save();
-    ctx.lineWidth = brushWidth;
+    ctx.lineWidth = lineWidth;
     ctx.strokeStyle = ctx.fillStyle = style.color;
 
     //move to the bottom left corner of the dataCanvas
@@ -477,12 +478,16 @@ enyo.kind({
           }
           if (style.dots) {
             ctx.moveTo(x, y);
-            ctx.arc(x - halfWidth, y - halfWidth, brushWidth, 0, Math.PI << 1);
+            ctx.arc(x - halfDot, y - halfDot, dotWidth, 0, Math.PI << 1);
           }
         }
       }
     }
-    ctx.stroke();    
+    if (style.fill) {
+      ctx.fill();
+    } else {
+      ctx.stroke(); 
+    }    
     ctx.restore();
   }
 });
