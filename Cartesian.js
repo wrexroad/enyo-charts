@@ -243,47 +243,66 @@ enyo.kind({
   },
   addDataset: function(data) {
     var
-      coords = data.coords || {},
-      xCoords = coords.x || [],
-      yCoords = coords.y || [],
-      name = data.name,
-      fullRange = this.fullAxisRange || {},
-      xRange = fullRange.x || {},
-      yRange = fullRange.y || {},
-      fullXMin = xRange.min || Number.MAX_SAFE_INTEGER,
-      fullXMax = xRange.max || Number.MIN_SAFE_INTEGER,
-      fullYMin = yRange.min || Number.MAX_SAFE_INTEGER,
-      fullYMax = yRange.max || Number.MIN_SAFE_INTEGER;
+      coords, xCoords, yCoords, name, fullRange,
+      xRange, yRange, newData, cached;
+    
+    data = data || {}; 
+    coords = data.coords || {};
+    xCoords = coords.x || [];
+    yCoords = coords.y || [];
+    name = data.name;
+    fullRange = this.fullAxisRange || {};
+    xRange = fullRange.x || {};
+    yRange = fullRange.y || {};
 
     if (!xCoords.length || !yCoords.length) {
       //no data
       return false;
     }
 
-    //update the full scale axis range
-    this.fullAxisRange = {
-      x: {
-        min: Math.min.apply(this, xCoords.concat(fullXMin)),
-        max: Math.max.apply(this, xCoords.concat(fullXMax))
-      },
-      y: {
-        min: Math.min.apply(this, yCoords.concat(fullYMin)),
-        max: Math.max.apply(this, yCoords.concat(fullYMax))
-      }
-    };
-
-    //cache the new dataset for use in redraws
+    //check if we already have this dataset
     if (!this.dataCache) {
       this.dataCache = {};
+    } else {
+      cached = this.dataCache[data.name] || {};
+      if (cached.checksum == data.checksum) {
+        newData = false;
+      } else {
+        newData = true;
+        //somehow the dataset has changed, update the full scale axis range
+        this.fullAxisRange = {
+          x: {
+            min: Math.min.apply(this,
+              xCoords.concat(xRange.min || Number.MAX_SAFE_INTEGER)
+            ),
+            max: Math.max.apply(this,
+              xCoords.concat(xRange.max || Number.MIN_SAFE_INTEGER)
+            )
+          },
+          y: {
+            min: Math.min.apply(this,
+              yCoords.concat(yRange.min || Number.MAX_SAFE_INTEGER)
+            ),
+            max: Math.max.apply(this,
+              yCoords.concat(yRange.max || Number.MIN_SAFE_INTEGER)
+            )
+          }
+        };
+      } 
     }
+
+    //cache the new dataset for use in redraws
     if (data.update) {
       //add to the old cache
       (this.dataCache[name].coords.x).push(xCoords);
       (this.dataCache[name].coords.y).push(yCoords);
     } else {
-      //replace the old chace
+      //replace the old cache even if we dont have new data
+      //some of the settings may have changed
       this.dataCache[name] = data;
     }
+    
+    return newData;
   },
   removeDataset: function(name) {
     if (this.dataCache[name]) {
