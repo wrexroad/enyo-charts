@@ -263,6 +263,7 @@ enyo.kind({
     //check if we already have this dataset
     if (!this.dataCache) {
       this.dataCache = {};
+      newData = true;
     } else {
       cached = this.dataCache[data.name] || {};
       if (cached.checksum == data.checksum) {
