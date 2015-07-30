@@ -452,25 +452,39 @@ enyo.kind({
     ctx.translate(
       0, this.height - this.decorMargin.top - this.decorMargin.bottom
     );
-
+    
+    ctx.beginPath();
     for (pnt_i = 0; pnt_i < numPts; pnt_i++) {
       //get the value of each point
       x = xCoords[pnt_i];
       y = yCoords[pnt_i];
-
+      
       //convert the value to a pixel coordinate
       x = (x - xRange.min) * xSpacingFactor;
       y = -(y - yRange.min) * ySpacingFactor;
 
       //if we hit a data gap, end the current path
       if (isNaN(y)) {
-        ctx.stroke();
+        if (style.fill && style.lines) {
+          //need to extend line down to y=0 for proper fill
+          ctx.lineTo(
+            x, (yRange.min * ySpacingFactor)
+          );
+        }
         onPath = false;
       } else {
         //make sure we have a current path
         if (!onPath) {
-          ctx.beginPath();
-          ctx.moveTo(x, y);
+          if (style.fill && style.lines) {
+            //need to extend line up from y=0 for proper fill
+            ctx.moveTo(x, (yRange.min * ySpacingFactor));
+            ctx.lineTo(x, y);
+          } else {
+            //not filling so we can just move the brush to
+            //the new coordinate without worrying about connecting
+            ctx.moveTo(x, y);  
+          }
+          
           onPath = true;
         } else {
           if (style.lines) {
@@ -483,7 +497,23 @@ enyo.kind({
         }
       }
     }
+    
     if (style.fill) {
+      if (style.lines) {
+        //this will fill the area between the curve and 0. we need to close the
+        //curve by drawing a straight light alone y=0
+        ctx.lineTo(
+          x, (yRange.min * ySpacingFactor)
+        );
+        ctx.lineTo(
+          ((xCoords[0] - xRange.min) * xSpacingFactor),
+          (yRange.min * ySpacingFactor)
+        );
+        ctx.lineTo(
+          ((xCoords[0] - xRange.min) * xSpacingFactor),
+          ((yRange.min - yCoords[0]) * ySpacingFactor)
+        );
+      }
       ctx.fill();
     } else {
       ctx.stroke(); 
