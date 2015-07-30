@@ -241,16 +241,15 @@ enyo.kind({
       };
     }
   },
-  addDataset: function(data) {
+  addDataset: function(name, data) {
     var
-      coords, xCoords, yCoords, name, fullRange,
+      coords, xCoords, yCoords, fullRange,
       xRange, yRange, newData, cached;
     
     data = data || {}; 
     coords = data.coords || {};
     xCoords = coords.x || [];
     yCoords = coords.y || [];
-    name = data.name;
     fullRange = this.fullAxisRange || {};
     xRange = fullRange.x || {};
     yRange = fullRange.y || {};
@@ -265,7 +264,7 @@ enyo.kind({
       this.dataCache = {};
       newData = true;
     } else {
-      cached = this.dataCache[data.name] || {};
+      cached = this.dataCache[name] || {};
       if (data.checksum && data.checksum == cached.checksum) {
         newData = false;
       } else {
