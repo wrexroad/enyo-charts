@@ -13,6 +13,7 @@ enyo.kind({
     fontName: '"Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace',
     fontSize: 10,
     decorCtx: null,
+    exportCtx: null,
     formatters: null,
     axisRange: null,
     fullAxisRange: null,
@@ -21,7 +22,9 @@ enyo.kind({
     dataLayers: null
   },
   components: [
-    {name: "decorCanvas", kind: "enyo.Canvas"}
+    {name: "decorCanvas", kind: "enyo.Canvas"},
+    {name: "exportCanvas", kind: "enyo.Canvas", showing: false},
+    {tag: "img", name: "img"}
   ],
   constructor: function() {
     this.inherited(arguments);
@@ -43,13 +46,16 @@ enyo.kind({
     this.inherited(arguments);
 
     var
-      decorCanvas = this.$.decorCanvas;
+      decorCanvas = this.$.decorCanvas,
+      exportCanvas = this.$.exportCanvas;
 
     this.decorCtx = decorCanvas.node.getContext('2d');
+    this.exportCtx = exportCanvas.node.getContext('2d');
 
     this.initValues();
 
     decorCanvas.render();
+    exportCanvas.render();
   },
   createDataCanvas: function(varName) {
     var
@@ -130,6 +136,11 @@ enyo.kind({
     canvas.setAttribute("height", this.height);
     canvas.setAttribute("width", this.width);
     canvas.update();
+    
+    canvas = this.$.exportCanvas;
+    canvas.setAttribute("height", this.height);
+    canvas.setAttribute("width", this.width);
+    canvas.update();
 
     for (layer_i in this.dataLayers) {
       canvas = this.dataLayers[layer_i].canvas;
@@ -178,6 +189,23 @@ enyo.kind({
       );
     }
   },
+  exportPNG: function() {
+    var
+      ctx = this.exportCtx,
+      margin = this.decorMargin;
+    
+    ctx.drawImage(this.$.decorCanvas.node, 0, 0);
+    for (var layer_i in this.dataLayers) {
+      ctx.drawImage(
+        this.dataLayers[layer_i].canvas.node, margin.left, margin.top
+      );
+    }
+    
+    window.open(
+      ctx.canvas.toDataURL().replace("image/png", "image/force-download")
+    );
+  },
+  
   defaultFormatter: function(val, decimalPlaces) {
     decimalPlaces = +decimalPlaces || 1;
 
