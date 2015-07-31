@@ -422,9 +422,9 @@ enyo.kind({
       range = this.axisRange || {},
       xRange = range.x || {},
       yRange = range.y || {},
-      lineWidth = style.brushWidth,
-      dotWidth = lineWidth * 2,
-      halfDot = lineWidth,
+      lineWidth = style.lineSize,
+      dotWidth = style.dotSize,
+      halfDot = style.dotSize / 2,
       pnt_i, x, y, ctx;
 
     //bail out if there are no data to plot
@@ -465,7 +465,7 @@ enyo.kind({
 
       //if we hit a data gap, end the current path
       if (isNaN(y)) {
-        if (style.fill && style.lines) {
+        if (style.fill && lineWidth) {
           //need to extend line down to y=0 for proper fill
           ctx.lineTo(
             x, (yRange.min * ySpacingFactor)
@@ -475,7 +475,7 @@ enyo.kind({
       } else {
         //make sure we have a current path
         if (!onPath) {
-          if (style.fill && style.lines) {
+          if (style.fill && lineWidth) {
             //need to extend line up from y=0 for proper fill
             ctx.moveTo(x, (yRange.min * ySpacingFactor));
             ctx.lineTo(x, y);
@@ -487,10 +487,10 @@ enyo.kind({
           
           onPath = true;
         } else {
-          if (style.lines) {
+          if (lineWidth) {
             ctx.lineTo(x, y);
           }
-          if (style.dots) {
+          if (dotWidth) {
             ctx.moveTo(x, y);
             ctx.arc(x - halfDot, y - halfDot, dotWidth, 0, 7);
           }
@@ -499,7 +499,7 @@ enyo.kind({
     }
     
     if (style.fill) {
-      if (style.lines) {
+      if (lineWidth && !dotWidth) {
         //this will fill the area between the curve and 0. we need to close the
         //curve by drawing a straight light alone y=0
         ctx.lineTo(
