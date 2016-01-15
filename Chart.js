@@ -81,18 +81,15 @@ enyo.kind({
     dataCanvas.setAttribute("height", height);
     dataCanvas.setAttribute("width", width);
 
+    //make sure the canvas is rendered
     dataCanvas.render();
-
+    dataCanvas.update();
+    
     //save a reference to the canvas and context
     this.dataLayers[canvasName] = {
       canvas: dataCanvas,
       ctx   : dataCanvas.node.getContext('2d')
-    };
-    
-    //make sure the canvas is rendered
-    this.dataLayers[canvasName].canvas.render();
-    dataCanvas.update();
-
+    }; 
   },
   printTitle: function() {
     var
