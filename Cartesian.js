@@ -409,6 +409,7 @@ enyo.kind({
   
     ctx.restore();
   },
+  /*
   drawData: function(data) {
     var
       style = data.style || {},
@@ -513,6 +514,109 @@ enyo.kind({
           ((xCoords[0] - xRange.min) * xSpacingFactor),
           ((yRange.min - yCoords[0]) * ySpacingFactor)
         );
+      }
+      ctx.fill();
+    } else {
+      ctx.stroke(); 
+    }    
+    ctx.restore();
+  }*/
+  drawData: function(data, opts) {
+    data = data || {};
+    opts = opts || {};
+    
+    var
+      name = data.name || "",
+      coords = data.coords || [],
+      numPts = coords.length,
+      xSpacingFactor = this.xSpacingFactor,
+      ySpacingFactor = this.ySpacingFactor,
+      onPath = false,
+      range = this.axisRange || {},
+      xRange = range.x || {},
+      yRange = range.y || {},
+      lineWidth = +((opts.lines || {}).size) || 0.5,
+      dotWidth = +((opts.dots || {}).size) || 0,
+      halfDot = dotWidth / 2,
+      ctx;
+
+    //bail out if there are no data to plot
+    if(!numPts) {return;}
+
+    //make sure there is a canvas for this variable and get the context
+    if (!this.dataLayers[name + "_layer"]) {
+      //this is a new dataset, create a layer for it
+      this.createDataCanvas(name);
+    } else {
+      //this is a redraw, clear the layer
+      if (!opts.noClobber) {
+        this.resetLayer(name);
+      }
+    }
+    ctx = this.dataLayers[name + "_layer"].ctx;
+
+    //configure the size and color of the brush
+    ctx.save();
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = ctx.fillStyle = opts.color || "black";
+
+    //move to the bottom left corner of the dataCanvas
+    ctx.translate(
+      0, this.height - this.decorMargin.top - this.decorMargin.bottom
+    );
+    
+    //set the transform matrix.
+    //We translate the point to the canvas origin, then scale it based on
+    //value-to-pixel ratio 
+    ctx.setTransform(
+      xSpacingFactor, 0, 0, -ySpacingFactor, -xRange.min, -yRange.min
+    );
+    
+    ctx.beginPath();
+    coords.forEach(function(pnt) {
+      //'pnt' is a 2 element array: [x,y]
+      
+      //if we hit a data gap, end the current path
+      if (!isFinite(pnt[1])) {
+        if (opts.fill && lineWidth) {
+          //need to extend line down to y=0 for proper fill
+          ctx.lineTo(pnt[0], yRange.min);
+        }
+        onPath = false;
+      } else {
+        //make sure we have a current path
+        if (!onPath) {
+          if (opts.fill && lineWidth) {
+            //need to extend line up from y=0 for proper fill
+            ctx.moveTo(pnt[0], (yRange.min * ySpacingFactor));
+            ctx.lineTo(pnt[0], pnt[1]);
+          } else {
+            //not filling so we can just move the brush to
+            //the new coordinate without worrying about connecting
+            ctx.moveTo(pnt[0], pnt[1]);  
+          }
+          
+          onPath = true;
+        } else {
+          if (lineWidth) {
+            ctx.lineTo(pnt[0], pnt[1]);
+          }
+          if (dotWidth) {
+            ctx.moveTo(pnt[0], pnt[1]);
+            ctx.arc(pnt[0] - halfDot, pnt[1] - halfDot, dotWidth, 0, 7);
+          }
+        }
+      }
+    }, this);
+    
+    if (opts.fill) {
+      if (lineWidth && !dotWidth) {
+        //this will fill the area between the curve and 0.
+        //we need to close the
+        //curve by drawing a straight light alone y=0
+        ctx.lineTo(coords[numPts - 1][0], yRange.min);
+        ctx.lineTo(coords[0][0], yRange.min);
+        ctx.lineTo(coords[0][0], coords[0][1]);
       }
       ctx.fill();
     } else {
