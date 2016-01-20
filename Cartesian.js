@@ -573,13 +573,11 @@ enyo.kind({
     
     //draw each dataset and equation
     datasets.forEach(function(dataset) {
-      var
-        opts = dataset.options || {},
-        name = opts.name;
+      var name = (dataset.data || {}).name;
       
       //if this dataset doesnt have a name, just give it the layer number
       if (!name) {
-        opts.name = name = Object.keys(this.layers).length;
+        (dataset.data || {}).name = name = Object.keys(this.layers).length;
       }
       
       //check if we already have a layer for this dataset
