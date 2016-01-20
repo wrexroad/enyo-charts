@@ -541,9 +541,13 @@ enyo.kind({
       yMin = +plotRange.yMin,
       yMax = +plotRange.yMax;
     
+    //make sure the datasets and equations are in arrays
+    datasets = [].concat(datasets || []);
+    equations = [].concat(equations || []);
+    
     //make sure we have a valid range
     if (!isFinite(xMin + xMax) || !isFinite(yMin + yMax)) {
-      if (datasets) {
+      if (datasets.length) {
         var newRange = this.getRangeFromData(datasets);
         xMin = isFinite(+plotRange.xMin) ? +plotRange.xMin : +newRange.xMin;
         xMax = isFinite(+plotRange.xMax) ? +plotRange.xMax : +newRange.xMax;
@@ -554,10 +558,6 @@ enyo.kind({
     
     //figure out the transform matrix and create a point inverting function
     this.calculateSpacing(xMin, xMax, yMin, yMax);
-    
-    //make sure the datasets and equations are in arrays
-    datasets = [].concat(datasets);
-    equations = [].concat(equations);
     
     //draw each dataset and equation
     datasets.forEach(function(dataset) {
@@ -595,9 +595,12 @@ enyo.kind({
     }, this);
   },
   drawDataset: function(dataset, ctx) {
+    dataset = dataset || {};
+    
     var
-      coords = dataset.data || [],
       opts = dataset.options || {},
+      data = dataset.data || {},
+      coords = data.coords || [],
       numPts = coords.length,
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
@@ -685,5 +688,34 @@ enyo.kind({
       ctx.stroke(); 
     }    
     ctx.restore();
-  }
+  },
+  getRangeFromData: function(datasets) {
+    var
+      xMin = Number.POSITIVE_INFINITY,
+      xMax = Number.NEGATIVE_INFINITY,
+      yMin = Number.POSITIVE_INFINITY,
+      yMax = Number.NEGATIVE_INFINITY;
+      
+    datasets.forEach(function(dataset) {
+      if (dataset.data.range[0][0] < xMin) {
+        xMin = +dataset.data.range[0][0];
+      }
+      if (dataset.data.range[0][1] > xMax) {
+        xMax = +dataset.data.range[0][1];
+      }
+      if (dataset.data.range[1][0] < yMin) {
+        yMin = +dataset.data.range[1][0];
+      }
+      if (dataset.data.range[1][1] > yMax) {
+        yMax = +dataset.data.range[1][1];
+      }
+    }, this);
+    
+    return {
+      xMin : xMax,
+      xMax : xMin,
+      yMin : yMax,
+      yMax : yMin
+    }
+  },
 });

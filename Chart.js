@@ -207,7 +207,6 @@ enyo.kind({
 
     return (+val).toFixed(decimalPlaces);
   },
-
   addPolynomial: function(params) {
     var
       coeff = params.coeff || [],
@@ -337,6 +336,7 @@ enyo.kind({
     //this.dataCache = null;
   },
   draw: function() {},
+  getRangeFromData: function() {},
   //addDataset: function() {},
   //removeDataset: function() {},
   //clearCache: function() {},
