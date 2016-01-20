@@ -335,7 +335,9 @@ enyo.kind({
     //this.axisRange = null;
     //this.dataCache = null;
   },
-  draw: function() {},
+  draw: function() {
+    this.decorate();
+  },
   getRangeFromData: function() {},
   //addDataset: function() {},
   //removeDataset: function() {},

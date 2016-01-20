@@ -548,6 +548,8 @@ enyo.kind({
     ctx.restore();
   }*/
   draw: function(plotRange, datasets, equations) {
+    this.inherited(arguments);
+    
     var
       xMin = +plotRange.xMin,
       xMax = +plotRange.xMax,
