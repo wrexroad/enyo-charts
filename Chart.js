@@ -336,7 +336,40 @@ enyo.kind({
     //this.dataCache = null;
   },
   draw: function() {
+    var
+      decorWidth = this.width,
+      decorHeight = this.height,
+      margin = this.decorMargin,
+      dataWidth = decorWidth - margin.left - margin.right,
+      dataHeight = decorHeight - margin.top - margin.bottom,
+      layer_i, canvas;
+
+    //clear the canvases
+    this.wipePlot();
+
+    this.calculateMargins();
+    
+    //adjust the size of each canvas
+    canvas = this.$.decorCanvas;
+    canvas.setAttribute("height", this.height);
+    canvas.setAttribute("width", this.width);
+    canvas.update();
+    
+    canvas = this.$.exportCanvas;
+    canvas.setAttribute("height", this.height);
+    canvas.setAttribute("width", this.width);
+    canvas.update();
+
     this.decorate();
+    
+    for (layer_i in this.layers) {
+      canvas = this.layers[layer_i].canvas;
+      canvas.setAttribute("height", dataHeight);
+      canvas.setAttribute("width", dataWidth);
+      canvas.update();
+    }
+    
+    this.printTitle();
   },
   getRangeFromData: function() {},
   //addDataset: function() {},
