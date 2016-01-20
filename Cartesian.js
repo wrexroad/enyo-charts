@@ -31,7 +31,7 @@ enyo.kind({
     this.yMax = +yMax || this.yMax;
     
     //figure out the transform matrix and create a point inverting function
-    this.calculateSpacing(xMin, xMax, yMin, yMax);
+    this.calculateSpacing();
   },
   getAxisRange: function() {
     return [
@@ -71,17 +71,17 @@ enyo.kind({
     
     return range;
   },*/
-  calculateSpacing: function(xMin, xMax, yMin, yMax) {
+  calculateSpacing: function() {
     var
       margin = this.decorMargin,
       width  = this.width - margin.left - margin.right,
       height = this.height - margin.top - margin.bottom;
 
     this.set(
-      "xSpacingFactor", width / ((+xMax || 0) - (+xMin || 0))
+      "xSpacingFactor", width / ((+this.xMax || 0) - (+this.xMin || 0))
     );
     this.set(
-      "ySpacingFactor", height / ((+yMax || 0) - (+yMin || 0))
+      "ySpacingFactor", height / ((+this.yMax || 0) - (+this.yMin || 0))
     );
   },
   /*calculateSpacing: function() {
@@ -608,7 +608,7 @@ enyo.kind({
   },
   drawDataset: function(dataset, ctx) {
     dataset = dataset || {};
-    
+
     var
       opts = dataset.options || {},
       data = dataset.data || {},
@@ -640,7 +640,7 @@ enyo.kind({
     ctx.translate(
       0, this.height - this.decorMargin.top - this.decorMargin.bottom
     );
-    
+
     //set the transform matrix.
     //We translate the point to the canvas origin, then scale it based on
     //value-to-pixel ratio 
