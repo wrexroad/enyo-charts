@@ -17,9 +17,9 @@ enyo.kind({
     formatters: null,
     axisRange: null,
     fullAxisRange: null,
-    dataCache: null,
+    //dataCache: null,
     decorMargin: null,
-    dataLayers: null
+    layers: null
   },
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"},
@@ -28,7 +28,7 @@ enyo.kind({
   constructor: function() {
     this.inherited(arguments);
 
-    this.dataCache = {};
+    //this.dataCache = {};
     this.decorMargin = {top: 10, bottom: 10, left: 10, right: 10};
 
     //make sure log10 is defined
@@ -38,7 +38,7 @@ enyo.kind({
       };
     }
 
-    this.dataLayers = {};
+    this.layers = {};
   },
   //functions directly related to generating the plot
   rendered: function() {
@@ -86,7 +86,7 @@ enyo.kind({
     dataCanvas.update();
     
     //save a reference to the canvas and context
-    this.dataLayers[canvasName] = {
+    this.layers[canvasName] = {
       canvas: dataCanvas,
       ctx   : dataCanvas.node.getContext('2d')
     }; 
@@ -94,25 +94,24 @@ enyo.kind({
   printTitle: function() {
     var
       ctx = this.decorCtx,
-      cache = this.dataCache,
       offset = 0,
-      dataset, set_i, name;
+      layers = this.layers,
+      dataset, layerName;
 
     ctx.save();
     ctx.translate(this.decorMargin.left, 0);
     ctx.textAlign = "start";
     ctx.textBaseline = "top";
 
-    for (set_i in cache) {
-        dataset = cache[set_i];
-        name = dataset.name || set_i;
+    for (layerName in layers) {
         ctx.fillStyle = dataset.style.color;
-        ctx.fillText(name, offset, 0);
-        offset += ctx.measureText(name + ' ').width;
+        ctx.fillText(layerName, offset, 0);
+        offset += ctx.measureText(layerName + ' ').width;
     }
 
     ctx.restore();
   },
+  /*
   redraw: function() {
     var
       decorWidth = this.width,
@@ -126,7 +125,7 @@ enyo.kind({
     this.wipePlot();
 
     this.calculateMargins();
-
+    
     //adjust the size of each canvas
     canvas = this.$.decorCanvas;
     canvas.setAttribute("height", this.height);
@@ -138,8 +137,8 @@ enyo.kind({
     canvas.setAttribute("width", this.width);
     canvas.update();
 
-    for (layer_i in this.dataLayers) {
-      canvas = this.dataLayers[layer_i].canvas;
+    for (layer_i in this.layers) {
+      canvas = this.layers[layer_i].canvas;
       canvas.setAttribute("height", dataHeight);
       canvas.setAttribute("width", dataWidth);
       canvas.update();
@@ -163,24 +162,25 @@ enyo.kind({
 
     return true;
   },
+  */
   resetPlot: function() {
-    //reset all of the plotting parameters
+    //reset all of the plotting parameters and clear any drawing
     this.initValues();
-
-    this.redraw();
+    this.wipePlot();
+    //this.redraw();
   },
   resetLayer: function(varName) {
     var layer;
 
-    if ((layer = this.dataLayers[varName + "_layer"])) {
+    if ((layer = this.layers[varName + "_layer"])) {
       layer.ctx.clearRect(
         0, 0, this.width, this.height
       );
     }
   },
   wipePlot: function() {
-    for (var layer_i in this.dataLayers) {
-      this.dataLayers[layer_i].ctx.clearRect(
+    for (var layer_i in this.layers) {
+      this.layers[layer_i].ctx.clearRect(
         0, 0, this.width, this.height
       );
     }
@@ -191,9 +191,9 @@ enyo.kind({
       margin = this.decorMargin;
     
     ctx.drawImage(this.$.decorCanvas.node, 0, 0);
-    for (var layer_i in this.dataLayers) {
+    for (var layer_i in this.layers) {
       ctx.drawImage(
-        this.dataLayers[layer_i].canvas.node, margin.left, margin.top
+        this.layers[layer_i].canvas.node, margin.left, margin.top
       );
     }
     
@@ -266,7 +266,8 @@ enyo.kind({
   removePolynomial: function(name) {
     if(this.cachedPolynomials) {
       delete this.cachedPolynomials[name];
-      this.redraw();
+      delete this.layers[name + "_layer"];
+      //this.redraw();
     }
   },
   drawPolynomial: function(params) {
@@ -332,12 +333,13 @@ enyo.kind({
   //abstract functions to be defined by the chart subkind
   initValues: function() {
     this.labels = null;
-    this.axisRange = null;
-    this.dataCache = null;
+    //this.axisRange = null;
+    //this.dataCache = null;
   },
-  addDataset: function() {},
-  removeDataset: function() {},
-  clearCache: function() {},
+  draw: function() {},
+  //addDataset: function() {},
+  //removeDataset: function() {},
+  //clearCache: function() {},
   drawLinear: function() {},
   drawParabola: function() {},
   drawData: function() {},

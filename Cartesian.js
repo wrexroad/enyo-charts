@@ -12,15 +12,15 @@ enyo.kind({
 
     this.formatters = {x: this.defaultFormatter, y: this.defaultFormatter};
 
-    this.initValues();
+    //this.initValues();
   },
-  initValues: function() {
+  /*initValues: function() {
     this.inherited(arguments);
 
     this.axisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
     this.fullAxisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
-  },
-  setAxisRange: function(axis, min, max) {
+  },*/
+  /*setAxisRange: function(axis, min, max) {
     var
       range = this.axisRange,
       offset;
@@ -51,8 +51,21 @@ enyo.kind({
     };
     
     return range;
+  },*/
+  calculateSpacing: function(xMin, xMax, yMin, yMax) {
+    var
+      margin = this.decorMargin,
+      width  = this.width - margin.left - margin.right,
+      height = this.height - margin.top - margin.bottom;
+
+    this.set(
+      "xSpacingFactor", width / ((+xMax || 0) - (+xMin || 0))
+    );
+    this.set(
+      "ySpacingFactor", height / ((+yMax || 0) - (+yMin || 0))
+    );
   },
-  calculateSpacing: function() {
+  /*calculateSpacing: function() {
     var
       yRange = this.axisRange.y,
       xRange = this.axisRange.x,
@@ -66,7 +79,7 @@ enyo.kind({
     this.set(
       "ySpacingFactor", height / ((+yRange.max || 0) - (+yRange.min || 0))
     );
-  },
+  },*/
   calculateMargins: function() {
     this.set("decorMargin", {
       //room for the title
@@ -240,7 +253,7 @@ enyo.kind({
         y: -(pointValue.y - this.axisRange.y.max) * this.ySpacingFactor
       };
     }
-  },
+  },/*
   addDataset: function(name, data) {
     var
       coords, xCoords, yCoords, fullRange,
@@ -312,7 +325,7 @@ enyo.kind({
   clearCache: function() {
     this.dataCache = null;
     this.axisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
-  },
+  },*/
   drawLinear: function(params) {
     var
       color = params.color || "black",
@@ -331,10 +344,10 @@ enyo.kind({
       ctx;
 
     //make sure there is a canvas for this variable and get the context
-    if (!this.dataLayers[name + "_layer"]) {
+    if (!this.layers[name + "_layer"]) {
       this.createDataCanvas(name);
     }
-    ctx = this.dataLayers[name + "_layer"].ctx;
+    ctx = this.layers[name + "_layer"].ctx;
 
     //configure the size and color of the brush
     ctx.save();
@@ -378,10 +391,10 @@ enyo.kind({
       ctx;
 
     //make sure there is a canvas for this variable and get the context
-    if (!this.dataLayers[name + "_layer"]) {
+    if (!this.layers[name + "_layer"]) {
       this.createDataCanvas(name);
     }
-    ctx = this.dataLayers[name + "_layer"].ctx;
+    ctx = this.layers[name + "_layer"].ctx;
 
     //configure the size and color of the brush
     ctx.save();
@@ -432,10 +445,10 @@ enyo.kind({
     if(!numPts) {return;}
 
     //make sure there is a canvas for this variable and get the context
-    if (!this.dataLayers[data.name + "_layer"]) {
+    if (!this.layers[data.name + "_layer"]) {
       this.createDataCanvas(data.name);
     }
-    ctx = this.dataLayers[data.name + "_layer"].ctx;
+    ctx = this.layers[data.name + "_layer"].ctx;
 
     //auto generate some xaxis coordinates if they are not provided
     if(!xCoords.length) {
@@ -521,13 +534,70 @@ enyo.kind({
     }    
     ctx.restore();
   }*/
-  drawData: function(data, opts) {
-    data = data || {};
-    opts = opts || {};
-    
+  draw: function(plotRange, datasets, equations) {
     var
-      name = data.name || "",
-      coords = data.coords || [],
+      xMin = +plotRange.xMin,
+      xMax = +plotRange.xMax,
+      yMin = +plotRange.yMin,
+      yMax = +plotRange.yMax;
+    
+    //make sure we have a valid range
+    if (!isFinite(xMin + xMax) || !isFinite(yMin + yMax)) {
+      if (datasets) {
+        var newRange = this.getRangeFromData(datasets);
+        xMin = isFinite(+plotRange.xMin) ? +plotRange.xMin : +newRange.xMin;
+        xMax = isFinite(+plotRange.xMax) ? +plotRange.xMax : +newRange.xMax;
+        yMin = isFinite(+plotRange.yMin) ? +plotRange.yMin : +newRange.yMin;
+        yMax = isFinite(+plotRange.yMax) ? +plotRange.yMax : +newRange.yMax;
+      }
+    }
+    
+    //figure out the transform matrix and create a point inverting function
+    this.calculateSpacing(xMin, xMax, yMin, yMax);
+    
+    //make sure the datasets and equations are in arrays
+    datasets = [].concat(datasets);
+    equations = [].concat(equations);
+    
+    //draw each dataset and equation
+    datasets.forEach(function(dataset) {
+      var
+        opts = dataset.options || {},
+        name = opts.name;
+      
+      //if this dataset doesnt have a name, just give it the layer number
+      if (!name) {
+        opts.name = name = Object.keys(this.layers).length;
+      }
+      
+      //check if we already have a layer for this dataset
+      if (!this.layers[name + "_layer"]) {
+        //this is a new dataset, create a layer for it
+        this.createDataCanvas(name);
+      }
+      
+      //draw the dataset onto the canvas
+      this.drawDataset(dataset, this.layers[name + "_layer"].ctx);
+    }, this);
+    
+    equations.forEach(function(dataset) {
+      var
+        opts = dataset.options || {},
+        name = opts.name;
+      
+      if (!name) {
+        opts.name = name = Object.keys(this.layers).length;
+      }
+      if (!this.layers[name + "_layer"]) {
+        this.createDataCanvas(name);
+      }
+      this.drawEquation(dataset, this.layers[name + "_layer"].ctx);
+    }, this);
+  },
+  drawDataset: function(dataset, ctx) {
+    var
+      coords = dataset.data || [],
+      opts = dataset.options || {},
       numPts = coords.length,
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
@@ -537,23 +607,15 @@ enyo.kind({
       yRange = range.y || {},
       lineWidth = +((opts.lines || {}).size) || 0.5,
       dotWidth = +((opts.dots || {}).size) || 0,
-      halfDot = dotWidth / 2,
-      ctx;
+      halfDot = dotWidth / 2;
 
     //bail out if there are no data to plot
     if(!numPts) {return;}
 
-    //make sure there is a canvas for this variable and get the context
-    if (!this.dataLayers[name + "_layer"]) {
-      //this is a new dataset, create a layer for it
-      this.createDataCanvas(name);
-    } else {
-      //this is a redraw, clear the layer
-      if (!opts.noClobber) {
-        this.resetLayer(name);
-      }
+    //clear the drawing canvas unless noClobber is set
+    if (!opts.noClobber) {
+      this.resetLayer(opts.name);
     }
-    ctx = this.dataLayers[name + "_layer"].ctx;
 
     //configure the size and color of the brush
     ctx.save();
