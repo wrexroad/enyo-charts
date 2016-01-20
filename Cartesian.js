@@ -549,7 +549,7 @@ enyo.kind({
   }*/
   draw: function(plotRange, datasets, equations) {
     this.inherited(arguments);
-    
+
     var
       xMin = +plotRange.xMin,
       xMax = +plotRange.xMax,
@@ -706,7 +706,7 @@ enyo.kind({
       xMax = Number.NEGATIVE_INFINITY,
       yMin = Number.POSITIVE_INFINITY,
       yMax = Number.NEGATIVE_INFINITY;
-      
+
     datasets.forEach(function(dataset) {
       if (dataset.data.range[0][0] < xMin) {
         xMin = +dataset.data.range[0][0];
@@ -725,8 +725,8 @@ enyo.kind({
     return {
       xMin : xMax,
       xMax : xMin,
-      yMin : yMax,
-      yMax : yMin
+      yMin : yMin,
+      yMax : yMax
     }
   },
 });
