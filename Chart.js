@@ -56,7 +56,7 @@ enyo.kind({
     decorCanvas.render();
     exportCanvas.render();
   },
-  createDataCanvas: function(varName) {
+  createDataCanvas: function(varName, options) {
     var
       margin = this.decorMargin,
       top = margin.top,
@@ -84,11 +84,12 @@ enyo.kind({
     //make sure the canvas is rendered
     dataCanvas.render();
     dataCanvas.update();
-    
+
     //save a reference to the canvas and context
     this.layers[canvasName] = {
-      canvas: dataCanvas,
-      ctx   : dataCanvas.node.getContext('2d')
+      canvas : dataCanvas,
+      ctx    : dataCanvas.node.getContext('2d'),
+      options: (options || {})
     }; 
   },
   printTitle: function() {
@@ -96,7 +97,7 @@ enyo.kind({
       ctx = this.decorCtx,
       offset = 0,
       layers = this.layers,
-      dataset, layerName;
+      layerName;
 
     ctx.save();
     ctx.translate(this.decorMargin.left, 0);
@@ -104,7 +105,7 @@ enyo.kind({
     ctx.textBaseline = "top";
 
     for (layerName in layers) {
-        ctx.fillStyle = dataset.style.color;
+        ctx.fillStyle = layers[layerName].options.color;
         ctx.fillText(layerName, offset, 0);
         offset += ctx.measureText(layerName + ' ').width;
     }

@@ -585,7 +585,7 @@ enyo.kind({
       //check if we already have a layer for this dataset
       if (!this.layers[name + "_layer"]) {
         //this is a new dataset, create a layer for it
-        this.createDataCanvas(name);
+        this.createDataCanvas(name, dataset.options);
       }
       
       //draw the dataset onto the canvas
