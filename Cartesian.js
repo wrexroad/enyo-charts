@@ -11,15 +11,34 @@ enyo.kind({
     this.inherited(arguments);
 
     this.formatters = {x: this.defaultFormatter, y: this.defaultFormatter};
-
-    //this.initValues();
+    
+    this.initValues();
   },
-  /*initValues: function() {
+  initValues: function() {
     this.inherited(arguments);
 
-    this.axisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
-    this.fullAxisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
-  },*/
+    //chose a default range for this plot.
+    //This should get changed when data are added
+    this.setAxisRange(-5, 5, -5, 5);
+    
+    //this.axisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
+    //this.fullAxisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
+  },
+  setAxisRange: function(xMin, xMax, yMin, yMax) {
+    this.xMin = +xMin || this.xMin;
+    this.xMax = +xMax || this.xMax;
+    this.yMin = +yMin || this.yMin;
+    this.yMax = +yMax || this.yMax;
+    
+    //figure out the transform matrix and create a point inverting function
+    this.calculateSpacing(xMin, xMax, yMin, yMax);
+  },
+  getAxisRange: function() {
+    return [
+      [this.xMin, this.xMax],
+      [this.yMin, this.yMax]
+    ]
+  },
   /*setAxisRange: function(axis, min, max) {
     var
       range = this.axisRange,
@@ -101,13 +120,10 @@ enyo.kind({
       formatters = this.formatters,
       yFormat = formatters.y,
       xFormat = formatters.x,
-      axisRange = this.axisRange,
-      yRange = axisRange.y,
-      yMin = yRange.min || 0,
-      yMax = yRange.max || 0,
-      xRange = axisRange.x,
-      xMin = xRange.min || 0,
-      xMax = xRange.max || 0,
+      xMin = this.xMin,
+      xMax = this.xMax,
+      yMin = this.yMin,
+      yMax = this.yMax,
       dataHeight = this.height - margin.top - margin.bottom,
       dataWidth  = this.width - margin.left - margin.right,
       diff, scale, value, step, offset, minor_i,
@@ -239,8 +255,8 @@ enyo.kind({
       return null;
     } else {
       return {
-        x: this.axisRange.x.min + coords.x / this.xSpacingFactor,
-        y: this.axisRange.y.max - coords.y / this.ySpacingFactor
+        x: this.xMin + coords.x / this.xSpacingFactor,
+        y: this.yMax - coords.y / this.ySpacingFactor
       };
     }
   },
@@ -249,8 +265,8 @@ enyo.kind({
       return null;
     } else {
       return {
-        x: (pointValue.x  - this.axisRange.x.min) * this.xSpacingFactor,
-        y: -(pointValue.y - this.axisRange.y.max) * this.ySpacingFactor
+        x: (pointValue.x  - this.xMin) * this.xSpacingFactor,
+        y: -(pointValue.y - this.yMax) * this.ySpacingFactor
       };
     }
   },/*
@@ -332,13 +348,13 @@ enyo.kind({
       name = params.name,
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
-      range = this.axisRange || {},
-      xRange = range.x || {},
-      yRange = range.y || {},
+      xMin = this.xMin,
+      xMax = this.xMax,
+      yMin = this.yMin,
       m = params.m || 0,
       b = params.b || 0,
-      x1 = xRange.min,
-      x2 = xRange.max,
+      x1 = xMin,
+      x2 = xMax,
       y1 = x1 * m + b,
       y2 = x2 * m + b,
       ctx;
@@ -361,8 +377,8 @@ enyo.kind({
     );  
 
     ctx.beginPath();
-    ctx.moveTo(0, -(y1 - yRange.min) * ySpacingFactor);
-    ctx.lineTo((x2 - x1) * xSpacingFactor, -(y2 - yRange.min) * ySpacingFactor);
+    ctx.moveTo(0, -(y1 - yMin) * ySpacingFactor);
+    ctx.lineTo((x2 - x1) * xSpacingFactor, -(y2 - yMin) * ySpacingFactor);
     ctx.stroke();
   
     ctx.restore();
@@ -373,14 +389,14 @@ enyo.kind({
       name = params.name,
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
-      range = this.axisRange || {},
-      xRange = range.x || {},
-      yRange = range.y || {},
+      xMin = this.xMin,
+      xMax = this.xMax,
+      yMin = this.yMin,
       a = params.a || 0,
       b = params.b || 0,
       c = params.c || 0,
       vertex = params.vertex || [0,0],
-      width = xRange.max - xRange.min,
+      width = xMax - xMin,
       x1 = vertex[0] - width,
       y1 = (a * Math.pow(x1, 2)) + (b * x1) + c,
       x2 = vertex[0] + width,
@@ -409,14 +425,11 @@ enyo.kind({
     
     ctx.beginPath();
     ctx.moveTo(
-      (x1 - xRange.min) * xSpacingFactor,
-      -(y1 - yRange.min) * ySpacingFactor
+      (x1 - xMin) * xSpacingFactor, -(y1 - yMin) * ySpacingFactor
     );
     ctx.quadraticCurveTo(
-      (vertex[0] - xRange.min) * xSpacingFactor,
-      -(cp1y - yRange.min) * ySpacingFactor,
-      (x2 - xRange.min) * xSpacingFactor,
-      -(y2 - yRange.min) * ySpacingFactor
+      (vertex[0] - xMin) * xSpacingFactor, -(cp1y - yMin) * ySpacingFactor,
+      (x2 - xMin) * xSpacingFactor, -(y2 - yMin) * ySpacingFactor
     );
     ctx.stroke();
   
@@ -556,8 +569,7 @@ enyo.kind({
       }
     }
     
-    //figure out the transform matrix and create a point inverting function
-    this.calculateSpacing(xMin, xMax, yMin, yMax);
+    this.setAxisRange(xMin, xMax, yMin, yMax);
     
     //draw each dataset and equation
     datasets.forEach(function(dataset) {
@@ -605,9 +617,8 @@ enyo.kind({
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
       onPath = false,
-      range = this.axisRange || {},
-      xRange = range.x || {},
-      yRange = range.y || {},
+      xMin = this.xMin,
+      yMin = this.yMin,
       lineWidth = +((opts.lines || {}).size) || 0.5,
       dotWidth = +((opts.dots || {}).size) || 0,
       halfDot = dotWidth / 2;
@@ -634,7 +645,7 @@ enyo.kind({
     //We translate the point to the canvas origin, then scale it based on
     //value-to-pixel ratio 
     ctx.setTransform(
-      xSpacingFactor, 0, 0, -ySpacingFactor, -xRange.min, -yRange.min
+      xSpacingFactor, 0, 0, -ySpacingFactor, -xMin, -yMin
     );
     
     ctx.beginPath();
@@ -645,7 +656,7 @@ enyo.kind({
       if (!isFinite(pnt[1])) {
         if (opts.fill && lineWidth) {
           //need to extend line down to y=0 for proper fill
-          ctx.lineTo(pnt[0], yRange.min);
+          ctx.lineTo(pnt[0], yMin);
         }
         onPath = false;
       } else {
@@ -653,7 +664,7 @@ enyo.kind({
         if (!onPath) {
           if (opts.fill && lineWidth) {
             //need to extend line up from y=0 for proper fill
-            ctx.moveTo(pnt[0], (yRange.min * ySpacingFactor));
+            ctx.moveTo(pnt[0], (yMin * ySpacingFactor));
             ctx.lineTo(pnt[0], pnt[1]);
           } else {
             //not filling so we can just move the brush to
@@ -679,8 +690,8 @@ enyo.kind({
         //this will fill the area between the curve and 0.
         //we need to close the
         //curve by drawing a straight light alone y=0
-        ctx.lineTo(coords[numPts - 1][0], yRange.min);
-        ctx.lineTo(coords[0][0], yRange.min);
+        ctx.lineTo(coords[numPts - 1][0], yMin);
+        ctx.lineTo(coords[0][0], yMin);
         ctx.lineTo(coords[0][0], coords[0][1]);
       }
       ctx.fill();
