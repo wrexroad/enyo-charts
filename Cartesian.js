@@ -468,7 +468,8 @@ enyo.kind({
       xMin = Number.POSITIVE_INFINITY,
       xMax = Number.NEGATIVE_INFINITY,
       yMin = Number.POSITIVE_INFINITY,
-      yMax = Number.NEGATIVE_INFINITY;
+      yMax = Number.NEGATIVE_INFINITY,
+      buffer;
 
     datasets.forEach(function(dataset) {
       if (dataset.data.range[0][0] < xMin) {
@@ -485,11 +486,13 @@ enyo.kind({
       }
     }, this);
     
+    buffer = (yMax - yMin) * 0.1;
+    
     return {
       xMin : xMax,
       xMax : xMin,
-      yMin : yMin,
-      yMax : yMax
+      yMin : yMin - buffer,
+      yMax : yMax + buffer
     }
   },
 });
