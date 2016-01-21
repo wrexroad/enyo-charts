@@ -39,38 +39,6 @@ enyo.kind({
       [this.yMin, this.yMax]
     ]
   },
-  /*setAxisRange: function(axis, min, max) {
-    var
-      range = this.axisRange,
-      offset;
-
-    if (!(axis = (axis || "").toLowerCase())) {
-      return false;
-    }
-
-    if (!isFinite(+min)) {
-      min = this.fullAxisRange[axis].min;
-    }
-    if (!isFinite(+max)) {
-      max = this.fullAxisRange[axis].max;
-    }
-
-    //make sure min != max
-    if (min == max) {
-      //get a number that is the same order of magnitude as the number
-      //of decimal places
-      offset = Math.pow(10, -this.getDecimalPlaces([min]));
-      min -= offset;
-      max += offset;
-    }
-
-    //build the new range from these min and max values and the other axes
-    range[axis] = {
-      min: min, max: max
-    };
-    
-    return range;
-  },*/
   calculateSpacing: function() {
     var
       margin = this.decorMargin,
@@ -84,21 +52,6 @@ enyo.kind({
       "ySpacingFactor", height / ((+this.yMax || 0) - (+this.yMin || 0))
     );
   },
-  /*calculateSpacing: function() {
-    var
-      yRange = this.axisRange.y,
-      xRange = this.axisRange.x,
-      margin = this.decorMargin,
-      width  = this.width - margin.left - margin.right,
-      height = this.height - margin.top - margin.bottom;
-
-    this.set(
-      "xSpacingFactor", width / ((+xRange.max || 0) - (+xRange.min || 0))
-    );
-    this.set(
-      "ySpacingFactor", height / ((+yRange.max || 0) - (+yRange.min || 0))
-    );
-  },*/
   calculateMargins: function() {
     this.set("decorMargin", {
       //room for the title
@@ -269,79 +222,7 @@ enyo.kind({
         y: -(pointValue.y - this.yMax) * this.ySpacingFactor
       };
     }
-  },/*
-  addDataset: function(name, data) {
-    var
-      coords, xCoords, yCoords, fullRange,
-      xRange, yRange, newData, cached;
-    
-    data = data || {}; 
-    coords = data.coords || {};
-    xCoords = coords.x || [];
-    yCoords = coords.y || [];
-    fullRange = this.fullAxisRange || {};
-    xRange = fullRange.x || {};
-    yRange = fullRange.y || {};
-
-    if (!xCoords.length || !yCoords.length) {
-      //no data
-      return false;
-    }
-
-    //check if we already have this dataset
-    if (!this.dataCache) {
-      this.dataCache = {};
-      newData = true;
-    } else {
-      cached = this.dataCache[name] || {};
-      if (data.checksum && data.checksum == cached.checksum) {
-        newData = false;
-      } else {
-        newData = true;
-        //somehow the dataset has changed, update the full scale axis range
-        this.fullAxisRange = {
-          x: {
-            min: Math.min.apply(this,
-              xCoords.concat(xRange.min || Number.MAX_SAFE_INTEGER)
-            ),
-            max: Math.max.apply(this,
-              xCoords.concat(xRange.max || Number.MIN_SAFE_INTEGER)
-            )
-          },
-          y: {
-            min: Math.min.apply(this,
-              yCoords.concat(yRange.min || Number.MAX_SAFE_INTEGER)
-            ),
-            max: Math.max.apply(this,
-              yCoords.concat(yRange.max || Number.MIN_SAFE_INTEGER)
-            )
-          }
-        };
-      } 
-    }
-
-    //cache the new dataset for use in redraws
-    if (data.update) {
-      //add to the old cache
-      (this.dataCache[name].coords.x).push(xCoords);
-      (this.dataCache[name].coords.y).push(yCoords);
-    } else {
-      //replace the old cache even if we dont have new data
-      //some of the settings may have changed
-      this.dataCache[name] = data;
-    }
-    
-    return newData;
   },
-  removeDataset: function(name) {
-    if (this.dataCache[name]) {
-      delete this.dataCache[name];
-    }
-  },
-  clearCache: function() {
-    this.dataCache = null;
-    this.axisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
-  },*/
   drawLinear: function(params) {
     var
       color = params.color || "black",
@@ -435,118 +316,7 @@ enyo.kind({
   
     ctx.restore();
   },
-  /*
-  drawData: function(data) {
-    var
-      style = data.style || {},
-      coords = data.coords || {},
-      xCoords = coords.x || [],
-      yCoords = coords.y || [],
-      numPts = yCoords.length,
-      xSpacingFactor = this.xSpacingFactor,
-      ySpacingFactor = this.ySpacingFactor,
-      onPath = false,
-      range = this.axisRange || {},
-      xRange = range.x || {},
-      yRange = range.y || {},
-      lineWidth = style.lineSize,
-      dotWidth = style.dotSize,
-      halfDot = style.dotSize / 2,
-      pnt_i, x, y, ctx;
-
-    //bail out if there are no data to plot
-    if(!numPts) {return;}
-
-    //make sure there is a canvas for this variable and get the context
-    if (!this.layers[data.name + "_layer"]) {
-      this.createDataCanvas(data.name);
-    }
-    ctx = this.layers[data.name + "_layer"].ctx;
-
-    //auto generate some xaxis coordinates if they are not provided
-    if(!xCoords.length) {
-      for(pnt_i = 0; pnt_i < numPts; pnt_i++) {
-        xCoords[pnt_i] = pnt_i;
-      }
-    }
-
-    //configure the size and color of the brush
-    ctx.save();
-    ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = ctx.fillStyle = style.color;
-
-    //move to the bottom left corner of the dataCanvas
-    ctx.translate(
-      0, this.height - this.decorMargin.top - this.decorMargin.bottom
-    );
-    
-    ctx.beginPath();
-    for (pnt_i = 0; pnt_i < numPts; pnt_i++) {
-      //get the value of each point
-      x = xCoords[pnt_i];
-      y = yCoords[pnt_i];
-      
-      //convert the value to a pixel coordinate
-      x = (x - xRange.min) * xSpacingFactor;
-      y = -(y - yRange.min) * ySpacingFactor;
-
-      //if we hit a data gap, end the current path
-      if (isNaN(y)) {
-        if (style.fill && lineWidth) {
-          //need to extend line down to y=0 for proper fill
-          ctx.lineTo(
-            x, (yRange.min * ySpacingFactor)
-          );
-        }
-        onPath = false;
-      } else {
-        //make sure we have a current path
-        if (!onPath) {
-          if (style.fill && lineWidth) {
-            //need to extend line up from y=0 for proper fill
-            ctx.moveTo(x, (yRange.min * ySpacingFactor));
-            ctx.lineTo(x, y);
-          } else {
-            //not filling so we can just move the brush to
-            //the new coordinate without worrying about connecting
-            ctx.moveTo(x, y);  
-          }
-          
-          onPath = true;
-        } else {
-          if (lineWidth) {
-            ctx.lineTo(x, y);
-          }
-          if (dotWidth) {
-            ctx.moveTo(x, y);
-            ctx.arc(x - halfDot, y - halfDot, dotWidth, 0, 7);
-          }
-        }
-      }
-    }
-    
-    if (style.fill) {
-      if (lineWidth && !dotWidth) {
-        //this will fill the area between the curve and 0. we need to close the
-        //curve by drawing a straight light alone y=0
-        ctx.lineTo(
-          x, (yRange.min * ySpacingFactor)
-        );
-        ctx.lineTo(
-          ((xCoords[0] - xRange.min) * xSpacingFactor),
-          (yRange.min * ySpacingFactor)
-        );
-        ctx.lineTo(
-          ((xCoords[0] - xRange.min) * xSpacingFactor),
-          ((yRange.min - yCoords[0]) * ySpacingFactor)
-        );
-      }
-      ctx.fill();
-    } else {
-      ctx.stroke(); 
-    }    
-    ctx.restore();
-  }*/
+  
   draw: function(plotRange, datasets, equations) {
     this.inherited(arguments);
 
