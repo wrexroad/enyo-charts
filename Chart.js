@@ -116,7 +116,10 @@ enyo.kind({
   resetPlot: function() {
     //reset all of the plotting parameters and clear any drawing
     this.initValues();
-    this.wipePlot();
+    for (var layer_i in this.layers) {
+      this.layers[layer_i].canvas.destroy();
+      delete this.layers[layer_i];
+    }
   },
   resetLayer: function(varName) {
     var layer;
