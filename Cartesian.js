@@ -640,23 +640,19 @@ enyo.kind({
     ctx.translate(
       0, this.height - this.decorMargin.top - this.decorMargin.bottom
     );
-
-    //set the transform matrix.
-    //We translate the point to the canvas origin, then scale it based on
-    //value-to-pixel ratio 
-    ctx.setTransform(
-      xSpacingFactor, 0, 0, -ySpacingFactor, -xMin, -yMin
-    );
     
     ctx.beginPath();
     coords.forEach(function(pnt) {
       //'pnt' is a 2 element array: [x,y]
+      var
+        x = (pnt[0] - xMin) * xSpacingFactor,
+        y = -(pnt[1] - yMin) * ySpacingFactor;
       
       //if we hit a data gap, end the current path
-      if (!isFinite(pnt[1])) {
+      if (!isFinite(y)) {
         if (opts.fill && lineWidth) {
           //need to extend line down to y=0 for proper fill
-          ctx.lineTo(pnt[0], yMin);
+          ctx.lineTo(x, yMin);
         }
         onPath = false;
       } else {
@@ -664,22 +660,22 @@ enyo.kind({
         if (!onPath) {
           if (opts.fill && lineWidth) {
             //need to extend line up from y=0 for proper fill
-            ctx.moveTo(pnt[0], (yMin * ySpacingFactor));
-            ctx.lineTo(pnt[0], pnt[1]);
+            ctx.moveTo(x, (yMin * ySpacingFactor));
+            ctx.lineTo(x, y);
           } else {
             //not filling so we can just move the brush to
             //the new coordinate without worrying about connecting
-            ctx.moveTo(pnt[0], pnt[1]);  
+            ctx.moveTo(x, y);  
           }
           
           onPath = true;
         } else {
           if (lineWidth) {
-            ctx.lineTo(pnt[0], pnt[1]);
+            ctx.lineTo(x, y);
           }
           if (dotWidth) {
-            ctx.moveTo(pnt[0], pnt[1]);
-            ctx.arc(pnt[0] - halfDot, pnt[1] - halfDot, dotWidth, 0, 7);
+            ctx.moveTo(x, y);
+            ctx.arc(x - halfDot, y - halfDot, dotWidth, 0, 7);
           }
         }
       }
