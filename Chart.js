@@ -49,10 +49,13 @@ enyo.kind({
     this.decorCtx = decorCanvas.node.getContext('2d');
     this.exportCtx = exportCanvas.node.getContext('2d');
 
-    this.initValues();
-
+    decorCanvas.setAttribute("height", this.height);
+    decorCanvas.setAttribute("width", this.width);
+    
     decorCanvas.render();
     exportCanvas.render();
+    
+    this.initValues();
   },
   createDataCanvas: function(varName, options) {
     var
