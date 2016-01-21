@@ -27,7 +27,6 @@ enyo.kind({
   constructor: function() {
     this.inherited(arguments);
 
-    //this.dataCache = {};
     this.decorMargin = {top: 10, bottom: 10, left: 10, right: 10};
 
     //make sure log10 is defined
