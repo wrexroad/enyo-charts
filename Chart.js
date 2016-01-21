@@ -17,7 +17,6 @@ enyo.kind({
     formatters: null,
     axisRange: null,
     fullAxisRange: null,
-    //dataCache: null,
     decorMargin: null,
     layers: null
   },
@@ -112,63 +111,10 @@ enyo.kind({
 
     ctx.restore();
   },
-  /*
-  redraw: function() {
-    var
-      decorWidth = this.width,
-      decorHeight = this.height,
-      margin = this.decorMargin,
-      dataWidth = decorWidth - margin.left - margin.right,
-      dataHeight = decorHeight - margin.top - margin.bottom,
-      draw_i, layer_i, canvas;
-
-    //clear the canvases
-    this.wipePlot();
-
-    this.calculateMargins();
-    
-    //adjust the size of each canvas
-    canvas = this.$.decorCanvas;
-    canvas.setAttribute("height", this.height);
-    canvas.setAttribute("width", this.width);
-    canvas.update();
-    
-    canvas = this.$.exportCanvas;
-    canvas.setAttribute("height", this.height);
-    canvas.setAttribute("width", this.width);
-    canvas.update();
-
-    for (layer_i in this.layers) {
-      canvas = this.layers[layer_i].canvas;
-      canvas.setAttribute("height", dataHeight);
-      canvas.setAttribute("width", dataWidth);
-      canvas.update();
-    }
-
-    //redraw everything
-    this.calculateSpacing();
-    this.decorate();
-    if (this.dataCache) {
-      for (draw_i in this.dataCache) {
-        this.drawData(this.dataCache[draw_i]);
-      }
-    }
-    if (this.cachedPolynomials) {
-      for (draw_i in this.cachedPolynomials) {
-        this.drawPolynomial(this.cachedPolynomials[draw_i]);
-      }
-    }
-
-    this.printTitle();
-
-    return true;
-  },
-  */
   resetPlot: function() {
     //reset all of the plotting parameters and clear any drawing
     this.initValues();
     this.wipePlot();
-    //this.redraw();
   },
   resetLayer: function(varName) {
     var layer;
@@ -267,7 +213,6 @@ enyo.kind({
     if(this.cachedPolynomials) {
       delete this.cachedPolynomials[name];
       delete this.layers[name + "_layer"];
-      //this.redraw();
     }
   },
   drawPolynomial: function(params) {
@@ -333,8 +278,6 @@ enyo.kind({
   //abstract functions to be defined by the chart subkind
   initValues: function() {
     this.labels = null;
-    //this.axisRange = null;
-    //this.dataCache = null;
   },
   draw: function() {
     var
@@ -373,9 +316,6 @@ enyo.kind({
     this.printTitle();
   },
   getRangeFromData: function() {},
-  //addDataset: function() {},
-  //removeDataset: function() {},
-  //clearCache: function() {},
   drawLinear: function() {},
   drawParabola: function() {},
   drawData: function() {},

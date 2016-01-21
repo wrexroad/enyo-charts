@@ -20,9 +20,6 @@ enyo.kind({
     //chose a default range for this plot.
     //This should get changed when data are added
     this.setAxisRange(-5, 5, -5, 5);
-    
-    //this.axisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
-    //this.fullAxisRange = {x: {min: NaN, max: NaN}, y: {min: NaN, max: NaN}};
   },
   setAxisRange: function(xMin, xMax, yMin, yMax) {
     this.xMin = +xMin || this.xMin;
