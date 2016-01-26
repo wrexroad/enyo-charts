@@ -118,7 +118,7 @@ enyo.kind({
     //draw the y axis tics and labels
     if (step > 0) {
       ctx.save();
-console.log(this.ySpacingFactor);
+
       //move to the bottom left corner of the dataCanvas
       ctx.translate(margin.left, dataHeight + margin.top);
 
