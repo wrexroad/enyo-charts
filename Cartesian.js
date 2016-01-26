@@ -412,8 +412,8 @@ enyo.kind({
     coords.forEach(function(pnt) {
       //'pnt' is a 2 element array: [x,y]
       var
-        x = (pnt[0] - xMin) * xSpacingFactor,
-        y = -(pnt[1] - yMin) * ySpacingFactor;
+        x = ((pnt[0] - xMin) * xSpacingFactor) >> 0,
+        y = (-(pnt[1] - yMin) * ySpacingFactor) >> 0;
       
       //if we hit a data gap, end the current path
       if (!isFinite(y)) {
