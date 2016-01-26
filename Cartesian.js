@@ -118,7 +118,7 @@ enyo.kind({
     //draw the y axis tics and labels
     if (step > 0) {
       ctx.save();
-
+console.log(this.ySpacingFactor);
       //move to the bottom left corner of the dataCanvas
       ctx.translate(margin.left, dataHeight + margin.top);
 
@@ -315,14 +315,17 @@ enyo.kind({
   },
   
   draw: function(plotRange, datasets, equations) {
-    this.inherited(arguments);
-
+    //set the plot axis range
     var
       xMin = +plotRange.xMin,
       xMax = +plotRange.xMax,
       yMin = +plotRange.yMin,
       yMax = +plotRange.yMax;
+    this.setAxisRange(xMin, xMax, yMin, yMax);
     
+    //do any generic Chart setup
+    this.inherited(arguments);  
+      
     //make sure the datasets and equations are in arrays
     datasets = [].concat(datasets || []);
     equations = [].concat(equations || []);
@@ -337,8 +340,6 @@ enyo.kind({
         yMax = isFinite(+plotRange.yMax) ? +plotRange.yMax : +newRange.yMax;
       }
     }
-    
-    this.setAxisRange(xMin, xMax, yMin, yMax);
     
     //draw each dataset and equation
     datasets.forEach(function(dataset) {
