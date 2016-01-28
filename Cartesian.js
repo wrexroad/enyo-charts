@@ -314,8 +314,10 @@ enyo.kind({
     ctx.restore();
   },
   
-  draw: function(plotRange, datasets, equations, antialiasing) {
+  draw: function(plotRange, plottables, antialiasing) {
     var
+      datasets = plottables.datasets,
+      equations = plottables.equations,
       xMin = +plotRange.xMin,
       xMax = +plotRange.xMax,
       yMin = +plotRange.yMin,
