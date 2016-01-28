@@ -314,18 +314,19 @@ enyo.kind({
     ctx.restore();
   },
   
-  draw: function(plotRange, datasets, equations) {
-    //set the plot axis range
+  draw: function(plotRange, datasets, equations, antialiasing) {
     var
       xMin = +plotRange.xMin,
       xMax = +plotRange.xMax,
       yMin = +plotRange.yMin,
       yMax = +plotRange.yMax;
+      
+    //calculate the pixel spacing before anything else is done
     this.setAxisRange(xMin, xMax, yMin, yMax);
     
-    //do any generic Chart setup
-    this.inherited(arguments);  
-      
+    //do any generic Chart setup including decorations
+    this.inherited(arguments);
+    
     //make sure the datasets and equations are in arrays
     datasets = [].concat(datasets || []);
     equations = [].concat(equations || []);
@@ -357,7 +358,7 @@ enyo.kind({
       }
       
       //draw the dataset onto the canvas
-      this.drawDataset(dataset, this.layers[name + "_layer"].ctx);
+      this.drawDataset(dataset, this.layers[name + "_layer"].ctx, antialiasing);
     }, this);
     
     equations.forEach(function(dataset) {
@@ -374,7 +375,7 @@ enyo.kind({
       this.drawEquation(dataset, this.layers[name + "_layer"].ctx);
     }, this);
   },
-  drawDataset: function(dataset, ctx) {
+  drawDataset: function(dataset, ctx, antialiasing) {
     dataset = dataset || {};
 
     var
@@ -389,7 +390,8 @@ enyo.kind({
       yMin = this.yMin,
       lineWidth = +((opts.lines || {}).size) || 0.5,
       dotWidth = +((opts.dots || {}).size) || 0,
-      halfDot = dotWidth / 2;
+      halfDot = dotWidth / 2,
+      subpixel = antialiasing ? 0.5 : 0;
 
     //bail out if there are no data to plot
     if(!numPts) {return;}
@@ -411,10 +413,13 @@ enyo.kind({
     
     ctx.beginPath();
     coords.forEach(function(pnt) {
-      //'pnt' is a 2 element array: [x,y]
+      //'pnt' is a 2 element array: [x,y].
+      //If we have antialiasing on we will shift the 
+      //x and y coordinates by a half pixel.
+
       var
-        x = ((pnt[0] - xMin) * xSpacingFactor) >> 0,
-        y = (-(pnt[1] - yMin) * ySpacingFactor) >> 0;
+        x = (((pnt[0] - xMin) * xSpacingFactor) >> 0)  + subpixel,
+        y = ((-(pnt[1] - yMin) * ySpacingFactor) >> 0) + subpixel;
       
       //if we hit a data gap, end the current path
       if (!isFinite(y)) {
