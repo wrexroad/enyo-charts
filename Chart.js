@@ -101,6 +101,7 @@ enyo.kind({
       layerName;
 
     ctx.save();
+    ctx.font = this.fontSize + "px " + this.font
     ctx.translate(this.decorMargin.left, 0);
     ctx.textAlign = "start";
     ctx.textBaseline = "top";
