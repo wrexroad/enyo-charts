@@ -98,7 +98,7 @@ enyo.kind({
       ctx = this.decorCtx,
       offset = 0,
       layers = this.layers,
-      layerName;
+      layerName, printedName;
 
     ctx.save();
     ctx.font = this.fontSize + "px " + this.font
@@ -107,9 +107,10 @@ enyo.kind({
     ctx.textBaseline = "top";
 
     for (layerName in layers) {
+        printedName = layerName.substring(0, (layerName).indexOf("_layer"));
         ctx.fillStyle = layers[layerName].options.color;
-        ctx.fillText(layerName, offset, 0);
-        offset += ctx.measureText(layerName + ' ').width;
+        ctx.fillText(printedName, offset, 0);
+        offset += ctx.measureText(printedName + ' ').width;
     }
 
     ctx.restore();
