@@ -311,8 +311,6 @@ enyo.kind({
     canvas.setAttribute("width", this.width);
     canvas.update();
 
-    this.decorate();
-    
     for (layer_i in this.layers) {
       canvas = this.layers[layer_i].canvas;
       canvas.setAttribute("height", dataHeight);
@@ -320,13 +318,14 @@ enyo.kind({
       canvas.update();
     }
     
+  },
+  decorate: function() {
     this.printTitle();
   },
   getRangeFromData: function() {},
   drawLinear: function() {},
   drawParabola: function() {},
   drawData: function() {},
-  decorate: function() {},
   setAxisRange: function() {},
   calculateSpacing: function() {},
   calculateMargins: function() {},

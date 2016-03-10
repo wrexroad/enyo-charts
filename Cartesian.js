@@ -22,10 +22,10 @@ enyo.kind({
     this.setAxisRange(-5, 5, -5, 5);
   },
   setAxisRange: function(xMin, xMax, yMin, yMax) {
-    this.xMin = +xMin || this.xMin;
-    this.xMax = +xMax || this.xMax;
-    this.yMin = +yMin || this.yMin;
-    this.yMax = +yMax || this.yMax;
+    this.xMin = isFinite(+xMin) ? +xMin : this.xMin;
+    this.xMax = isFinite(+xMax) ? +xMax : this.xMax;
+    this.yMin = isFinite(+yMin) ? +yMin : this.yMin;
+    this.yMax = isFinite(+yMax) ? +yMax : this.yMax;
     
     //figure out the transform matrix and create a point inverting function
     this.calculateSpacing();
@@ -78,6 +78,8 @@ enyo.kind({
       dataWidth  = this.width - margin.left - margin.right,
       diff, scale, value, step, offset, minor_i,
       text_i, labelWidth, decimalPlaces, firstTic, lastTic, numTics;
+
+    this.inherited(arguments);
 
     //configure the drawing context
     ctx.save();
@@ -322,11 +324,8 @@ enyo.kind({
       xMax = +plotRange.xMax,
       yMin = +plotRange.yMin,
       yMax = +plotRange.yMax;
-      
-    //calculate the pixel spacing before anything else is done
-    this.setAxisRange(xMin, xMax, yMin, yMax);
     
-    //do any generic Chart setup including decorations
+    //do any generic Chart setup
     this.inherited(arguments);
     
     //make sure the datasets and equations are in arrays
@@ -337,13 +336,20 @@ enyo.kind({
     if (!isFinite(xMin + xMax) || !isFinite(yMin + yMax)) {
       if (datasets.length) {
         var newRange = this.getRangeFromData(datasets);
-        xMin = isFinite(+plotRange.xMin) ? +plotRange.xMin : +newRange.xMin;
-        xMax = isFinite(+plotRange.xMax) ? +plotRange.xMax : +newRange.xMax;
-        yMin = isFinite(+plotRange.yMin) ? +plotRange.yMin : +newRange.yMin;
-        yMax = isFinite(+plotRange.yMax) ? +plotRange.yMax : +newRange.yMax;
+        xMin =
+          isFinite(+plotRange.xMin) ? +plotRange.xMin : +newRange.xMin;
+        xMax =
+          isFinite(+plotRange.xMax) ? +plotRange.xMax : +newRange.xMax;
+        yMin =
+          isFinite(+plotRange.yMin) ? +plotRange.yMin : +newRange.yMin;
+        yMax =
+          isFinite(+plotRange.yMax) ? +plotRange.yMax : +newRange.yMax;
       }
     }
     
+    //calculate the pixel spacing before anything else is done
+    this.setAxisRange(xMin, xMax, yMin, yMax);
+
     //draw each dataset and equation
     datasets.forEach(function(dataset) {
       var name = (dataset.data || {}).name;
@@ -376,6 +382,9 @@ enyo.kind({
       }
       this.drawEquation(dataset, this.layers[name + "_layer"].ctx);
     }, this);
+    
+    //add the plot border and tic marks
+    this.decorate();
   },
   drawDataset: function(dataset, ctx, antialiasing) {
     dataset = dataset || {};
@@ -477,9 +486,26 @@ enyo.kind({
       xMax = Number.NEGATIVE_INFINITY,
       yMin = Number.POSITIVE_INFINITY,
       yMax = Number.NEGATIVE_INFINITY,
-      buffer;
-
+      buffer, xVals, yVals;
+    
     datasets.forEach(function(dataset) {
+      //no range was given, so dig through the coordinates and figure it out
+      if (!dataset.data.range) {
+        xVals = [];
+        yVals = [];
+        dataset.data.coords.forEach(function(coord) {
+          if (isFinite(+coord[0])) {xVals.push(+coord[0]);}
+          if (isFinite(+coord[1])) {yVals.push(+coord[1]);}
+        });
+        
+        dataset.data.range = [[],[]];
+        dataset.data.range[0][0] = Math.min.apply(this, xVals);
+        dataset.data.range[0][1] = Math.max.apply(this, xVals);
+        dataset.data.range[1][0] = Math.min.apply(this, yVals);
+        dataset.data.range[1][1] = Math.max.apply(this, yVals); 
+      }
+      
+      //see if this dataset contains a global extreme
       if (dataset.data.range[0][0] < xMin) {
         xMin = +dataset.data.range[0][0];
       }
@@ -494,11 +520,13 @@ enyo.kind({
       }
     }, this);
     
+    //we dont want the plot to have the min and max point pressed right up 
+    //against the boarder, add a 10% buffer
     buffer = (yMax - yMin) * 0.1;
     
     return {
-      xMin : xMax,
-      xMax : xMin,
+      xMin : xMin,
+      xMax : xMax,
       yMin : yMin - buffer,
       yMax : yMax + buffer
     }
