@@ -1,8 +1,8 @@
 enyo.kind({
-	name: "XYScatterSample",
-	kind: "FittableRows",
+  name: "XYScatterSample",
+  kind: "FittableRows",
   classes: "chart-panel",
-	components: [
+  components: [
     {kind: "onyx.Toolbar", components: [
       {kind: "onyx.InputDecorator", components: [
         {content: "XY - Scatter"}
@@ -10,36 +10,99 @@ enyo.kind({
     ]},
     {
       kind: "Chart.Cartesian", name: "chart",
-      width: 400,
-      height: 400,
       bgColor: "white",
       fontSize: 14
     },
     {kind: "FittableColumns", components: [
       {kind: "onyx.Groupbox", components: [
-		   {kind: "onyx.GroupboxHeader", content: "X"},
-		   {kind: "onyx.InputDecorator", components: [{
-          kind: "onyx.TextArea", name: "xVals",
-          attributes: {cols: 20, rows: 10},
-          onchange: "draw"
-        }]},
-		  ]},
+        {kind: "onyx.GroupboxHeader", content: "Plot Options"},
+        {kind: "onyx.InputDecorator", components: [
+          {content: "Width: "},
+          {
+            kind: "onyx.Input", name: "width", attributes: {size: 5},
+            onchange: "draw", value: 400
+          },
+        ]},
+        {kind: "onyx.InputDecorator", components: [
+          {content: "Height: "},
+          {
+            kind: "onyx.Input", name: "height", attributes: {size: 5},
+            onchange: "draw", value: 400
+          }
+        ]},
+        {kind: "onyx.InputDecorator", components: [
+          {content: "xMin: "},
+          {
+            kind: "onyx.Input", name: "xMin", attributes: {size: 5},
+            onchange: "draw", value: 0
+          },
+          {content: "xMax: "},
+          {
+            kind: "onyx.Input", name: "xMax", attributes: {size: 5},
+            onchange: "draw", value: 360
+          }
+        ]},
+        {kind: "onyx.InputDecorator", components: [
+          {content: "yMin: "},
+          {
+            kind: "onyx.Input", name: "yMin", attributes: {size: 5},
+            onchange: "draw", value: -1
+          },
+          {content: "yMax: "},
+          {
+            kind: "onyx.Input", name: "yMax", attributes: {size: 5},
+            onchange: "draw", value: 1
+          }
+        ]},
+      ]},
       {kind: "onyx.Groupbox", components: [
-		   {kind: "onyx.GroupboxHeader", content: "Y"},
-		   {kind: "onyx.InputDecorator", components: [{
-          kind: "onyx.TextArea", name: "yVals",
-          attributes: {cols: 20, rows: 10},
+        {kind: "onyx.GroupboxHeader", content: "X"},
+        {kind: "onyx.InputDecorator", components: [{
+          kind: "onyx.TextArea", name: "xVals",
+          attributes: {cols: 10, rows: 7},
           onchange: "draw"
         }]},
-		  ]}
-    ]},
-    {kind: "onyx.Groupbox", components: [
-		 {kind: "onyx.GroupboxHeader", content: "Messages"},
-		 {kind: "onyx.InputDecorator", components: [
-        {kind: "onyx.TextArea", name: "msg", attributes: {cols: 40}}
+      ]},
+      {kind: "onyx.Groupbox", components: [
+        {kind: "onyx.GroupboxHeader", content: "Y"},
+        {kind: "onyx.InputDecorator", components: [{
+          kind: "onyx.TextArea", name: "yVals",
+          attributes: {cols: 10, rows: 7},
+          onchange: "draw"
+        }]}
+      ]},
+      {kind: "onyx.Groupbox", fit: true, components: [
+        {kind: "onyx.GroupboxHeader", content: "Data Options"},
+        {kind: "Group", components: [
+          {
+            kind: "onyx.Button", style: "padding: 10px;background-color: red",
+            value: "red", active: true, content: "Red", ontap: "setColor"
+          },
+          {
+            kind: "onyx.Button", style: "padding: 10px;background-color: blue",
+            value: "blue", content: "Blue", ontap: "setColor"
+          },
+          {
+            kind: "onyx.Button", style: "padding: 10px;background-color: green",
+            value: "green", content: "Green", ontap: "setColor"
+          },
+          {
+            kind: "onyx.Button", style: "padding: 10px;background-color: black",
+            value: "black", content: "Black", ontap: "setColor"
+          }
+        ]},
+        {kind: "onyx.Groupbox", components: [
+          {kind: "onyx.GroupboxHeader", content: "Messages"},
+          {kind: "onyx.InputDecorator", components: [
+            {tag: "div", name: "msg"}
+          ]}
+        ]}
       ]}
-		]}
-	],
+    ]}
+  ],
+  published: {
+    color: "red"
+  },
   rendered: function() {
     var
       twopi = Math.PI * 2,
@@ -57,7 +120,15 @@ enyo.kind({
     //and fill the text boxes with them
     this.$.xVals.set("value", xVals.join(", "));
     this.$.yVals.set("value", yVals.join(", "));
+
+    if (this.width) {
+      this.$.width.set("value", this.width - 20);
+    }
     
+    this.draw();
+  },
+  setColor: function(inSender, inEvent) {
+    this.color = inSender.value;
     this.draw();
   },
   draw: function() {
@@ -73,7 +144,7 @@ enyo.kind({
           coords: []
         }
       }];
-    	
+      
     //if x values are not provided, just use the index form the y values
     if (this.$.xVals.value.trim() == "") {
       yVals.forEach(function(val, i) {
@@ -92,8 +163,16 @@ enyo.kind({
       datasets[0].data.coords.push([xVals[index], value]);
     })
     
+    this.$.chart.set("width", this.$.width.value);
+    this.$.chart.set("height", this.$.height.value);
+    
     this.$.chart.draw(
-      {/*Plot Options*/},
+      {
+        xMin: this.$.xMin.value,
+        xMax: this.$.xMax.value,
+        yMin: this.$.yMin.value,
+        yMax: this.$.yMax.value,
+      },
       {datasets: datasets}
     );
     
