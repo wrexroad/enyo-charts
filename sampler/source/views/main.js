@@ -14,8 +14,7 @@ enyo.kind({
       wrap: false,
       fit: true,
       components: [
-        {kind: "XYScatterSample"},
-        {kind: "XYScatterSample", color: "red"}
+        {kind: "XYScatterSample"}
       ]
     }
 	],

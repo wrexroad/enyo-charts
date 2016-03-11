@@ -2,10 +2,6 @@ enyo.kind({
 	name: "XYScatterSample",
 	kind: "FittableRows",
   classes: "chart-panel",
-	fit: true,
-  published: {
-    color: "black"
-  },
 	components: [
     {kind: "onyx.Toolbar", components: [
       {kind: "onyx.InputDecorator", components: [
