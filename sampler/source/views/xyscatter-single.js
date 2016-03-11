@@ -1,12 +1,12 @@
 enyo.kind({
-  name: "XYScatterSample",
+  name: "XYScatterSingle",
   kind: "FittableRows",
   classes: "chart-panel",
   components: [
     {kind: "onyx.Toolbar", components: [
       {kind: "onyx.InputDecorator", components: [
-        {content: "XY - Scatter"}
-      ]}
+        {content: "XY - Scatter (Plot Options)"}
+      ]} 
     ]},
     {
       kind: "Chart.Cartesian", name: "chart",

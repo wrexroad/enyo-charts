@@ -11,10 +11,12 @@ enyo.kind({
       name: "samples",
       arrangerKind: "CollapsingArranger",
       classes: "sliding-panels",
+      realtime: true,
       wrap: false,
       fit: true,
       components: [
-        {kind: "XYScatterSample"}
+        {kind: "XYScatterSingle"},
+        {kind: "XYScatterMulti"}
       ]
     }
 	],

@@ -5,8 +5,16 @@ enyo.kind({
       kind: "onyx.Toolbar", components: [{
         kind: "onyx.Button",
         ontap: "switchPanel",
-        content: "XY - Scatter",
+        content: "XY - Scatter (Plot Options)",
         panelID: "0"
+      }]
+    },
+    {
+      kind: "onyx.Toolbar", components: [{
+        kind: "onyx.Button",
+        ontap: "switchPanel",
+        content: "XY - Scatter (Multi Data)",
+        panelID: "1"
       }]
     }
   ],
