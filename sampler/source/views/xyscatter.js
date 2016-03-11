@@ -1,9 +1,17 @@
 enyo.kind({
-	name: "myapp.MainView",
-	kind: "FittableColumns",
+	name: "XYScatterSample",
+	kind: "FittableRows",
   classes: "chart-panel",
 	fit: true,
+  published: {
+    color: "black"
+  },
 	components: [
+    {kind: "onyx.Toolbar", components: [
+      {kind: "onyx.InputDecorator", components: [
+        {content: "XY - Scatter"}
+      ]}
+    ]},
     {
       kind: "Chart.Cartesian", name: "chart",
       width: 400,
@@ -11,32 +19,30 @@ enyo.kind({
       bgColor: "white",
       fontSize: 14
     },
-    {kind: "FittableRows", components: [
-      {kind: "FittableColumns", components: [
-        {kind: "onyx.Groupbox", components: [
-			    {kind: "onyx.GroupboxHeader", content: "X"},
-			    {kind: "onyx.InputDecorator", components: [{
-            kind: "onyx.TextArea", name: "xVals",
-            attributes: {cols: 20, rows: 10},
-            onchange: "draw"
-          }]},
-		    ]},
-        {kind: "onyx.Groupbox", components: [
-			    {kind: "onyx.GroupboxHeader", content: "Y"},
-			    {kind: "onyx.InputDecorator", components: [{
-            kind: "onyx.TextArea", name: "yVals",
-            attributes: {cols: 20, rows: 10},
-            onchange: "draw"
-          }]},
-		    ]}
-      ]},
+    {kind: "FittableColumns", components: [
       {kind: "onyx.Groupbox", components: [
-			  {kind: "onyx.GroupboxHeader", content: "Messages"},
-			  {kind: "onyx.InputDecorator", components: [
-          {kind: "onyx.TextArea", name: "msg", attributes: {cols: 40}}
-        ]}
+		   {kind: "onyx.GroupboxHeader", content: "X"},
+		   {kind: "onyx.InputDecorator", components: [{
+          kind: "onyx.TextArea", name: "xVals",
+          attributes: {cols: 20, rows: 10},
+          onchange: "draw"
+        }]},
+		  ]},
+      {kind: "onyx.Groupbox", components: [
+		   {kind: "onyx.GroupboxHeader", content: "Y"},
+		   {kind: "onyx.InputDecorator", components: [{
+          kind: "onyx.TextArea", name: "yVals",
+          attributes: {cols: 20, rows: 10},
+          onchange: "draw"
+        }]},
 		  ]}
-    ]}
+    ]},
+    {kind: "onyx.Groupbox", components: [
+		 {kind: "onyx.GroupboxHeader", content: "Messages"},
+		 {kind: "onyx.InputDecorator", components: [
+        {kind: "onyx.TextArea", name: "msg", attributes: {cols: 40}}
+      ]}
+		]}
 	],
   rendered: function() {
     var
@@ -64,7 +70,7 @@ enyo.kind({
       xVals = this.$.xVals.getValue().split(","),
       yVals = this.$.yVals.getValue().split(","),
       datasets = [{
-        options: {},
+        options: {color: this.color},
         data: {
           name: "Sample Data",
           //An array of points where each element is a 2 element array [x, y]
@@ -91,7 +97,7 @@ enyo.kind({
     })
     
     this.$.chart.draw(
-      {/*options*/},
+      {/*Plot Options*/},
       {datasets: datasets}
     );
     
