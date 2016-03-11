@@ -23,6 +23,8 @@ enyo.kind({
     {kind: "onyx.InputDecorator", components: [
       {content: "FPS: "},
       {kind: "onyx.Input", name: "fps", attributes: {size: 10}},
+      {content: "Datasets Plotted: "},
+      {kind: "onyx.Input", name: "numSets", attributes: {size: 10}},
       {content: "Points Plotted: "},
       {kind: "onyx.Input", name: "numPts", attributes: {size: 10}}
     ]}
@@ -96,6 +98,7 @@ enyo.kind({
   },
   updateStats: function() {
     this.$.fps.set("value", (enyo.perfNow() - this.startTime).toFixed(3));
+    this.$.numSets.set("value", this.datasets.length);
     this.$.numPts.set("value", this.datasets.length * 90);
   }
 });
