@@ -1,6 +1,6 @@
 enyo.kind({
   name: "Chart",
-  kind: "Control",
+  kind: "Scroller",
 
   published: {
     width: 0,

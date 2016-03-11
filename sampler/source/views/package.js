@@ -1,3 +1,5 @@
 enyo.depends(
-	"views.js"
+	"main.js",
+  "sampleSwitcher.js",
+  "xyscatter.js"
 );
