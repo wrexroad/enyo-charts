@@ -84,8 +84,6 @@ enyo.kind({
     });
   },
   draw: function() {
-    var startTime = enyo.perfNow();
-
     this.$.chart.set("width", this.width ? (this.width - 20) : 400);
     this.$.chart.set("height", 400);
     
