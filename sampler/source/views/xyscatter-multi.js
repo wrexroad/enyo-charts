@@ -48,7 +48,12 @@ enyo.kind({
     if (this.animation) {
       window.requestAnimationFrame(this.animationStep.bind(this));
     }
+     
+    //record the draw time of the last frame and restart the draw timer
+    this.elapsedTime = enyo.perfNow() - this.drawTimer;
+    this.drawTimer = enyo.perfNow();
     
+    //create some new data and draw it
     this.addDataset();
     this.draw();
   },
@@ -62,9 +67,6 @@ enyo.kind({
       twopininety = twopi / 90,
       amplitude = ((10 - this.datasets.length) / 10),
       coords = [[], []];
-     
-    //start a draw timer to help collect statistics
-    this.startTime = enyo.perfNow();
     
     //generate a 90 point sine wave that is a little shorter than the last
     for (var i = 0; i < twopi; i += twopininety) {
@@ -95,7 +97,8 @@ enyo.kind({
     this.updateStats();
   },
   updateStats: function() {
-    this.$.fps.set("value", (enyo.perfNow() - this.startTime).toFixed(3));
+    var fps = (1/(this.elapsedTime / 1000)).toFixed(3);
+    this.$.fps.set("value", fps);
     this.$.numSets.set("value", this.datasets.length);
     this.$.numPts.set("value", this.datasets.length * 90);
   }
