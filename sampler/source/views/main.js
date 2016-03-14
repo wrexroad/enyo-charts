@@ -21,7 +21,7 @@ enyo.kind({
     }
 	],
   switchSample: function(inSender, inEvent) {
-    this.$.samples.set("index", inEvent)
+    this.$.samples.set("index", inEvent);
     return true;
   }
 });
