@@ -72,7 +72,7 @@ enyo.kind({
     ]},
     
     {fit: true, components: [
-      {kind: "onyx.GroupboxHeader", content: "Color"},
+      {kind: "onyx.GroupboxHeader", content: "Data Options"},
       {kind: "Group", components: [
         {
           kind: "onyx.Button", style: "padding: 10px; background-color: red",
