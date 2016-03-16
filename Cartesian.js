@@ -387,37 +387,84 @@ enyo.kind({
     this.decorate();
   },
   drawDataset: function(dataset, ctx, antialiasing) {
-    dataset = dataset || {};
-
     var
       opts = dataset.options || {},
       data = dataset.data || {},
       coords = data.coords || [],
-      numPts = coords.length,
+      lineWidth = +((opts.lines || {}).size),
+      dotWidth = +((opts.dots || {}).size),
+      subpixel = antialiasing ? 0.5 : 0;
+      
+      //bail out if there are no data to plot
+      if(!coords.length) {return;}
+  
+      //clear the drawing canvas unless noClobber is set
+      if (!opts.noClobber) {
+        this.resetLayer(opts.name);
+      }
+      
+      if (dotWidth) {
+        this.drawDots(ctx, coords, dotWidth, opts, subpixel);
+      }
+      if (lineWidth) {
+        this.drawLine(ctx, coords, lineWidth, opts, subpixel);
+      } 
+  },
+  drawDots: function(ctx, coords, dotWidth, opts, subpixel) {
+    var
+      xSpacingFactor = this.xSpacingFactor,
+      ySpacingFactor = this.ySpacingFactor,
+      xMin = this.xMin,
+      yMin = this.yMin,
+      halfDot = dotWidth / 2;
+
+    ctx.save();
+    
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = ctx.fillStyle = opts.color || "black";
+
+    //move to the bottom left corner of the dataCanvas
+    ctx.translate(
+      0, this.height - this.decorMargin.top - this.decorMargin.bottom
+    );
+    
+    ctx.beginPath();
+    coords.forEach(function(pnt) {
+      //'pnt' is a 2 element array: [x,y].
+      //If we have antialiasing on we will shift the 
+      //x and y coordinates by a half pixel.
+
+      var
+        x = (((pnt[0] - xMin) * xSpacingFactor) >> 0)  + subpixel,
+        y = ((-(pnt[1] - yMin) * ySpacingFactor) >> 0) + subpixel;
+      
+      //if we hit a data gap, end the current path
+      if (isFinite(+y)) {
+        ctx.moveTo(x + halfDot, y);
+        ctx.arc(
+          x/* - dotWidth - lineWidth*/, y/* - dotWidth - lineWidth*/,
+          halfDot, 0, 6.283185307179586
+        );
+        //ctx.stroke();
+      }
+    }, this);
+    
+    if (opts.fill) {
+      ctx.fill();
+    } else {
+      ctx.stroke(); 
+    }    
+    ctx.restore();    
+  },
+  drawLine: function(ctx, coords, lineWidth, opts, subpixel) {
+    var
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
       onPath = false,
       xMin = this.xMin,
-      yMin = this.yMin,
-      lineWidth = +((opts.lines || {}).size),
-      dotWidth = +((opts.dots || {}).size),
-      subpixel = antialiasing ? 0.5 : 0,
-      halfDot;
-
-    //bail out if there are no data to plot
-    if(!numPts) {return;}
-
-    //clear the drawing canvas unless noClobber is set
-    if (!opts.noClobber) {
-      this.resetLayer(opts.name);
-    }
+      yMin = this.yMin;
 
     ctx.save();
-    
-    //make sure we have good size values
-    lineWidth = isFinite(lineWidth) ? lineWidth : 0;
-    dotWidth = isFinite(dotWidth) ? dotWidth : 0;
-    halfDot = dotWidth / 2;
     
     ctx.lineWidth = lineWidth;
     ctx.strokeStyle = ctx.fillStyle = opts.color || "black";
@@ -462,20 +509,16 @@ enyo.kind({
           if (lineWidth) {
             ctx.lineTo(x, y);
           }
-          if (dotWidth) {
-            ctx.moveTo(x, y);
-            ctx.arc(x - halfDot, y - halfDot, dotWidth, 0, 7);
-          }
         }
       }
     }, this);
     
     if (opts.fill) {
-      if (lineWidth && !dotWidth) {
+      if (lineWidth) {
         //this will fill the area between the curve and 0.
         //we need to close the
         //curve by drawing a straight light alone y=0
-        ctx.lineTo(coords[numPts - 1][0], yMin);
+        ctx.lineTo(coords[coords.length - 1][0], yMin);
         ctx.lineTo(coords[0][0], yMin);
         ctx.lineTo(coords[0][0], coords[0][1]);
       }
