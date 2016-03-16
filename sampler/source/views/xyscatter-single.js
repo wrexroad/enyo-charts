@@ -70,36 +70,43 @@ enyo.kind({
         ]},
       ]}
     ]},
-    {kind: "onyx.Groupbox", components: [
-      {kind: "onyx.Groupbox", fit: true, components: [
-        {kind: "onyx.GroupboxHeader", content: "Color"},
-        {kind: "Group", components: [
-          {
-            kind: "onyx.Button", style: "padding: 10px; background-color: red",
-            value: "red", active: true, content: "Red", ontap: "setColor"
-          },
-          {
-            kind: "onyx.Button",
-            style: "padding: 10px; background-color: blue",
-            value: "blue", content: "Blue", ontap: "setColor"
-          },
-          {
-            kind: "onyx.Button",
-            style: "padding: 10px; background-color: green",
-            value: "green", content: "Green", ontap: "setColor"
-          },
-          {
-            kind: "onyx.Button",
-            style: "padding: 10px; background-color: black",
-            value: "black", content: "Black", ontap: "setColor"
-          }
-        ]}
+    
+    {fit: true, components: [
+      {kind: "onyx.GroupboxHeader", content: "Color"},
+      {kind: "Group", components: [
+        {
+          kind: "onyx.Button", style: "padding: 10px; background-color: red",
+          value: "red", active: true, content: "Red", ontap: "setColor"
+        },
+        {
+          kind: "onyx.Button",
+          style: "padding: 10px; background-color: blue",
+          value: "blue", content: "Blue", ontap: "setColor"
+        },
+        {
+          kind: "onyx.Button",
+          style: "padding: 10px; background-color: green",
+          value: "green", content: "Green", ontap: "setColor"
+        },
+        {
+          kind: "onyx.Button",
+          style: "padding: 10px; background-color: black",
+          value: "black", content: "Black", ontap: "setColor"
+        }
       ]},
-      {kind: "onyx.Groupbox", components: [
-        {kind: "onyx.GroupboxHeader", content: "Messages"},
-        {kind: "onyx.InputDecorator", components: [
-          {tag: "div", name: "msg"}
-        ]}
+      {kind: "onyx.InputDecorator", components: [
+        {content: "Lines"},
+        {kind: "onyx.Checkbox", name: "lines", checked: true, onchange: "draw"},
+      ]},
+      {kind: "onyx.InputDecorator", components: [
+        {content: "Points"},
+        {kind: "onyx.Checkbox", name: "dots", onchange: "draw"}
+      ]}
+    ]},
+    {kind: "onyx.Groupbox", components: [
+      {kind: "onyx.GroupboxHeader", content: "Messages"},
+      {kind: "onyx.InputDecorator", components: [
+        {tag: "div", name: "msg"}
       ]}
     ]}
   ],
@@ -135,15 +142,20 @@ enyo.kind({
     this.draw();
   },
   draw: function() {
+    console.log("draw")
     var
       //turn the x and y values into an array
       xVals = this.$.xVals.getValue().split(","),
       yVals = this.$.yVals.getValue().split(","),
       datasets = [{
-        options: {color: this.color},
+        options: {
+          color: this.color,
+          lines: {size: this.$.lines.checked ? 0.5 : 0},
+          dots: {size: this.$.dots.checked ? 1 : 0}
+        },
         data: {
           name: "Sample Data",
-          //An array of points where each element is a 2 element array [x, y]
+          //An 2d array of points where each element is a 2 element array [x, y]
           coords: []
         }
       }];
