@@ -404,10 +404,10 @@ enyo.kind({
       }
       
       if (dotWidth) {
-        this.drawDots(ctx, coords, dotWidth, opts, subpixel);
+        this.drawDots(ctx, coords, dotWidth, opts.dots, subpixel);
       }
       if (lineWidth) {
-        this.drawLine(ctx, coords, lineWidth, opts, subpixel);
+        this.drawLine(ctx, coords, lineWidth, opts.lines, subpixel);
       } 
   },
   drawDots: function(ctx, coords, dotWidth, opts, subpixel) {
