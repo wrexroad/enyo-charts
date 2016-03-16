@@ -97,13 +97,13 @@ enyo.kind({
       {content: "Line Width"},
       {
         kind: "onyx.Slider", name: "lineSize", 
-        value: 5, increment: 5,
+        value: 5,
         onChanging:"draw", onChange:"draw"
       },
       {content: "Point Width"},
       {
         kind: "onyx.Slider", name: "dotSize", 
-        value: 0, increment: 5,
+        value: 0,
          onChanging:"draw", onChange:"draw"
       }
     ]},
