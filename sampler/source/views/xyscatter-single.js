@@ -15,6 +15,22 @@ enyo.kind({
     },
     {kind: "FittableColumns", components: [
       {kind: "onyx.Groupbox", components: [
+        {kind: "onyx.GroupboxHeader", content: "X"},
+        {kind: "onyx.InputDecorator", components: [{
+          kind: "onyx.TextArea", name: "xVals",
+          attributes: {cols: 10, rows: 7},
+          onchange: "draw"
+        }]},
+      ]},
+      {kind: "onyx.Groupbox", components: [
+        {kind: "onyx.GroupboxHeader", content: "Y"},
+        {kind: "onyx.InputDecorator", components: [{
+          kind: "onyx.TextArea", name: "yVals",
+          attributes: {cols: 10, rows: 7},
+          onchange: "draw"
+        }]}
+      ]},
+      {kind: "onyx.Groupbox", fit: true, components: [
         {kind: "onyx.GroupboxHeader", content: "Plot Options"},
         {kind: "onyx.InputDecorator", components: [
           {content: "Width: "},
@@ -22,8 +38,6 @@ enyo.kind({
             kind: "onyx.Input", name: "width", attributes: {size: 5},
             onchange: "draw", value: 400
           },
-        ]},
-        {kind: "onyx.InputDecorator", components: [
           {content: "Height: "},
           {
             kind: "onyx.Input", name: "height", attributes: {size: 5},
@@ -54,48 +68,37 @@ enyo.kind({
             onchange: "draw", value: 1
           }
         ]},
-      ]},
-      {kind: "onyx.Groupbox", components: [
-        {kind: "onyx.GroupboxHeader", content: "X"},
-        {kind: "onyx.InputDecorator", components: [{
-          kind: "onyx.TextArea", name: "xVals",
-          attributes: {cols: 10, rows: 7},
-          onchange: "draw"
-        }]},
-      ]},
-      {kind: "onyx.Groupbox", components: [
-        {kind: "onyx.GroupboxHeader", content: "Y"},
-        {kind: "onyx.InputDecorator", components: [{
-          kind: "onyx.TextArea", name: "yVals",
-          attributes: {cols: 10, rows: 7},
-          onchange: "draw"
-        }]}
-      ]},
+      ]}
+    ]},
+    {kind: "onyx.Groupbox", components: [
       {kind: "onyx.Groupbox", fit: true, components: [
-        {kind: "onyx.GroupboxHeader", content: "Data Options"},
+        {kind: "onyx.GroupboxHeader", content: "Color"},
         {kind: "Group", components: [
           {
-            kind: "onyx.Button", style: "padding: 10px;background-color: red",
+            kind: "onyx.Button", style: "padding: 10px; background-color: red",
             value: "red", active: true, content: "Red", ontap: "setColor"
           },
           {
-            kind: "onyx.Button", style: "padding: 10px;background-color: blue",
+            kind: "onyx.Button",
+            style: "padding: 10px; background-color: blue",
             value: "blue", content: "Blue", ontap: "setColor"
           },
           {
-            kind: "onyx.Button", style: "padding: 10px;background-color: green",
+            kind: "onyx.Button",
+            style: "padding: 10px; background-color: green",
             value: "green", content: "Green", ontap: "setColor"
           },
           {
-            kind: "onyx.Button", style: "padding: 10px;background-color: black",
+            kind: "onyx.Button",
+            style: "padding: 10px; background-color: black",
             value: "black", content: "Black", ontap: "setColor"
           }
-        ]},
-        {kind: "onyx.Groupbox", components: [
-          {kind: "onyx.GroupboxHeader", content: "Messages"},
-          {kind: "onyx.InputDecorator", components: [
-            {tag: "div", name: "msg"}
-          ]}
+        ]}
+      ]},
+      {kind: "onyx.Groupbox", components: [
+        {kind: "onyx.GroupboxHeader", content: "Messages"},
+        {kind: "onyx.InputDecorator", components: [
+          {tag: "div", name: "msg"}
         ]}
       ]}
     ]}
