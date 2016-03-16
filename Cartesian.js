@@ -399,10 +399,10 @@ enyo.kind({
       onPath = false,
       xMin = this.xMin,
       yMin = this.yMin,
-      lineWidth = +((opts.lines || {}).size) || 0.5,
-      dotWidth = +((opts.dots || {}).size) || 0,
-      halfDot = dotWidth / 2,
-      subpixel = antialiasing ? 0.5 : 0;
+      lineWidth = +((opts.lines || {}).size),
+      dotWidth = +((opts.dots || {}).size),
+      subpixel = antialiasing ? 0.5 : 0,
+      halfDot;
 
     //bail out if there are no data to plot
     if(!numPts) {return;}
@@ -412,8 +412,13 @@ enyo.kind({
       this.resetLayer(opts.name);
     }
 
-    //configure the size and color of the brush
     ctx.save();
+    
+    //make sure we have good size values
+    lineWidth = isFinite(lineWidth) ? lineWidth : 0;
+    dotWidth = isFinite(dotWidth) ? dotWidth : 0;
+    halfDot = dotWidth / 2;
+    
     ctx.lineWidth = lineWidth;
     ctx.strokeStyle = ctx.fillStyle = opts.color || "black";
 
