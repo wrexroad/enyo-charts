@@ -29,6 +29,81 @@ enyo.kind({
           attributes: {cols: 10, rows: 7},
           onchange: "draw"
         }]}
+      ]}
+    ]},
+    
+    {kind: "FittableColumns", fit: true, components: [
+      {kind: "onyx.Groupbox", components: [
+        {kind: "onyx.GroupboxHeader", content: "Line Options"},
+        {kind: "Group", components: [
+          {
+            kind: "onyx.Button", linedot: "line",
+            style: "padding: 10px; background-color: red",
+            value: "red", active: true, content: "Red", ontap: "setColor"
+          },
+          {
+            kind: "onyx.Button", linedot: "line",
+            style: "padding: 10px; background-color: blue",
+            value: "blue", content: "Blue", ontap: "setColor"
+          },
+          {
+            kind: "onyx.Button", linedot: "line",
+            style: "padding: 10px; background-color: green",
+            value: "green", content: "Green", ontap: "setColor"
+          },
+          {
+            kind: "onyx.Button", linedot: "line",
+            style: "padding: 10px; background-color: black",
+            value: "black", content: "Black", ontap: "setColor"
+          }
+        ]},
+        {components:[
+          {
+            kind: "onyx.Button", name: "lineFill", linedot: "line",
+            content: "Fill", ontap:"toggleFill"
+          },
+          {content: "Line Width"},
+          {
+            kind: "onyx.Slider", name: "lineSize", 
+            value: 5, onChanging:"draw", onChange:"draw"
+          }
+        ]}
+      ]},
+      {kind: "onyx.Groupbox", components: [
+        {kind: "onyx.GroupboxHeader", content: "Dot Options"},
+        {kind: "Group", components: [
+          {
+            kind: "onyx.Button", linedot: "dot",
+            style: "padding: 10px; background-color: red",
+            value: "red", active: true, content: "Red", ontap: "setColor"
+          },
+          {
+            kind: "onyx.Button", linedot: "dot",
+            style: "padding: 10px; background-color: blue",
+            value: "blue", content: "Blue", ontap: "setColor"
+          },
+          {
+            kind: "onyx.Button", linedot: "dot",
+            style: "padding: 10px; background-color: green",
+            value: "green", content: "Green", ontap: "setColor"
+          },
+          {
+            kind: "onyx.Button", linedot: "dot",
+            style: "padding: 10px; background-color: black",
+            value: "black", content: "Black", ontap: "setColor"
+          }
+        ]},
+        {components:[
+          {
+            kind: "onyx.Button", name: "dotFill", linedot: "dot",
+            content: "Fill", ontap:"toggleFill"
+          },
+          {content: "Dot Width"},
+          {
+            kind: "onyx.Slider", name: "dotSize", 
+            value: 5, onChanging:"draw", onChange:"draw"
+          }
+        ]}
       ]},
       {kind: "onyx.Groupbox", fit: true, components: [
         {kind: "onyx.GroupboxHeader", content: "Plot Options"},
@@ -70,43 +145,6 @@ enyo.kind({
         ]},
       ]}
     ]},
-    
-    {fit: true, components: [
-      {kind: "onyx.GroupboxHeader", content: "Data Options"},
-      {kind: "Group", components: [
-        {
-          kind: "onyx.Button", style: "padding: 10px; background-color: red",
-          value: "red", active: true, content: "Red", ontap: "setColor"
-        },
-        {
-          kind: "onyx.Button",
-          style: "padding: 10px; background-color: blue",
-          value: "blue", content: "Blue", ontap: "setColor"
-        },
-        {
-          kind: "onyx.Button",
-          style: "padding: 10px; background-color: green",
-          value: "green", content: "Green", ontap: "setColor"
-        },
-        {
-          kind: "onyx.Button",
-          style: "padding: 10px; background-color: black",
-          value: "black", content: "Black", ontap: "setColor"
-        }
-      ]},
-      {content: "Line Width"},
-      {
-        kind: "onyx.Slider", name: "lineSize", 
-        value: 5,
-        onChanging:"draw", onChange:"draw"
-      },
-      {content: "Point Width"},
-      {
-        kind: "onyx.Slider", name: "dotSize", 
-        value: 0,
-         onChanging:"draw", onChange:"draw"
-      }
-    ]},
     {kind: "onyx.Groupbox", components: [
       {kind: "onyx.GroupboxHeader", content: "Messages"},
       {kind: "onyx.InputDecorator", components: [
@@ -126,6 +164,10 @@ enyo.kind({
       
     this.inherited(arguments);
     
+    //create a place to store the dot and line settings
+    this.color = {dot: "red", line: "red"};
+    this.fill = {dot: false, line: false};
+    
     //generate a 90 point sine wave
     for (var i = 0; i < twopi; i += twopininety) {
       xVals.push((360 * (i / twopi)).toFixed(3));
@@ -142,8 +184,16 @@ enyo.kind({
     this.draw();
   },
   setColor: function(inSender, inEvent) {
-    this.color = inSender.value;
+    this.color[inSender.linedot] = inSender.value;
     this.draw();
+    return true;
+  },
+  toggleFill: function(inSender, inEvernt) {
+    inSender.addRemoveClass("active");
+    this.fill[inSender.linedot] = !this.fill[inSender.linedot];
+    
+    this.draw();
+    return true;
   },
   draw: function() {
 
@@ -153,9 +203,16 @@ enyo.kind({
       yVals = this.$.yVals.getValue().split(","),
       datasets = [{
         options: {
-          color: this.color,
-          lines: {size: this.$.lineSize.getValue() / 10},
-          dots: {size: this.$.dotSize.getValue() / 10}
+          lines: {
+            color: this.color.line,
+            size: this.$.lineSize.getValue() / 10,
+            fill: this.fill.line
+          },
+          dots: {
+            color: this.color.dot,
+            size: this.$.dotSize.getValue() / 10,
+            fill: this.fill.dot
+          }
         },
         data: {
           name: "Sample Data",
