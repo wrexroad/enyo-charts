@@ -94,14 +94,18 @@ enyo.kind({
           value: "black", content: "Black", ontap: "setColor"
         }
       ]},
-      {kind: "onyx.InputDecorator", components: [
-        {content: "Lines"},
-        {kind: "onyx.Checkbox", name: "lines", checked: true, onchange: "draw"},
-      ]},
-      {kind: "onyx.InputDecorator", components: [
-        {content: "Points"},
-        {kind: "onyx.Checkbox", name: "dots", onchange: "draw"}
-      ]}
+      {content: "Line Width"},
+      {
+        kind: "onyx.Slider", name: "lineSize", 
+        value: 5, increment: 5,
+        onChanging:"draw", onChange:"draw"
+      },
+      {content: "Point Width"},
+      {
+        kind: "onyx.Slider", name: "dotSize", 
+        value: 0, increment: 5,
+         onChanging:"draw", onChange:"draw"
+      }
     ]},
     {kind: "onyx.Groupbox", components: [
       {kind: "onyx.GroupboxHeader", content: "Messages"},
@@ -142,7 +146,7 @@ enyo.kind({
     this.draw();
   },
   draw: function() {
-    console.log("draw")
+
     var
       //turn the x and y values into an array
       xVals = this.$.xVals.getValue().split(","),
@@ -150,8 +154,8 @@ enyo.kind({
       datasets = [{
         options: {
           color: this.color,
-          lines: {size: this.$.lines.checked ? 0.5 : 0},
-          dots: {size: this.$.dots.checked ? 1 : 0}
+          lines: {size: this.$.lineSize.getValue() / 10},
+          dots: {size: this.$.dotSize.getValue() / 10}
         },
         data: {
           name: "Sample Data",
@@ -159,7 +163,7 @@ enyo.kind({
           coords: []
         }
       }];
-      
+
     //if x values are not provided, just use the index form the y values
     if (this.$.xVals.value.trim() == "") {
       yVals.forEach(function(val, i) {
