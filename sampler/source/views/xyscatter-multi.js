@@ -42,16 +42,18 @@ enyo.kind({
   },
   toggleAnimation: function() {
     this.animation = !this.animation;
-    this.animationStep();
-  },
-  animationStep: function() {
     if (this.animation) {
       window.requestAnimationFrame(this.animationStep.bind(this));
     }
-     
+  },
+  animationStep: function(timestamp) {
+    if (this.animation) {
+      window.requestAnimationFrame(this.animationStep.bind(this));
+    }
+    
     //record the draw time of the last frame and restart the draw timer
-    this.elapsedTime = enyo.perfNow() - this.drawTimer;
-    this.drawTimer = enyo.perfNow();
+    this.elapsedTime = timestamp - this.drawTimer;
+    this.drawTimer = timestamp;
     
     //create some new data and draw it
     this.addDataset();
@@ -59,6 +61,7 @@ enyo.kind({
   },
   reset: function() {
     this.datasets = [];
+    this.elapsedTime = NaN;
     this.draw();
   },
   addDataset: function() {
