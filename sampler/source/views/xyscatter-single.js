@@ -11,6 +11,7 @@ enyo.kind({
     {
       kind: "Chart.Cartesian", name: "chart",
       bgColor: "white",
+      font: "sans-serif",
       fontSize: 14
     },
     
