@@ -80,7 +80,14 @@ enyo.kind({
     
     this.datasets.push({
       options: {
-        color: "#" + ((Math.random() * 0xFFFFFF) >> 0).toString(16)
+        lines: {
+          color: "#" + ((Math.random() * 0xFFFFFF) >> 0).toString(16),
+          size: 0.5,
+          fill: false
+        },
+        dots: {
+          size: 0
+        }
       },
       data: {
         name: "Data " + this.datasets.length,
