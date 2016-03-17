@@ -1,6 +1,6 @@
 enyo.kind({
   name: "XYScatterSingle",
-  kind: "FittableRows",
+  kind: "Scroller",
   classes: "chart-panel",
   components: [
     {kind: "onyx.Toolbar", components: [
@@ -13,7 +13,53 @@ enyo.kind({
       bgColor: "white",
       fontSize: 14
     },
-    {kind: "FittableColumns", components: [
+    
+    {kind: "FittableColumns", fit: true, components: [
+      {kind: "onyx.Groupbox", components: [
+        {kind: "onyx.GroupboxHeader", content: "Data Options"},
+        {kind: "Group", components: [
+          {
+            kind: "onyx.Button",
+            style: "padding: 10px; background-color: red",
+            value: "red", active: true, content: "Red", ontap: "setColor"
+          },
+          {
+            kind: "onyx.Button",
+            style: "padding: 10px; background-color: blue",
+            value: "blue", content: "Blue", ontap: "setColor"
+          },
+          {
+            kind: "onyx.Button",
+            style: "padding: 10px; background-color: green",
+            value: "green", content: "Green", ontap: "setColor"
+          },
+          {
+            kind: "onyx.Button",
+            style: "padding: 10px; background-color: black",
+            value: "black", content: "Black", ontap: "setColor"
+          }
+        ]},
+        {components:[
+          {
+            kind: "onyx.Button", name: "lineFill", linedot: "line",
+            content: "Line Fill", ontap:"toggleFill"
+          },
+          {
+            kind: "onyx.Button", name: "dotFill", linedot: "dot",
+            content: "Dot Fill", ontap:"toggleFill"
+          },
+          {content: "Line Width"},
+          {
+            kind: "onyx.Slider", name: "lineSize", 
+            value: 5, onChanging:"draw", onChange:"draw"
+          },
+          {content: "Dot Width"},
+          {
+            kind: "onyx.Slider", name: "dotSize", 
+            value: 5, onChanging:"draw", onChange:"draw"
+          }
+        ]}
+      ]},
       {kind: "onyx.Groupbox", components: [
         {kind: "onyx.GroupboxHeader", content: "X"},
         {kind: "onyx.InputDecorator", components: [{
@@ -29,115 +75,39 @@ enyo.kind({
           attributes: {cols: 10, rows: 7},
           onchange: "draw"
         }]}
-      ]}
-    ]},
-    
-    {kind: "FittableColumns", fit: true, components: [
-      {kind: "onyx.Groupbox", components: [
-        {kind: "onyx.GroupboxHeader", content: "Line Options"},
-        {kind: "Group", components: [
-          {
-            kind: "onyx.Button", linedot: "line",
-            style: "padding: 10px; background-color: red",
-            value: "red", active: true, content: "Red", ontap: "setColor"
-          },
-          {
-            kind: "onyx.Button", linedot: "line",
-            style: "padding: 10px; background-color: blue",
-            value: "blue", content: "Blue", ontap: "setColor"
-          },
-          {
-            kind: "onyx.Button", linedot: "line",
-            style: "padding: 10px; background-color: green",
-            value: "green", content: "Green", ontap: "setColor"
-          },
-          {
-            kind: "onyx.Button", linedot: "line",
-            style: "padding: 10px; background-color: black",
-            value: "black", content: "Black", ontap: "setColor"
-          }
-        ]},
-        {components:[
-          {
-            kind: "onyx.Button", name: "lineFill", linedot: "line",
-            content: "Fill", ontap:"toggleFill"
-          },
-          {content: "Line Width"},
-          {
-            kind: "onyx.Slider", name: "lineSize", 
-            value: 5, onChanging:"draw", onChange:"draw"
-          }
-        ]}
-      ]},
-      {kind: "onyx.Groupbox", components: [
-        {kind: "onyx.GroupboxHeader", content: "Dot Options"},
-        {kind: "Group", components: [
-          {
-            kind: "onyx.Button", linedot: "dot",
-            style: "padding: 10px; background-color: red",
-            value: "red", active: true, content: "Red", ontap: "setColor"
-          },
-          {
-            kind: "onyx.Button", linedot: "dot",
-            style: "padding: 10px; background-color: blue",
-            value: "blue", content: "Blue", ontap: "setColor"
-          },
-          {
-            kind: "onyx.Button", linedot: "dot",
-            style: "padding: 10px; background-color: green",
-            value: "green", content: "Green", ontap: "setColor"
-          },
-          {
-            kind: "onyx.Button", linedot: "dot",
-            style: "padding: 10px; background-color: black",
-            value: "black", content: "Black", ontap: "setColor"
-          }
-        ]},
-        {components:[
-          {
-            kind: "onyx.Button", name: "dotFill", linedot: "dot",
-            content: "Fill", ontap:"toggleFill"
-          },
-          {content: "Dot Width"},
-          {
-            kind: "onyx.Slider", name: "dotSize", 
-            value: 5, onChanging:"draw", onChange:"draw"
-          }
-        ]}
       ]},
       {kind: "onyx.Groupbox", fit: true, components: [
         {kind: "onyx.GroupboxHeader", content: "Plot Options"},
+        {content: "Canvas Size"},
         {kind: "onyx.InputDecorator", components: [
-          {content: "Width: "},
           {
             kind: "onyx.Input", name: "width", attributes: {size: 5},
             onchange: "draw", value: 400
           },
-          {content: "Height: "},
+          {content: "x"},
+          {tag: "br"},
           {
             kind: "onyx.Input", name: "height", attributes: {size: 5},
             onchange: "draw", value: 400
           }
         ]},
-        {kind: "onyx.InputDecorator", components: [
-          {content: "xMin: "},
+        {content: "X Axis Range"},
+          {kind: "onyx.InputDecorator", components: [
           {
             kind: "onyx.Input", name: "xMin", attributes: {size: 5},
             onchange: "draw", value: 0
           },
-          {content: "xMax: "},
           {
             kind: "onyx.Input", name: "xMax", attributes: {size: 5},
             onchange: "draw", value: 360
           }
         ]},
-        {kind: "onyx.InputDecorator", components: [
-          {content: "yMin: "},
+        {content: "Y Axis Range"},
+          {kind: "onyx.InputDecorator", components: [
           {
             kind: "onyx.Input", name: "yMin", attributes: {size: 5},
             onchange: "draw", value: -1
           },
-          {content: "yMax: "},
           {
             kind: "onyx.Input", name: "yMax", attributes: {size: 5},
             onchange: "draw", value: 1
@@ -165,7 +135,7 @@ enyo.kind({
     this.inherited(arguments);
     
     //create a place to store the dot and line settings
-    this.color = {dot: "red", line: "red"};
+    this.color = "red";
     this.fill = {dot: false, line: false};
     
     //generate a 90 point sine wave
@@ -184,7 +154,7 @@ enyo.kind({
     this.draw();
   },
   setColor: function(inSender, inEvent) {
-    this.color[inSender.linedot] = inSender.value;
+    this.color = inSender.value;
     this.draw();
     return true;
   },
@@ -203,13 +173,12 @@ enyo.kind({
       yVals = this.$.yVals.getValue().split(","),
       datasets = [{
         options: {
+          color: this.color,
           lines: {
-            color: this.color.line,
             size: this.$.lineSize.getValue() / 10,
             fill: this.fill.line
           },
           dots: {
-            color: this.color.dot,
             size: this.$.dotSize.getValue() / 10,
             fill: this.fill.dot
           }
