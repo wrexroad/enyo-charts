@@ -403,12 +403,16 @@ enyo.kind({
         this.resetLayer(opts.name);
       }
       
+      ctx.save();
+      ctx.strokeStyle = ctx.fillStyle = opts.color || "black";
+      
       if (dotWidth) {
         this.drawDots(ctx, coords, dotWidth, opts.dots, subpixel);
       }
       if (lineWidth) {
         this.drawLine(ctx, coords, lineWidth, opts.lines, subpixel);
-      } 
+      }
+      ctx.restore();
   },
   drawDots: function(ctx, coords, dotWidth, opts, subpixel) {
     var
@@ -421,7 +425,6 @@ enyo.kind({
     ctx.save();
     
     ctx.lineWidth = 1;
-    ctx.strokeStyle = ctx.fillStyle = opts.color || "black";
 
     //move to the bottom left corner of the dataCanvas
     ctx.translate(
@@ -467,7 +470,6 @@ enyo.kind({
     ctx.save();
     
     ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = ctx.fillStyle = opts.color || "black";
 
     //move to the bottom left corner of the dataCanvas
     ctx.translate(
