@@ -98,19 +98,25 @@ enyo.kind({
       ctx = this.decorCtx,
       offset = 0,
       layers = this.layers,
-      layerName, printedName;
+      layerName, printedName, titleAreaWidth;
 
     ctx.save();
-    ctx.font = this.fontSize + "px " + this.font
     ctx.translate(this.decorMargin.left, 0);
     ctx.textAlign = "start";
     ctx.textBaseline = "top";
 
     //print the main plot title
+    titleAreaWidth = this.width - this.decorMargin.left;
+    ctx.font = (this.fontSize * 1.5) + "px " + this.font;
     ctx.fillStyle = "black";
-    ctx.fillText(this.plotTitle || "", 0, this.fontSize);
+    ctx.fillText(
+      this.plotTitle || "", 
+      (titleAreaWidth - ctx.measureText(this.plotTitle).width) >> 1,
+      this.fontSize >> 1
+    );
 
     //print a legend as a subtitle
+    ctx.font = this.fontSize + "px " + this.font;
     for (layerName in layers) {
         printedName = layerName.substring(0, (layerName).indexOf("_layer"));
         ctx.fillStyle = layers[layerName].options.color;
