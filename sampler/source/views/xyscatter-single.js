@@ -61,20 +61,28 @@ enyo.kind({
         ]}
       ]},
       {kind: "onyx.Groupbox", components: [
-        {kind: "onyx.GroupboxHeader", content: "X"},
+        {kind: "onyx.GroupboxHeader", content: "Sample Data"},
         {kind: "onyx.InputDecorator", components: [{
-          kind: "onyx.TextArea", name: "xVals",
-          attributes: {cols: 10, rows: 7},
+          kind: "onyx.Input", name: "datasetName",
+          value: "Dataset 1",
           onchange: "draw"
         }]},
-      ]},
-      {kind: "onyx.Groupbox", components: [
-        {kind: "onyx.GroupboxHeader", content: "Y"},
-        {kind: "onyx.InputDecorator", components: [{
-          kind: "onyx.TextArea", name: "yVals",
-          attributes: {cols: 10, rows: 7},
-          onchange: "draw"
-        }]}
+        {style: "display: inline-block", components: [
+          {content: "X"},
+          {
+            kind: "onyx.TextArea", name: "xVals",
+            attributes: {cols: 10, rows: 7},
+            onchange: "draw"
+          }
+        ]},
+        {style: "display: inline-block", components: [
+          {content: "Y"},
+          {
+            kind: "onyx.TextArea", name: "yVals",
+            attributes: {cols: 10, rows: 7},
+            onchange: "draw"
+          }
+        ]}
       ]},
       {kind: "onyx.Groupbox", fit: true, components: [
         {kind: "onyx.GroupboxHeader", content: "Plot Options"},
@@ -184,7 +192,7 @@ enyo.kind({
           }
         },
         data: {
-          name: "Sample Data",
+          name: this.$.datasetName.value,
           //An 2d array of points where each element is a 2 element array [x, y]
           coords: []
         }
