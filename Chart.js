@@ -118,10 +118,7 @@ enyo.kind({
   resetPlot: function() {
     //reset all of the plotting parameters and clear any drawing
     this.initValues();
-    for (var layer_i in this.layers) {
-      this.layers[layer_i].canvas.destroy();
-      delete this.layers[layer_i];
-    }
+    this.cleanup();
   },
   resetLayer: function(varName) {
     var layer;
@@ -139,6 +136,15 @@ enyo.kind({
       );
     }
   },
+  cleanup: function() {
+    for (var layer_i in this.layers) {
+      if (!this.activeLayerNames[layer_i]){
+        this.layers[layer_i].canvas.destroy();
+        delete this.layers[layer_i];
+      }
+    }
+  },
+  
   exportPNG: function() {
     var
       ctx = this.exportCtx,
@@ -284,6 +290,7 @@ enyo.kind({
 
   //abstract functions to be defined by the chart subkind
   initValues: function() {
+    this.activeLayerNames = {};
     this.labels = null;
   },
   draw: function() {
