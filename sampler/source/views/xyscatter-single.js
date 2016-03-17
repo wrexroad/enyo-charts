@@ -86,6 +86,12 @@ enyo.kind({
       ]},
       {kind: "onyx.Groupbox", fit: true, components: [
         {kind: "onyx.GroupboxHeader", content: "Plot Options"},
+        {kind: "onyx.InputDecorator", components: [
+          {
+            kind: "onyx.Input", name: "title",
+            onchange: "draw", value: "Single Dataset Plot"
+          }
+        ]},
         {content: "Canvas Size"},
         {kind: "onyx.InputDecorator", components: [
           {
@@ -221,6 +227,7 @@ enyo.kind({
     
     this.$.chart.draw(
       {
+        title: this.$.title.value,
         xMin: this.$.xMin.value,
         xMax: this.$.xMax.value,
         yMin: this.$.yMin.value,

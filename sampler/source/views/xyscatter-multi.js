@@ -10,6 +10,7 @@ enyo.kind({
     ]},
     {
       kind: "Chart.Cartesian", name: "chart",
+      plotTitle: "Multi-Dataset Plot",
       bgColor: "white",
       fontSize: 14
     },
