@@ -106,10 +106,15 @@ enyo.kind({
     ctx.textAlign = "start";
     ctx.textBaseline = "top";
 
+    //print the main plot title
+    ctx.fillStyle = "black";
+    ctx.fillText(this.plotTitle, 0, this.fontSize);
+
+    //print a legend as a subtitle
     for (layerName in layers) {
         printedName = layerName.substring(0, (layerName).indexOf("_layer"));
         ctx.fillStyle = layers[layerName].options.color;
-        ctx.fillText(printedName, offset, 0);
+        ctx.fillText(printedName, offset, this.fontSize * 2);
         offset += ctx.measureText(printedName + ' ').width;
     }
 
@@ -293,7 +298,7 @@ enyo.kind({
     this.activeLayerNames = {};
     this.labels = null;
   },
-  draw: function() {
+  draw: function(plotOptions, plottables, antialiasing) {
     var
       decorWidth = this.width,
       decorHeight = this.height,
@@ -304,10 +309,10 @@ enyo.kind({
 
     //clear the canvases
     this.wipePlot();
-
-    this.calculateMargins();
+    this.activeLayerNames = {};
     
     //adjust the size of each canvas
+    this.calculateMargins();
     canvas = this.$.decorCanvas;
     canvas.setAttribute("height", this.height);
     canvas.setAttribute("width", this.width);
@@ -325,6 +330,8 @@ enyo.kind({
       canvas.update();
     }
     
+    //update the plot title parameter
+    this.plotTitle = (plotOptions || {}).title;
   },
   decorate: function() {
     this.printTitle();

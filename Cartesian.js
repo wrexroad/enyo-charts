@@ -52,7 +52,7 @@ enyo.kind({
   calculateMargins: function() {
     this.set("decorMargin", {
       //room for the title
-      top: this.fontSize,
+      top: this.fontSize * 3,
       
       //room for two lines of x axis lables
       bottom: this.fontSize << 1,
@@ -319,7 +319,6 @@ enyo.kind({
   draw: function(plotOptions, plottables, antialiasing) {
     plotOptions = plotOptions || {};
     plottables = plottables || {};
-    this.activeLayerNames = {};
     
     var
       datasets = plottables.datasets,
