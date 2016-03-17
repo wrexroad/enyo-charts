@@ -98,18 +98,29 @@ enyo.kind({
       ctx = this.decorCtx,
       offset = 0,
       layers = this.layers,
-      layerName, printedName;
+      layerName, printedName, titleAreaWidth;
 
     ctx.save();
-    ctx.font = this.fontSize + "px " + this.font
     ctx.translate(this.decorMargin.left, 0);
     ctx.textAlign = "start";
     ctx.textBaseline = "top";
 
+    //print the main plot title
+    titleAreaWidth = this.width - this.decorMargin.left;
+    ctx.font = (this.fontSize * 1.5) + "px " + this.font;
+    ctx.fillStyle = "black";
+    ctx.fillText(
+      this.plotTitle || "", 
+      (titleAreaWidth - ctx.measureText(this.plotTitle).width) >> 1,
+      this.fontSize >> 1
+    );
+
+    //print a legend as a subtitle
+    ctx.font = this.fontSize + "px " + this.font;
     for (layerName in layers) {
         printedName = layerName.substring(0, (layerName).indexOf("_layer"));
         ctx.fillStyle = layers[layerName].options.color;
-        ctx.fillText(printedName, offset, 0);
+        ctx.fillText(printedName, offset, this.fontSize * 2);
         offset += ctx.measureText(printedName + ' ').width;
     }
 
@@ -118,10 +129,7 @@ enyo.kind({
   resetPlot: function() {
     //reset all of the plotting parameters and clear any drawing
     this.initValues();
-    for (var layer_i in this.layers) {
-      this.layers[layer_i].canvas.destroy();
-      delete this.layers[layer_i];
-    }
+    this.cleanup();
   },
   resetLayer: function(varName) {
     var layer;
@@ -139,6 +147,15 @@ enyo.kind({
       );
     }
   },
+  cleanup: function() {
+    for (var layer_i in this.layers) {
+      if (!this.activeLayerNames[layer_i]){
+        this.layers[layer_i].canvas.destroy();
+        delete this.layers[layer_i];
+      }
+    }
+  },
+  
   exportPNG: function() {
     var
       ctx = this.exportCtx,
@@ -284,9 +301,10 @@ enyo.kind({
 
   //abstract functions to be defined by the chart subkind
   initValues: function() {
+    this.activeLayerNames = {};
     this.labels = null;
   },
-  draw: function() {
+  draw: function(plotOptions, plottables, antialiasing) {
     var
       decorWidth = this.width,
       decorHeight = this.height,
@@ -297,10 +315,10 @@ enyo.kind({
 
     //clear the canvases
     this.wipePlot();
-
-    this.calculateMargins();
+    this.activeLayerNames = {};
     
     //adjust the size of each canvas
+    this.calculateMargins();
     canvas = this.$.decorCanvas;
     canvas.setAttribute("height", this.height);
     canvas.setAttribute("width", this.width);
@@ -318,6 +336,8 @@ enyo.kind({
       canvas.update();
     }
     
+    //update the plot title parameter
+    this.plotTitle = (plotOptions || {}).title || this.plotTitle || "";
   },
   decorate: function() {
     this.printTitle();

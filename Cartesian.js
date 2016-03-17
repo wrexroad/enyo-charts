@@ -52,7 +52,7 @@ enyo.kind({
   calculateMargins: function() {
     this.set("decorMargin", {
       //room for the title
-      top: this.fontSize,
+      top: this.fontSize * 3,
       
       //room for two lines of x axis lables
       bottom: this.fontSize << 1,
@@ -316,14 +316,17 @@ enyo.kind({
     ctx.restore();
   },
   
-  draw: function(plotRange, plottables, antialiasing) {
+  draw: function(plotOptions, plottables, antialiasing) {
+    plotOptions = plotOptions || {};
+    plottables = plottables || {};
+    
     var
       datasets = plottables.datasets,
       equations = plottables.equations,
-      xMin = +plotRange.xMin,
-      xMax = +plotRange.xMax,
-      yMin = +plotRange.yMin,
-      yMax = +plotRange.yMax;
+      xMin = +plotOptions.xMin,
+      xMax = +plotOptions.xMax,
+      yMin = +plotOptions.yMin,
+      yMax = +plotOptions.yMax;
     
     //do any generic Chart setup
     this.inherited(arguments);
@@ -337,13 +340,13 @@ enyo.kind({
       if (datasets.length) {
         var newRange = this.getRangeFromData(datasets);
         xMin =
-          isFinite(+plotRange.xMin) ? +plotRange.xMin : +newRange.xMin;
+          isFinite(+plotOptions.xMin) ? +plotOptions.xMin : +newRange.xMin;
         xMax =
-          isFinite(+plotRange.xMax) ? +plotRange.xMax : +newRange.xMax;
+          isFinite(+plotOptions.xMax) ? +plotOptions.xMax : +newRange.xMax;
         yMin =
-          isFinite(+plotRange.yMin) ? +plotRange.yMin : +newRange.yMin;
+          isFinite(+plotOptions.yMin) ? +plotOptions.yMin : +newRange.yMin;
         yMax =
-          isFinite(+plotRange.yMax) ? +plotRange.yMax : +newRange.yMax;
+          isFinite(+plotOptions.yMax) ? +plotOptions.yMax : +newRange.yMax;
       }
     }
     
@@ -367,6 +370,9 @@ enyo.kind({
       
       //draw the dataset onto the canvas
       this.drawDataset(dataset, this.layers[name + "_layer"].ctx, antialiasing);
+      
+      //remeber what we plotted this time
+      this.activeLayerNames[name + "_layer"] = true;
     }, this);
     
     equations.forEach(function(dataset) {
@@ -383,6 +389,9 @@ enyo.kind({
       this.drawEquation(dataset, this.layers[name + "_layer"].ctx);
     }, this);
     
+    //remove any unused layers
+    this.cleanup();
+    
     //add the plot border and tic marks
     this.decorate();
   },
@@ -397,7 +406,7 @@ enyo.kind({
       
       //bail out if there are no data to plot
       if(!coords.length) {return;}
-  
+      
       //clear the drawing canvas unless noClobber is set
       if (!opts.noClobber) {
         this.resetLayer(opts.name);
