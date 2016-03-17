@@ -108,7 +108,7 @@ enyo.kind({
 
     //print the main plot title
     ctx.fillStyle = "black";
-    ctx.fillText(this.plotTitle, 0, this.fontSize);
+    ctx.fillText(this.plotTitle || "", 0, this.fontSize);
 
     //print a legend as a subtitle
     for (layerName in layers) {
@@ -331,7 +331,7 @@ enyo.kind({
     }
     
     //update the plot title parameter
-    this.plotTitle = (plotOptions || {}).title;
+    this.plotTitle = (plotOptions || {}).title || this.plotTitle || "";
   },
   decorate: function() {
     this.printTitle();
