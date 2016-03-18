@@ -1,20 +1,23 @@
 enyo.kind({
 	name: "SampleSwitcher",
   components: [
-    {
-      kind: "onyx.Toolbar", components: [{
+    {kind: "onyx.Toolbar", components: [
+      {content: "XY Plots"}
+    ]},
+    {kind: "onyx.Toolbar", components: [{
         kind: "onyx.Button",
-        ontap: "switchPanel",
-        content: "XY - Scatter (Plot Options)",
-        panelID: "0"
+        style: "width: 95%",
+        content: "Scatter (Plot Details)",
+        panelID: "0",
+        ontap: "switchPanel"
       }]
     },
-    {
-      kind: "onyx.Toolbar", components: [{
+    {kind: "onyx.Toolbar", components: [{
         kind: "onyx.Button",
-        ontap: "switchPanel",
-        content: "XY - Scatter (Multi Data)",
-        panelID: "1"
+        style: "width: 95%",
+        content: "Scatter (Multi Data)",
+        panelID: "1",
+        ontap: "switchPanel"
       }]
     }
   ],
