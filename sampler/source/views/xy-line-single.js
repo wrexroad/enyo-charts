@@ -15,7 +15,7 @@ enyo.kind({
       fontSize: 14
     },
     
-    {kind: "FittableColumns", fit: true, components: [
+    {kind: "FittableColumns", components: [
       {kind: "onyx.Groupbox", components: [
         {kind: "onyx.GroupboxHeader", content: "Data Options"},
         {kind: "Group", components: [
@@ -68,7 +68,7 @@ enyo.kind({
           value: "Dataset 1",
           onchange: "draw"
         }]},
-        {style: "display: inline-block", components: [
+        {style: "display: inline-block; width: 49%", components: [
           {content: "X"},
           {
             kind: "onyx.TextArea", name: "xVals",
@@ -76,7 +76,7 @@ enyo.kind({
             onchange: "draw"
           }
         ]},
-        {style: "display: inline-block", components: [
+        {style: "display: inline-block; width: 49%", components: [
           {content: "Y"},
           {
             kind: "onyx.TextArea", name: "yVals",
@@ -130,7 +130,7 @@ enyo.kind({
         ]},
       ]}
     ]},
-    {kind: "onyx.Groupbox", components: [
+    {kind: "onyx.Groupbox", fit: true, components: [
       {kind: "onyx.GroupboxHeader", content: "Messages"},
       {kind: "onyx.InputDecorator", components: [
         {tag: "div", name: "msg"}
