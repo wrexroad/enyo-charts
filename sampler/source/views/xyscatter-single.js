@@ -1,11 +1,11 @@
 enyo.kind({
-  name: "XYLineSingle",
+  name: "XYScatterSingle",
   kind: "Scroller",
   classes: "chart-panel",
   components: [
     {kind: "onyx.Toolbar", components: [
       {kind: "onyx.InputDecorator", components: [
-        {content: "XY - Line (Plot Options)"}
+        {content: "XY - Scatter (Plot Options)"}
       ]} 
     ]},
     {
@@ -15,7 +15,7 @@ enyo.kind({
       fontSize: 14
     },
     
-    {kind: "FittableColumns", fit: true, components: [
+    {kind: "FittableColumns", components: [
       {kind: "onyx.Groupbox", components: [
         {kind: "onyx.GroupboxHeader", content: "Data Options"},
         {kind: "Group", components: [
@@ -52,12 +52,12 @@ enyo.kind({
           {content: "Line Width"},
           {
             kind: "onyx.Slider", name: "lineSize", 
-            value: 5, onChanging:"draw", onChange:"draw"
+            value: 3, onChanging:"draw", onChange:"draw"
           },
           {content: "Dot Width"},
           {
             kind: "onyx.Slider", name: "dotSize", 
-            value: 5, onChanging:"draw", onChange:"draw"
+            value: 30, onChanging:"draw", onChange:"draw"
           }
         ]}
       ]},
@@ -68,7 +68,7 @@ enyo.kind({
           value: "Dataset 1",
           onchange: "draw"
         }]},
-        {style: "display: inline-block", components: [
+        {style: "display: inline-block; width: 49%", components: [
           {content: "X"},
           {
             kind: "onyx.TextArea", name: "xVals",
@@ -76,7 +76,7 @@ enyo.kind({
             onchange: "draw"
           }
         ]},
-        {style: "display: inline-block", components: [
+        {style: "display: inline-block; width: 49%", components: [
           {content: "Y"},
           {
             kind: "onyx.TextArea", name: "yVals",
@@ -114,23 +114,23 @@ enyo.kind({
           },
           {
             kind: "onyx.Input", name: "xMax", attributes: {size: 5},
-            onchange: "draw", value: 360
+            onchange: "draw", value: 100
           }
         ]},
         {content: "Y Axis Range"},
           {kind: "onyx.InputDecorator", components: [
           {
             kind: "onyx.Input", name: "yMin", attributes: {size: 5},
-            onchange: "draw", value: -1
+            onchange: "draw", value: 0
           },
           {
             kind: "onyx.Input", name: "yMax", attributes: {size: 5},
-            onchange: "draw", value: 1
+            onchange: "draw", value: 100
           }
         ]},
       ]}
     ]},
-    {kind: "onyx.Groupbox", components: [
+    {kind: "onyx.Groupbox", fit: true, components: [
       {kind: "onyx.GroupboxHeader", content: "Messages"},
       {kind: "onyx.InputDecorator", components: [
         {tag: "div", name: "msg"}
@@ -141,27 +141,10 @@ enyo.kind({
     color: "red"
   },
   rendered: function() {
-    var
-      twopi = Math.PI * 2,
-      twopininety = twopi / 90,
-      xVals = [],
-      yVals = [];
-      
     this.inherited(arguments);
     
-    //create a place to store the dot and line settings
-    this.color = "red";
-    this.fill = {dot: false, line: false};
+    this.generateData();
     
-    //generate a 90 point sine wave
-    for (var i = 0; i < twopi; i += twopininety) {
-      xVals.push((360 * (i / twopi)).toFixed(3));
-      yVals.push(Math.sin(i).toFixed(3));
-    }
-    //and fill the text boxes with them
-    this.$.xVals.set("value", xVals.join(", "));
-    this.$.yVals.set("value", yVals.join(", "));
-
     if (this.width) {
       this.$.width.set("value", this.width - 20);
     }
@@ -179,6 +162,24 @@ enyo.kind({
     
     this.draw();
     return true;
+  },
+  generateData: function() {
+    var
+      xVals = [],
+      yVals = [];
+    
+    //create a place to store the dot and line settings
+    this.color = "red";
+    this.fill = {dot: false, line: false};
+    
+    //generate some points of sort of linear data
+    for (var i = 0; i < 100; i += (Math.random() * 2.5)) {
+      xVals.push(i);
+      yVals.push(((Math.random() > 0.5 ? -1 : 1) * Math.random() * 5) + i);
+    }
+    //and fill the text boxes with them
+    this.$.xVals.set("value", xVals.join(", "));
+    this.$.yVals.set("value", yVals.join(", "));
   },
   draw: function() {
 
@@ -204,13 +205,6 @@ enyo.kind({
           coords: []
         }
       }];
-
-    //if x values are not provided, just use the index form the y values
-    if (this.$.xVals.value.trim() == "") {
-      yVals.forEach(function(val, i) {
-        xVals[i] = i;
-      });
-    } 
     
     //make sure we have the same number of coordinates for x and y 
     if (xVals.length != yVals.length) {

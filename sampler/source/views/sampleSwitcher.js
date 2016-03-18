@@ -4,24 +4,22 @@ enyo.kind({
     {kind: "onyx.Toolbar", components: [
       {content: "XY Plots"}
     ]},
-    {kind: "onyx.Toolbar", components: [
-      {
+    {kind: "onyx.Toolbar", components: [{
         kind: "onyx.Button",
-        content: "Line (Plot Options)",
-        style: "width: 90%",
+        style: "width: 95%",
+        content: "Scatter (Plot Details)",
         panelID: "0",
         ontap: "switchPanel"
-      }
-    ]},
-    {kind: "onyx.Toolbar", components: [
-      {
+      }]
+    },
+    {kind: "onyx.Toolbar", components: [{
         kind: "onyx.Button",
-        content: "Line (Multi Data)",
-        style: "width: 90%",
+        style: "width: 95%",
+        content: "Scatter (Multi Data)",
         panelID: "1",
         ontap: "switchPanel"
-      }
-    ]}
+      }]
+    }
   ],
   events: {
     onSwitchSample: ""
