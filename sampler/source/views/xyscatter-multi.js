@@ -1,11 +1,11 @@
 enyo.kind({
-  name: "XYLineMulti",
+  name: "XYScatterMulti",
   kind: "FittableRows",
   classes: "chart-panel",
   components: [
     {kind: "onyx.Toolbar", components: [
       {kind: "onyx.InputDecorator", components: [
-        {content: "XY - Line (Multi Data)"}
+        {content: "XY - Scatter (Multi Data)"}
       ]}
     ]},
     {
