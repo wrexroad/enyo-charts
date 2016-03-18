@@ -204,13 +204,6 @@ enyo.kind({
           coords: []
         }
       }];
-
-    //if x values are not provided, just use the index form the y values
-    if (this.$.xVals.value.trim() == "") {
-      yVals.forEach(function(val, i) {
-        xVals[i] = i;
-      });
-    } 
     
     //make sure we have the same number of coordinates for x and y 
     if (xVals.length != yVals.length) {
