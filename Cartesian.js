@@ -194,7 +194,7 @@ enyo.kind({
           ctx.beginPath();
           ctx.moveTo(offset, -5);
           ctx.lineTo(offset, 0);
-          ctx.stroke(); 
+          ctx.stroke();
         }
       }
       ctx.restore();
@@ -402,7 +402,8 @@ enyo.kind({
       coords = data.coords || [],
       lineWidth = +((opts.lines || {}).size),
       dotWidth = +((opts.dots || {}).size),
-      subpixel = antialiasing ? 0.5 : 0;
+      subpixel = antialiasing ? 0.5 : 0,
+      dot;
       
       //bail out if there are no data to plot
       if(!coords.length) {return;}
@@ -415,58 +416,45 @@ enyo.kind({
       ctx.save();
       ctx.strokeStyle = ctx.fillStyle = opts.color || "black";
       
+      //move to the bottom left corner of the dataCanvas
+      ctx.translate(
+        0, this.height - this.decorMargin.top - this.decorMargin.bottom
+      );
+  
       if (dotWidth) {
-        this.drawDots(ctx, coords, dotWidth, opts.dots, subpixel);
+        dot = this.$.renderedPoint;
+        dot.set("color", opts.color);
+        dot.set("size", dotWidth);
+        dot.set("fill", opts.dots.fill);
+        
+        this.drawDots(ctx, coords, dot.node, dotWidth);
       }
       if (lineWidth) {
         this.drawLine(ctx, coords, lineWidth, opts.lines, subpixel);
       }
       ctx.restore();
   },
-  drawDots: function(ctx, coords, dotWidth, opts, subpixel) {
+  drawDots: function(ctx, coords, dotCanvas, dotWidth) {
     var
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
       xMin = this.xMin,
-      yMin = this.yMin,
-      halfDot = dotWidth / 2;
-
-    ctx.save();
+      yMin = this.yMin;
     
-    ctx.lineWidth = 1;
-
-    //move to the bottom left corner of the dataCanvas
-    ctx.translate(
-      0, this.height - this.decorMargin.top - this.decorMargin.bottom
-    );
-    
-    ctx.beginPath();
     coords.forEach(function(pnt) {
       //'pnt' is a 2 element array: [x,y].
       //If we have antialiasing on we will shift the 
       //x and y coordinates by a half pixel.
 
       var
-        x = (((pnt[0] - xMin) * xSpacingFactor) >> 0)  + subpixel,
-        y = ((-(pnt[1] - yMin) * ySpacingFactor) >> 0) + subpixel;
+        x = (((pnt[0] - xMin) * xSpacingFactor) >> 0),
+        y = ((-(pnt[1] - yMin) * ySpacingFactor) >> 0);
       
       //if we hit a data gap, end the current path
-      if (isFinite(+y)) {
-        ctx.moveTo(x + halfDot, y);
-        ctx.arc(
-          x/* - dotWidth - lineWidth*/, y/* - dotWidth - lineWidth*/,
-          halfDot, 0, 6.283185307179586
-        );
-        //ctx.stroke();
+      if (isFinite(y)) {
+        ctx.drawImage(dotCanvas, x - dotWidth, y - dotWidth);
       }
-    }, this);
-    
-    if (opts.fill) {
-      ctx.fill();
-    } else {
-      ctx.stroke(); 
-    }    
-    ctx.restore();    
+    }, this);    
   },
   drawLine: function(ctx, coords, lineWidth, opts, subpixel) {
     var
@@ -479,11 +467,6 @@ enyo.kind({
     ctx.save();
     
     ctx.lineWidth = lineWidth;
-
-    //move to the bottom left corner of the dataCanvas
-    ctx.translate(
-      0, this.height - this.decorMargin.top - this.decorMargin.bottom
-    );
     
     ctx.beginPath();
     coords.forEach(function(pnt) {

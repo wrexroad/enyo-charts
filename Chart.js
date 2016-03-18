@@ -22,7 +22,8 @@ enyo.kind({
   },
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"},
-    {name: "exportCanvas", kind: "enyo.Canvas", showing: false}
+    {name: "exportCanvas", kind: "enyo.Canvas", showing: false},
+    {name: "renderedPoint", kind: "RenderedPoint", showing: false}
   ],
   constructor: function() {
     this.inherited(arguments);
