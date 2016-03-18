@@ -15,8 +15,8 @@ enyo.kind({
       wrap: false,
       fit: true,
       components: [
-        {kind: "XYScatterSingle"},
-        {kind: "XYScatterMulti"}
+        {kind: "XYLineSingle"},
+        {kind: "XYLineMulti"}
       ]
     }
 	],

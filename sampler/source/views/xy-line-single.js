@@ -1,11 +1,11 @@
 enyo.kind({
-  name: "XYScatterSingle",
+  name: "XYLineSingle",
   kind: "Scroller",
   classes: "chart-panel",
   components: [
     {kind: "onyx.Toolbar", components: [
       {kind: "onyx.InputDecorator", components: [
-        {content: "XY - Scatter (Plot Options)"}
+        {content: "XY - Line (Plot Options)"}
       ]} 
     ]},
     {
