@@ -1,6 +1,6 @@
 enyo.depends(
 	"main.js",
   "sampleSwitcher.js",
-  "xyscatter-single.js",
-  "xyscatter-multi.js"
+  "xy-line-single.js",
+  "xy-line-multi.js"
 );
