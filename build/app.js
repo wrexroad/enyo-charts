@@ -231,7 +231,7 @@ enyo&&enyo.version&&(enyo.version.layout="2.6.0-pre.4");
 
 
 // source/views/main.js
-enyo.kind({name:"myapp.MainView",kind:"FittableColumns",handlers:{onSwitchSample:"switchSample"},components:[{kind:"SampleSwitcher",classes:"sample-switcher"},{kind:"Panels",name:"samples",arrangerKind:"CollapsingArranger",classes:"sliding-panels",realtimeFit:!0,wrap:!1,fit:!0,components:[{kind:"XYScatterSingle"},{kind:"XYScatterMulti"}]}],switchSample:function(t,e){return this.$.samples.set("index",e),!0}});
+enyo.kind({name:"myapp.MainView",kind:"FittableColumns",handlers:{onSwitchSample:"switchSample"},components:[{kind:"SampleSwitcher",classes:"sample-switcher"},{kind:"Panels",name:"samples",arrangerKind:"CollapsingArranger",classes:"sliding-panels",draggable:!1,realtimeFit:!0,wrap:!1,fit:!0,components:[{kind:"XYScatterSingle"},{kind:"XYScatterMulti"}]}],switchSample:function(t,e){return this.$.samples.set("index",e),!0}});
 
 // source/views/sampleSwitcher.js
 enyo.kind({name:"SampleSwitcher",components:[{kind:"onyx.Toolbar",components:[{content:"XY Plots"}]},{kind:"onyx.Toolbar",components:[{kind:"onyx.Button",style:"width: 95%",content:"Scatter (Plot Details)",panelID:"0",ontap:"switchPanel"}]},{kind:"onyx.Toolbar",components:[{kind:"onyx.Button",style:"width: 95%",content:"Scatter (Multi Data)",panelID:"1",ontap:"switchPanel"}]}],events:{onSwitchSample:""},switchPanel:function(t){return this.doSwitchSample(t.panelID),!0}});
