@@ -480,24 +480,11 @@ enyo.kind({
       
       //if we hit a data gap, end the current path
       if (!isFinite(y)) {
-        if (opts.fill && lineWidth) {
-          //need to extend line down to y=0 for proper fill
-          ctx.lineTo(x, yMin);
-        }
         onPath = false;
       } else {
         //make sure we have a current path
         if (!onPath) {
-          if (opts.fill && lineWidth) {
-            //need to extend line up from y=0 for proper fill
-            ctx.moveTo(x, (yMin * ySpacingFactor));
-            ctx.lineTo(x, y);
-          } else {
-            //not filling so we can just move the brush to
-            //the new coordinate without worrying about connecting
-            ctx.moveTo(x, y);  
-          }
-          
+          ctx.moveTo(x, y);
           onPath = true;
         } else {
           if (lineWidth) {
@@ -512,9 +499,13 @@ enyo.kind({
         //this will fill the area between the curve and 0.
         //we need to close the
         //curve by drawing a straight light alone y=0
-        ctx.lineTo(coords[coords.length - 1][0], yMin);
+        ctx.lineTo(
+          (((coords[0][0] - xMin) * xSpacingFactor) >> 0),
+          ((-(coords[0][1] - yMin) * ySpacingFactor) >> 0)
+        );
+        /*ctx.lineTo(coords[coords.length - 1][0], yMin);
         ctx.lineTo(coords[0][0], yMin);
-        ctx.lineTo(coords[0][0], coords[0][1]);
+        ctx.lineTo(coords[0][0], coords[0][1]);*/
       }
       ctx.fill();
     } else {
