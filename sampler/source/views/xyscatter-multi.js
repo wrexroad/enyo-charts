@@ -25,7 +25,9 @@ enyo.kind({
       {kind: "enyo.Group", components: [
 			  {kind: "enyo.Checkbox", name: "lines", active: true, content: "Lines"},
         {tag: "br"},
-			  {kind: "enyo.Checkbox", name: "dots", content: "Dots"}
+			  {kind: "enyo.Checkbox", name: "dots", content: "Dots"},
+        {tag: "br"},
+			  {kind: "enyo.Checkbox", name: "poly", content: "Polygons"}
       ]}
     ]},
     {kind: "onyx.InputDecorator", components: [
@@ -96,8 +98,8 @@ enyo.kind({
       options: {
         color: "#" + ((Math.random() * 0xFFFFFF) >> 0).toString(16),
         lines: {
-          size: this.$.lines.getActive() ? 0.5 : 0,
-          fill: false
+          size: (this.$.lines.getActive() || this.$.poly.getActive()) ? 0.5 : 0,
+          fill: this.$.poly.getActive()
         },
         dots: {
           size: this.$.dots.getActive() ? 3 : 0,
