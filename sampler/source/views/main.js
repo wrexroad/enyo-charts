@@ -11,6 +11,7 @@ enyo.kind({
       name: "samples",
       arrangerKind: "CollapsingArranger",
       classes: "sliding-panels",
+      draggable: false,
       realtimeFit: true,
       wrap: false,
       fit: true,
