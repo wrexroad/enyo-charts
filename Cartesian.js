@@ -2,6 +2,11 @@ enyo.kind({
   name: "Chart.Cartesian",
   kind: "Chart",
 
+  components: [
+    {name: "xTics" , kind: "TicMarks"},
+    {name: "yTics" , kind: "TicMarks"}
+  ],
+  
   published: {
     xSpacingFactor: 1,
     ySpacingFactor: 1
