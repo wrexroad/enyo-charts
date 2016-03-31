@@ -39,10 +39,6 @@ enyo.kind({
     this.max = +this.max;
   },
   
-  observers: {
-    generateTics: ["min", "max", "numTics"],
-  },
-  
   generateTics: function() {
     var
       multiplier, roundMin, roundMax, scaledRange,
