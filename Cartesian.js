@@ -2,11 +2,6 @@ enyo.kind({
   name: "Chart.Cartesian",
   kind: "Chart",
 
-  components: [
-    {name: "xTics" , kind: "TicMarks"},
-    {name: "yTics" , kind: "TicMarks"}
-  ],
-  
   published: {
     xSpacingFactor: 1,
     ySpacingFactor: 1
@@ -16,6 +11,11 @@ enyo.kind({
     this.inherited(arguments);
 
     this.formatters = {x: this.defaultFormatter, y: this.defaultFormatter};
+    
+    this.createComponents([
+      {name: "xTics" , kind: "TicMarks"},
+      {name: "yTics" , kind: "TicMarks"}
+    ]);
     
     this.initValues();
   },
@@ -340,6 +340,10 @@ enyo.kind({
     datasets = [].concat(datasets || []);
     equations = [].concat(equations || []);
     
+    if (!(datasets.length + equations.length)) {
+      return;
+    }
+    
     //make sure we have a valid range
     if (!isFinite(xMin + xMax) || !isFinite(yMin + yMax)) {
       if (datasets.length) {
@@ -357,7 +361,7 @@ enyo.kind({
     
     //calculate the pixel spacing before anything else is done
     this.setAxisRange(xMin, xMax, yMin, yMax);
-
+    
     //draw each dataset and equation
     datasets.forEach(function(dataset) {
       var name = (dataset.data || {}).name;
