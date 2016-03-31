@@ -57,7 +57,7 @@ enyo.kind({
     multiplier = Math.pow(10, this.roundingDigit);
     roundMin = ((this.min / multiplier) >> 0) * multiplier;
     roundMax = ((this.max / multiplier) >> 0) * multiplier;
-    
+
     //figure out if we are going to be counting by 0.2, 0.5, or 1
     scaledRange = ((this.range / multiplier) >> 0);
     
@@ -91,13 +91,11 @@ enyo.kind({
       });
       ticVal += this.ticStep;
     }
-    
-    console.log(this.tics);
   },
   
   isValidRange: function() {
     //make sure there is a valid min and max: two numbers that are not equal.
-    if (this.min == this.max) {
+    if (this.min >= this.max) {
       return false;
     } else if (!Number.isFinite(this.min + this.max)) {
       return false;
@@ -109,20 +107,30 @@ enyo.kind({
   },
   
   calcDigits: function() {
-    var expRange, expDelim;
-     
-    expRange = (this.max - this.min).toExponential();
-    expDelim = expRange.indexOf("e-");
+    var expMin, expMax, expRange, minMag, maxMag;
     
-    if (expDelim > -1) {
-      //the range has a negative exponent,
-      //so we will be rounding to a fractional digit
-      this.fractionDigits = (+expRange.substring(expDelim + 2)) + 1;
-      this.roundingDigit = -(this.fractionDigits - 1);
+    expMin = this.min.toExponential();
+    expMax = this.max.toExponential();
+    minMag = +expMin.substring(expMin.indexOf("e") + 1);
+    maxMag = +expMax.substring(expMax.indexOf("e") + 1);
+      
+    //if this.max is above 1 find the whole number rounding digit
+    if (this.max > 1) {
+      //if minMag is negative, that means this.min is less than 1,
+      //but we are dealing with whole numbers, so just make it 0
+      minMag = Math.max(minMag, 0);
+      
+      //we will round at 1 lower than the difference of the two magnitudes
+      this.roundingDigit = maxMag - minMag - 1;
+      //if we are rounding to the 1's place, display one fractional digit
+      this.fractionDigits = this.roundingDigit <= 1 ? 1 : 0;
     } else {
-      //there is a positive exponent so we want to deal with integers
-      this.fractionDigits = 0;
-      this.roundingDigit = (+expRange.substring(expRange.indexOf("e+")+2)) - 1;
+      //this.max is below 0 (and so is this.min if the range is valid)
+      //we need to figure out how many fractional digits should be displayed
+      expRange = (this.max - this.min).toExponential();
+      this.fractionDigits =
+        (+expRange.substring(expRange.indexOf("e-") + 2)) + 1;
+      this.roundingDigit = -(this.fractionDigits - 1);
     }
   },
   
