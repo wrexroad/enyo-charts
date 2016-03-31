@@ -60,57 +60,44 @@ enyo.kind({
         formatter.formatFunction.call(formatter, val, this.min, this.max);
       }
     } else if (formatter.type == "range") {
-      //filter any NaNs out of the range bounds
-      formatter.values = ([].concat(formatter.values)).filter(
-        function (value) {
-          return +value ? true : false;
-        });
-      
-      //make sure there are still some valid bounds
-      if (!formatter.values.length) {
-        this.setDefaultFormater();
+      if (!formatter.labels) {
+        this.setDefaultFormatter();
         return;
       }
       
-      //create some labels if they are not provided
-      if (!formatter.labels || !formatter.labels.length) {
-        formatter.labels = [];
-        formatter.labels[0] = "Below " + formatter.values[0];
-        
-        numLabels = formatter.values.length - 1;
-        for (val_i = 0; val_i < numLabels; val_i++) {
-          formatter.labels[val_i + 1] =
-            formatter.values[val_i] + " - " + formatter.values[val_i + 1];
-        }
-        
-        formatter.labels[val_i + 1] = "Above " + formatter.values[val_i];
-      }
-      
-      //Search for the label for the region that this value falls under 
       this._format = function (val) {
-        var
-          labels = this.formatter.labels,
-          numLabels = labels.length,
-          values = this.formatter.values,
-          numValues = values.length,
-          lowerValue = +values[0],
-          upperValue = +values[numValues - 1],
-          val_i;
+        var labelObj, label_i;
         
-        if (val < lowerValue) {
-          return this.formatter.labels[0];
-        } else if (val > upperValue) {
-          return this.formatter.labels[numLabels];
-        }
-        
-        for (val_i = 1; val_i < numValues; val_i++) {
-          if (val < values[val_i] && val > values[val_i - 1]) {
-            return labels[val_i];
+        for (label_i in formatter.labels) {
+          labelObj = formatter.labels[label_i] || {};
+          if (val >= labelObj.min && val <= labelObj.max) {
+            return label_i;
           }
         }
+        
+        return "";
       }
     } else if (formatter.type == "discrete") {
+      if (!formatter.labels) {
+        this.setDefaultFormatter();
+        return;
+      }
       
+      this._format = function (val) {
+        var
+          distances = {},
+          label_i;
+        
+        //get the distance from each label's value to the target
+        for (label_i in formatter.labels) {
+          distances[Math.abs(formatter.labels[label_i].value - val)] = label_i;
+        }
+        
+        //return the closest label to the target
+        return formatter.labels[
+          Math.min.apply(this, distances.keys())
+        ];
+      }
     }
   },
   setDefaultFormatter: function() {
