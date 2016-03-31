@@ -43,7 +43,6 @@ enyo.kind({
   },
   
   setFormatter: function(formatter) {
-    var numLabels, val_i;
     
     if (!formatter || !formatter.type) {
       this.setDefaultFormatter();
@@ -86,7 +85,7 @@ enyo.kind({
       this._format = function (val) {
         var
           distances = {},
-          label_i;
+          label_i, result;
         
         //get the distance from each label's value to the target
         for (label_i in formatter.labels) {
@@ -94,9 +93,8 @@ enyo.kind({
         }
         
         //return the closest label to the target
-        return formatter.labels[
-          Math.min.apply(this, distances.keys())
-        ];
+        result = formatter.labels[Math.min.apply(this, distances.keys())];
+        return result === 0 ? "0" : (result || "");
       }
     }
   },
