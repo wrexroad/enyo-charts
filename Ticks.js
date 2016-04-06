@@ -133,7 +133,7 @@ enyo.kind({
   kind: "Ticks",
   published: {
     timeZone: 0,
-    dateFormat: "$YYYY-$M-$D $h:$m:$s.$ms $AMPM $T"
+    dateFormat: "%YYYY%-%M%-%D% %h%:%m%:%s%.%ms% %AMPM% %T%"
   },
   constructor: function (opts) {
     this.inherited(arguments);
@@ -141,40 +141,40 @@ enyo.kind({
     this.formatChanged();
   },
   formatCodes: {
-    "$ampm" : function(date) {
+    "ampm" : function(date) {
       return date.getUTCHours() > 12 ? "pm" : "am";
     },
-    "$AMPM" : function(date) {
+    "AMPM" : function(date) {
       return date.getUTCHours() > 12 ? "PM" : "AM";
     },
-    "$ms": function(date) {
+    "ms": function(date) {
       return date.getUTCMilliseconds()
     },
-    "$s": function(date) {
+    "s": function(date) {
       var seconds = date.getUTCSeconds();
       return (seconds < 10 ? "0" : "") + seconds;
     },
-    "$m": function(date) {
+    "m": function(date) {
       var min = date.getUTCMinutes();
       return (min < 10 ? "0" : "") + min;
     },
-    "$H": function(date) {
+    "H": function(date) {
       var hours = date.getUTCHours();
       return (hours < 10 ? "0" : "") + hours;
     },
-    "$h": function(date) {
+    "h": function(date) {
       var hours = date.getUTCHours();
       hours -= (hours > 12 ? 12 : 0);
       return (hours < 10 ? "0" : "") + hours;
     },
-    "$D": function(date) {
+    "D": function(date) {
       var dom = date.getUTCDate();
       return (dom < 10 ? "0" : "") + dom;
     },
-    "$DOW": function(date) {
+    "DOW": function(date) {
       return date.getUTCDay();
     },
-    "$DOY": function(date) {
+    "DOY": function(date) {
       var ms, day, zeros;
       
       //find out how many milliseconds have elapsed since the start of the year
@@ -188,17 +188,17 @@ enyo.kind({
   
       return zeros + day;
     },
-    "$M": function(date) {
+    "M": function(date) {
       var month = date.getUTCMonth() + 1;
       return (month < 10 ? "0" : "") + month;
     },
-    "$YYYY": function(date) {
+    "YYYY": function(date) {
       return date.getUTCFullYear();
     },
-    "$YY": function(date) {
+    "YY": function(date) {
       return date.getUTCFullYear() % 2000;
     },
-    "$T": function() {
+    "T": function() {
       return "GMT" + (this.timeZone < 0 ? "" : "+") + this.timeZone;
     } 
   },
@@ -208,7 +208,7 @@ enyo.kind({
     var format = ((this.dateFormat || "") + "");
     
     //split up the format string
-    this._format = format.match(/(\$[A-Za-z]+)/g);
+    this._format = format.split("%");
     
     console.log(this._format)
   },
@@ -221,8 +221,8 @@ enyo.kind({
     
     //convert any format codes to the date value
     this._format.forEach(function(fmtCode) {
-      convertedDate.push(
-        this.formatCodes[fmtCode] ? this.formatCodes[fmtCode](date) : fmtCode
+      convertedDate.push(this.formatCodes[fmtCode] ?
+        this.formatCodes[fmtCode].call(this, date) : fmtCode
       );
     }, this);
     
