@@ -46,7 +46,7 @@ enyo.kind({
 });
 
 enyo.kind({
-  name: "Ticks.Linear",
+  name: "LinearTicks",
   kind: "Ticks",
   published: {
     niceSteps: null
@@ -125,5 +125,136 @@ enyo.kind({
       });
       tickVal += bestStep.value;
     }
+  }
+});
+
+enyo.kind({
+  name: "DateTicks",
+  kind: "Ticks",
+  published: {
+    timeZone: 0,
+    dateFormat: "$YYYY-$M-$D $h:$m:$s.$ms $AMPM $T"
+  },
+  constructor: function (opts) {
+    this.inherited(arguments);
+    
+    this.formatChanged();
+  },
+  formatCodes: {
+    "$ampm" : function(date) {
+      return date.getUTCHours() > 12 ? "pm" : "am";
+    },
+    "$AMPM" : function(date) {
+      return date.getUTCHours() > 12 ? "PM" : "AM";
+    },
+    "$ms": function(date) {
+      return date.getUTCMilliseconds()
+    },
+    "$s": function(date) {
+      var seconds = date.getUTCSeconds();
+      return (seconds < 10 ? "0" : "") + seconds;
+    },
+    "$m": function(date) {
+      var min = date.getUTCMinutes();
+      return (min < 10 ? "0" : "") + min;
+    },
+    "$H": function(date) {
+      var hours = date.getUTCHours();
+      return (hours < 10 ? "0" : "") + hours;
+    },
+    "$h": function(date) {
+      var hours = date.getUTCHours();
+      hours -= (hours > 12 ? 12 : 0);
+      return (hours < 10 ? "0" : "") + hours;
+    },
+    "$D": function(date) {
+      var dom = date.getUTCDate();
+      return (dom < 10 ? "0" : "") + dom;
+    },
+    "$DOW": function(date) {
+      return date.getUTCDay();
+    },
+    "$DOY": function(date) {
+      var ms, day, zeros;
+      
+      //find out how many milliseconds have elapsed since the start of the year
+      ms = date - (+(new Date(date.getUTCFullYear(), 0, 0)));
+  
+      //convert ms to full days that have elapsed
+      day = (ms / 86400000) >> 0;
+  
+      //get zeros for paddings
+      zeros = day < 10 ? "00" : day < 100 ? "0" : "";
+  
+      return zeros + day;
+    },
+    "$M": function(date) {
+      var month = date.getUTCMonth() + 1;
+      return (month < 10 ? "0" : "") + month;
+    },
+    "$YYYY": function(date) {
+      return date.getUTCFullYear();
+    },
+    "$YY": function(date) {
+      return date.getUTCFullYear() % 2000;
+    },
+    "$T": function() {
+      return "GMT" + (this.timeZone < 0 ? "" : "+") + this.timeZone;
+    } 
+  },
+  formatChanged: function() {
+    //make sure format is a string because we are about
+    //to do some really stringy stuff to it
+    var format = ((this.dateFormat || "") + "");
+    
+    //split up the format string
+    this._format = format.match(/(\$[A-Za-z]+)/g);
+    
+    console.log(this._format)
+  },
+  
+  dateToString: function(date) {
+    var convertedDate = [];
+    
+    //adjust the date based on the time zone
+    date.setUTCHours(-this.timeZone);
+    
+    //convert any format codes to the date value
+    this._format.forEach(function(fmtCode) {
+      convertedDate.push(
+        this.formatCodes[fmtCode] ? this.formatCodes[fmtCode](date) : fmtCode
+      );
+    }, this);
+    
+    return convertedDate.join("");
+  },
+  
+  generateTicks: function() {
+    var
+      bestStep = {
+        value: NaN,
+        error: Number.POSITIVE_INFINITY,
+        magnitude: NaN,
+        multiplier: NaN
+      },
+      rawInterval, magnitude, multiplier, roundMin, roundMax, tickVal;
+    console.log("DSA", this.dateToString(new Date));
+    function testStep(stepVal) {
+      //scale the step value by the range magnitude 
+      stepVal *= multiplier;
+      var stepError = Math.abs(this.count - (this.range / stepVal));
+
+      if (stepError < bestStep.error) {
+        bestStep.value = stepVal;
+        bestStep.error = stepError;
+        bestStep.multiplier = multiplier;
+        bestStep.magnitude = magnitude;
+      }
+    }
+    
+    if (!this.isValidRange()) {
+      return false;
+    }
+    
   }
 });
