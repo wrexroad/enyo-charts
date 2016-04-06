@@ -1,6 +1,6 @@
 enyo.depends(
    "RenderedPoint.js",
-   "TicMarks.js",
+   "Ticks.js",
    "Chart.js",
    "Cartesian.js"
 );
