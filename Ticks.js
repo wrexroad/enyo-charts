@@ -217,7 +217,7 @@ enyo.kind({
     var convertedDate = [];
     
     //adjust the date based on the time zone
-    date.setUTCHours(-this.timeZone);
+    date.setUTCHours(date.getUTCHours() + this.timeZone);
     
     //convert any format codes to the date value
     this._format.forEach(function(fmtCode) {
@@ -237,8 +237,9 @@ enyo.kind({
         magnitude: NaN,
         multiplier: NaN
       },
+      stepTypes = {},
       rawInterval, magnitude, multiplier, roundMin, roundMax, tickVal;
-    console.log("DSA", this.dateToString(new Date));
+    
     function testStep(stepVal) {
       //scale the step value by the range magnitude 
       stepVal *= multiplier;
@@ -256,5 +257,19 @@ enyo.kind({
       return false;
     }
     
+    //calculate the number of tick marks we will get with each method
+    stepTypes.fullday = ((this.range / 86400000) >> 0) / this.count;
+    stepTypes.halfday = ((this.range / 43200000) >> 0) / this.count;
+    stepTypes.quartday = ((this.range / 21600000) >> 0) / this.count;
+    stepTypes.fullhour = ((this.range / 3600000) >> 0) / this.count;
+    stepTypes.halfhour = ((this.range / 1800000) >> 0) / this.count;
+    stepTypes.quarthour = ((this.range / 900000) >> 0) / this.count;
+    stepTypes.fullMin = ((this.range / 60000) >> 0) / this.count;
+    stepTypes.halfMin = ((this.range / 30000) >> 0) / this.count;
+    stepTypes.quartMin = ((this.range / 15000) >> 0) / this.count;
+    stepTypes.fullsec = ((this.range / 1000) >> 0) / this.count;
+    stepTypes.halfsec = ((this.range / 500) >> 0) / this.count;
+    stepTypes.quartsec = ((this.range / 250) >> 0) / this.count;
+    stepTypes.millisec = ((this.range) >> 0) / this.count;
   }
 });
