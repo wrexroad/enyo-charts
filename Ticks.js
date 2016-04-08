@@ -64,7 +64,8 @@ enyo.kind({
         magnitude: NaN,
         multiplier: NaN
       },
-      rawInterval, magnitude, multiplier, roundMin, roundMax, tickVal;
+      rawInterval, magnitude, multiplier, roundMin, roundMax,
+      tickVal, tickLabel;
     
     function testStep(stepVal) {
       //scale the step value by the range magnitude 
@@ -113,17 +114,20 @@ enyo.kind({
    
     //round the min and max values to the nice step interval
     roundMin = ((this.min / multiplier) >> 0) * multiplier;
-    roundMax = ((this.max / multiplier) >> 0) * multiplier;
-    
+    roundMax = Math.ceil(this.max / multiplier) * multiplier;
+    console.log(roundMax);
     //generate the tick labels and locations
-    tickVal = roundMin;
-    while (tickVal <= roundMax) {
+    for (tickVal = roundMin; tickVal <= roundMax; tickVal += bestStep.value) {
+      //truncate any erroneous digits due to floating point errors
+      tickLabel =
+        tickVal.toFixed(bestStep.magnitude < 0 ? (-bestStep.magnitude) : 0);
+      tickVal = +tickLabel;
+      
       this.ticks.push({
         value: tickVal,
-        label:
-          tickVal.toFixed(bestStep.magnitude < 0 ? (-bestStep.magnitude) : 0)
+        label: tickLabel
       });
-      tickVal += bestStep.value;
+      console.log(tickVal)
     }
   }
 });
@@ -272,10 +276,13 @@ enyo.kind({
     //generate converted date strings for each step between rounded min and max
     this.ticks = [];
     for (tickVal = roundMin; tickVal <= roundMax; tickVal += bestStep.size) {
-      this.ticks.push({
-        label: this.dateToString(new Date(tickVal)),
-        value: tickVal
-      });
+      //only add the tick if it is in range
+      if (tickVal >= this.min && tickVal <= this.max) {
+        this.ticks.push({
+          label: this.dateToString(new Date(tickVal)),
+          value: tickVal
+        });
+      }
     }
     
     return this.ticks;
