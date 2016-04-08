@@ -7,15 +7,21 @@ enyo.kind({
     ySpacingFactor: 1
   },
 
-  constructor: function() {
+  constructor: function(opts) {
+    var axes = {};
     this.inherited(arguments);
 
-    this.formatters = {x: this.defaultFormatter, y: this.defaultFormatter};
+    //set the tick mark type
+    axes.x = (opts.axisTypes || {}).x || {};
+    axes.x.type = axes.x.type || "Linear";
+    axes.x.name = "xTicks";
+    axes.x.kind = axes.x.type + "Ticks";
+    axes.y = (opts.axisTypes || {}).y || {};
+    axes.y.type = axes.y.type || "Linear";
+    axes.y.name = "yTicks";
+    axes.y.kind = axes.y.type + "Ticks";
     
-    this.createComponents([
-      {name: "xTics" , kind: "TicMarks"},
-      {name: "yTics" , kind: "TicMarks"}
-    ]);
+    this.createComponents([axes.x, axes.y]);
     
     this.initValues();
   },
@@ -72,18 +78,19 @@ enyo.kind({
     var
       ctx = this.decorCtx,
       margin = this.decorMargin,
-      formatters = this.formatters,
-      yFormat = formatters.y,
-      xFormat = formatters.x,
       xMin = this.xMin,
       xMax = this.xMax,
       yMin = this.yMin,
       yMax = this.yMax,
       dataHeight = this.height - margin.top - margin.bottom,
       dataWidth  = this.width - margin.left - margin.right,
-      diff, scale, value, step, offset, minor_i,
-      text_i, labelWidth, decimalPlaces, firstTic, lastTic, numTics;
+      offset, tick_i, ticks;
 
+    //make sure the x and y ranges are valid
+    if(!(xMax - xMin) || !(yMax - yMin)) {
+      return;
+    }
+    
     this.inherited(arguments);
 
     //configure the drawing context
@@ -99,112 +106,49 @@ enyo.kind({
     ctx.strokeStyle = this.borderColor;
     ctx.fillStyle = this.borderColor;
     ctx.strokeRect(margin.left, margin.top, dataWidth, dataHeight);
-
-    diff = (yMax - yMin) / 10; 
-
-    // get the integer and fractional part of the scale's magnitude
-    scale = Math.log10(diff);
-    scale -= scale >> 0;
     
-    // pick a canonical scale
-    if (scale < 0.3010299956639812) { // scale < Math.log10(2)
-      step = 0.1;
-    }
-    else if (scale < 0.6989700043360189) { // scale < Math.log10(5)
-      step = 0.2;
-    }
-    else {
-      step = 0.5;
-    }
-
-    // get the step size with the proper exponent
-    step *= Math.pow(10, (Math.log10(diff)) >> 0);
-
-    decimalPlaces = this.getDecimalPlaces(step);
-  
+    //get the tick mark locations and labels for this range
+    this.$.xTicks.set("min", xMin);
+    this.$.xTicks.set("max", xMax);
+    this.$.xTicks.generateTicks();
+    console.log(this.$.xTicks.ticks);
+    this.$.yTicks.set("min", yMin);
+    this.$.yTicks.set("max", yMax);
+    this.$.yTicks.generateTicks();
+    
     //draw the y axis tics and labels
-    if (step > 0) {
-      ctx.save();
-
-      //move to the bottom left corner of the dataCanvas
-      ctx.translate(margin.left, dataHeight + margin.top);
-
-      //use a for loop to draw all tic execpt the last one
-      firstTic = Math.ceil(yMin / step) * step;
-      lastTic = ((yMax / step) >> 0) * step;
-      for (
-        value = firstTic, minor_i = 0;
-        value <= lastTic;
-        value = this.add(value, step), minor_i++
-      ) {
-        //if we have drawn 10 minor tics, include a major
-        if ((minor_i % 10) === 0) {
-          //get the formatted label and make sure it doesnt isnt a duplicate
-          text_i = yFormat(value, decimalPlaces);
-
-          offset = -(text_i - yMin) * this.ySpacingFactor;
-          
-          ctx.fillText(text_i, -5, offset + 5);
-          ctx.beginPath();
-          ctx.moveTo(0, offset);
-          ctx.lineTo(15, offset);
-          ctx.stroke();
-        } else {
-          //draw the minor tic mark
-          offset = -(value - yMin) * this.ySpacingFactor;
-          ctx.beginPath();
-          ctx.moveTo(0, offset);
-          ctx.lineTo(5, offset);
-          ctx.stroke(); 
-        }
-      }
-      ctx.restore();
+    ctx.save();
+    ctx.translate(margin.left, dataHeight + margin.top);
+    ticks = this.$.yTicks.ticks;
+    for (tick_i = 0; tick_i < ticks.length; tick_i++) {
+      //get the formatted label and make sure it doesnt isnt a duplicate
+      offset = -(ticks[tick_i].value - yMin) * this.ySpacingFactor;
+      
+      ctx.fillText(ticks[tick_i].label, -5, offset + 5);
+      ctx.beginPath();
+      ctx.moveTo(0, offset);
+      ctx.lineTo(15, offset);
+      ctx.stroke();
     }
+    ctx.restore();
 
-    //figure out the x label width. Assume that no labels will be longer than 
-    //the min or max values.
-    //If a min or max can not be found, just assume 20 characters
-    labelWidth =
-      ctx.measureText(
-        (new Array(
-          Math.max(xFormat(xMin).length, xFormat(xMax).length) || 20
-        )).join('W')
-      ).width;
-
-    //decimalPlaces = this.getDecimalPlaces(xMax, xMin);
-    numTics = Math.ceil(dataWidth / (labelWidth)) >> 0;
-    step = (xMax - xMin) / numTics / 10;
-
-    if (step > 0) {
-      ctx.save();
-      ctx.translate(margin.left, this.height - margin.bottom);
-      ctx.textAlign = "center";
-      ctx.textBaseline = "top";
-
-      for (
-        value = xMin, minor_i = 0;
-        value < xMax;
-        value = this.add(value, step), minor_i++
-      ) {
-        if ((minor_i % 10) === 0) {
-          offset = (value - xMin) * this.xSpacingFactor;
-          ctx.fillText(xFormat(value, decimalPlaces), offset, this.fontSize);
-          ctx.beginPath();
-          ctx.moveTo(offset, -15);
-          ctx.lineTo(offset, 0);
-          ctx.stroke();
-        } else {
-          //draw the minor tic mark
-          offset = (value - xMin) * this.xSpacingFactor;
-          ctx.beginPath();
-          ctx.moveTo(offset, -5);
-          ctx.lineTo(offset, 0);
-          ctx.stroke();
-        }
-      }
-      ctx.restore();
+    //print the x ticks
+    ctx.save();
+    ctx.translate(margin.left, this.height - margin.bottom);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ticks = this.$.xTicks.ticks;
+    
+    for (tick_i = 0; tick_i < ticks.length; tick_i++) {
+      offset = (ticks[tick_i].value - xMin) * this.xSpacingFactor;
+      ctx.fillText(ticks[tick_i].label, offset, this.fontSize);
+      ctx.beginPath();
+      ctx.moveTo(offset, -15);
+      ctx.lineTo(offset, 0);
+      ctx.stroke();
     }
-
+    
+    ctx.restore();
     ctx.restore();
   },
   invertCoordinates: function(coords) {
@@ -332,7 +276,7 @@ enyo.kind({
       xMax = +plotOptions.xMax,
       yMin = +plotOptions.yMin,
       yMax = +plotOptions.yMax;
-    
+
     //do any generic Chart setup
     this.inherited(arguments);
     
@@ -343,7 +287,7 @@ enyo.kind({
     if (!(datasets.length + equations.length)) {
       return;
     }
-    
+
     //make sure we have a valid range
     if (!isFinite(xMin + xMax) || !isFinite(yMin + yMax)) {
       if (datasets.length) {
