@@ -228,48 +228,58 @@ enyo.kind({
     
     return convertedDate.join("");
   },
-  
+  stepSizes: {
+    fullday: 86400000,
+    halfday: 43200000,
+    quartday: 21600000,
+    fullhour: 3600000,
+    halfhour: 1800000,
+    quarthour: 900000,
+    fullMin: 60000,
+    halfMin: 30000,
+    quartMin: 15000,
+    fullsec: 1000,
+    halfsec: 500,
+    quartsec: 250,
+    millisec: 1
+  },
   generateTicks: function() {
     var
       bestStep = {
-        value: NaN,
-        error: Number.POSITIVE_INFINITY,
-        magnitude: NaN,
-        multiplier: NaN
+        name : "",
+        size: NaN,
+        error: Number.POSITIVE_INFINITY
       },
-      stepTypes = {},
-      rawInterval, magnitude, multiplier, roundMin, roundMax, tickVal;
-    
-    function testStep(stepVal) {
-      //scale the step value by the range magnitude 
-      stepVal *= multiplier;
-      var stepError = Math.abs(this.count - (this.range / stepVal));
-
-      if (stepError < bestStep.error) {
-        bestStep.value = stepVal;
-        bestStep.error = stepError;
-        bestStep.multiplier = multiplier;
-        bestStep.magnitude = magnitude;
-      }
-    }
+      stepName, countError, roundMin, roundMax, tickVal;
     
     if (!this.isValidRange()) {
       return false;
     }
     
-    //calculate the number of tick marks we will get with each method
-    stepTypes.fullday = ((this.range / 86400000) >> 0) / this.count;
-    stepTypes.halfday = ((this.range / 43200000) >> 0) / this.count;
-    stepTypes.quartday = ((this.range / 21600000) >> 0) / this.count;
-    stepTypes.fullhour = ((this.range / 3600000) >> 0) / this.count;
-    stepTypes.halfhour = ((this.range / 1800000) >> 0) / this.count;
-    stepTypes.quarthour = ((this.range / 900000) >> 0) / this.count;
-    stepTypes.fullMin = ((this.range / 60000) >> 0) / this.count;
-    stepTypes.halfMin = ((this.range / 30000) >> 0) / this.count;
-    stepTypes.quartMin = ((this.range / 15000) >> 0) / this.count;
-    stepTypes.fullsec = ((this.range / 1000) >> 0) / this.count;
-    stepTypes.halfsec = ((this.range / 500) >> 0) / this.count;
-    stepTypes.quartsec = ((this.range / 250) >> 0) / this.count;
-    stepTypes.millisec = ((this.range) >> 0) / this.count;
+    //calculate the number of tick marks we will get with each step size
+    for (stepName in this.stepSizes) {
+      countError = Math.abs(this.range / this.stepSizes[stepName] - this.count);
+      console.log(stepName, this.range / this.stepSizes[stepName], countError)
+      if (countError < bestStep.error) {
+        bestStep.name = stepName;
+        bestStep.size = this.stepSizes[stepName];
+        bestStep.error = countError;
+      }
+    }
+    
+    //round the min and max values to the selected step size
+    roundMin = ((this.min / bestStep.size) >> 0) * bestStep.size;
+    roundMax = (Math.ceil(this.max / bestStep.size)) * (bestStep.size);
+    
+    //generate converted date strings for each step between rounded min and max
+    this.ticks = [];
+    for (tickVal = roundMin; tickVal <= roundMax; tickVal += bestStep.size) {
+      this.ticks.push({
+        label: this.dateToString(new Date(tickVal)),
+        value: tickVal
+      });
+    }
+    
+    return this.ticks;
   }
 });
