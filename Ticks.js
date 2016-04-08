@@ -133,7 +133,7 @@ enyo.kind({
   kind: "Ticks",
   published: {
     timeZone: 0,
-    dateFormat: "%YYYY%-%M%-%D% %h%:%m%:%s%.%ms% %AMPM% %T%"
+    dateFormat: "%YYYY%-%MM%-%DD% %hh%:%mm%:%ss%.%ms% %AMPM% %T%"
   },
   constructor: function (opts) {
     this.inherited(arguments);
@@ -150,24 +150,24 @@ enyo.kind({
     "ms": function(date) {
       return date.getUTCMilliseconds()
     },
-    "s": function(date) {
+    "ss": function(date) {
       var seconds = date.getUTCSeconds();
       return (seconds < 10 ? "0" : "") + seconds;
     },
-    "m": function(date) {
+    "mm": function(date) {
       var min = date.getUTCMinutes();
       return (min < 10 ? "0" : "") + min;
     },
-    "H": function(date) {
+    "HH": function(date) {
       var hours = date.getUTCHours();
       return (hours < 10 ? "0" : "") + hours;
     },
-    "h": function(date) {
+    "hh": function(date) {
       var hours = date.getUTCHours();
       hours -= (hours > 12 ? 12 : 0);
       return (hours < 10 ? "0" : "") + hours;
     },
-    "D": function(date) {
+    "DD": function(date) {
       var dom = date.getUTCDate();
       return (dom < 10 ? "0" : "") + dom;
     },
@@ -188,7 +188,7 @@ enyo.kind({
   
       return zeros + day;
     },
-    "M": function(date) {
+    "MM": function(date) {
       var month = date.getUTCMonth() + 1;
       return (month < 10 ? "0" : "") + month;
     },
@@ -209,8 +209,6 @@ enyo.kind({
     
     //split up the format string
     this._format = format.split("%");
-    
-    console.log(this._format)
   },
   
   dateToString: function(date) {
@@ -259,7 +257,7 @@ enyo.kind({
     //calculate the number of tick marks we will get with each step size
     for (stepName in this.stepSizes) {
       countError = Math.abs(this.range / this.stepSizes[stepName] - this.count);
-      console.log(stepName, this.range / this.stepSizes[stepName], countError)
+      
       if (countError < bestStep.error) {
         bestStep.name = stepName;
         bestStep.size = this.stepSizes[stepName];
