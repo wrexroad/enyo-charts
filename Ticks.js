@@ -41,7 +41,13 @@ enyo.kind({
     
     return true;
   },
-  
+  labelWidth: function() {
+    return 
+      Math.max(
+        Math.abs(Math.log10(this.min)) || 0,
+        Math.abs(Math.log10(this.max)) || 0
+      ) + 1;
+  },
   generateTicks: function() {}
 });
 
@@ -55,13 +61,6 @@ enyo.kind({
     this.inherited(arguments);
     //If no step intervals are set, defalt to stepping by 1, 2, and 5
     this.niceSteps = opts.niceSteps || [1, 2, 5];
-  },
-  labelWidth: function() {
-    return 
-      Math.max(
-        Math.abs(Math.log10(this.min)) || 0,
-        Math.abs(Math.log10(this.max)) || 0
-      ) + 1;
   },
   generateTicks: function() {
     var
@@ -122,7 +121,7 @@ enyo.kind({
     //round the min and max values to the nice step interval
     roundMin = ((this.min / multiplier) >> 0) * multiplier;
     roundMax = Math.ceil(this.max / multiplier) * multiplier;
-    console.log(roundMax);
+
     //generate the tick labels and locations
     for (tickVal = roundMin; tickVal <= roundMax; tickVal += bestStep.value) {
       //truncate any erroneous digits due to floating point errors
@@ -134,7 +133,6 @@ enyo.kind({
         value: tickVal,
         label: tickLabel
       });
-      console.log(tickVal)
     }
   }
 });
