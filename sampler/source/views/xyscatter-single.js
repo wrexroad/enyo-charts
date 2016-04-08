@@ -15,11 +15,13 @@ enyo.kind({
       fontSize: 14,
       axisTypes: {
         y: {
-          type: "Linear"
+          type: "Linear",
+          tickCount: 10
         },
         x: {
           type: "Date",
-          dateFormat: "%YYYY%/%MM%/%DD% %HH%:%mm%:%ss% %T%"           
+          dateFormat: "%YYYY%/%MM%/%DD% %HH%:%mm%:%ss% %T%",
+          tickCount: null //defaults to auto calculated           
         }
       }
     },
