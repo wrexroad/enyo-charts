@@ -56,6 +56,13 @@ enyo.kind({
     //If no step intervals are set, defalt to stepping by 1, 2, and 5
     this.niceSteps = opts.niceSteps || [1, 2, 5];
   },
+  labelWidth: function() {
+    return 
+      Math.max(
+        Math.abs(Math.log10(this.min)) || 0,
+        Math.abs(Math.log10(this.max)) || 0
+      ) + 1;
+  },
   generateTicks: function() {
     var
       bestStep = {
@@ -143,6 +150,9 @@ enyo.kind({
     this.inherited(arguments);
     
     this.formatChanged();
+  },
+  labelWidth: function() {
+    return this.dateFormat.length;
   },
   formatCodes: {
     "ampm" : function(date) {
