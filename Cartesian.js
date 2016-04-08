@@ -111,7 +111,7 @@ enyo.kind({
     this.$.xTicks.set("min", xMin);
     this.$.xTicks.set("max", xMax);
     this.$.xTicks.generateTicks();
-    console.log(this.$.xTicks.ticks);
+    
     this.$.yTicks.set("min", yMin);
     this.$.yTicks.set("max", yMax);
     this.$.yTicks.generateTicks();
