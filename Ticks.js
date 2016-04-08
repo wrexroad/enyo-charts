@@ -21,6 +21,25 @@ enyo.kind({
     this.ticks = [];
   },
   
+  observers: [
+    {path: "count", method:"generateTicks"}
+  ],
+  
+  setRange: function(min, max) {
+    if(min == this.min && max == this.max) {
+      //nothing has changed, dont regenerate
+      return;
+    }
+    
+    this.set("min", min);
+    this.set("max", max);
+    this.range = this.max - this.min;
+    
+    if (this.range) {
+      this.generateTicks();
+    }
+  },
+  
   //make sure min and max are set as Numbers
   minChanged: function() {
     this.min = +this.min;
@@ -29,18 +48,6 @@ enyo.kind({
     this.max = +this.max;
   },
   
-  isValidRange: function() {
-    //make sure there is a valid min and max: two numbers that are not equal.
-    if (this.min >= this.max) {
-      return false;
-    } else if (!Number.isFinite(this.min + this.max)) {
-      return false;
-    }
-    
-    this.range = this.max - this.min;
-    
-    return true;
-  },
   labelWidth: function() {
     return 
       Math.max(
@@ -48,6 +55,7 @@ enyo.kind({
         Math.abs(Math.log10(this.max)) || 0
       ) + 1;
   },
+  
   generateTicks: function() {}
 });
 
@@ -62,6 +70,7 @@ enyo.kind({
     //If no step intervals are set, defalt to stepping by 1, 2, and 5
     this.niceSteps = opts.niceSteps || [1, 2, 5];
   },
+  
   generateTicks: function() {
     var
       bestStep = {
@@ -84,10 +93,6 @@ enyo.kind({
         bestStep.multiplier = multiplier;
         bestStep.magnitude = magnitude;
       }
-    }
-    
-    if (!this.isValidRange()) {
-      return false;
     }
     
     //clear old ticks and make sure the niceSteps options are in an array
@@ -261,10 +266,6 @@ enyo.kind({
         error: Number.POSITIVE_INFINITY
       },
       stepName, countError, roundMin, roundMax, tickVal;
-    
-    if (!this.isValidRange()) {
-      return false;
-    }
     
     //calculate the number of tick marks we will get with each step size
     for (stepName in this.stepSizes) {

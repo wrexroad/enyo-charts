@@ -108,8 +108,7 @@ enyo.kind({
     ctx.strokeRect(margin.left, margin.top, dataWidth, dataHeight);
     
     //get the tick mark locations and labels for this range
-    this.$.xTicks.set("min", xMin);
-    this.$.xTicks.set("max", xMax);
+    this.$.xTicks.setRange(xMin, xMax);
     this.$.xTicks.set("count",
       +this.$.xTicks.tickCount ||
       (this.width /
@@ -119,15 +118,11 @@ enyo.kind({
         ).width
       )) + 1
     );
-    console.log(this.$.xTicks.count)
-    this.$.xTicks.generateTicks();
     
-    this.$.yTicks.set("min", yMin);
-    this.$.yTicks.set("max", yMax);
+    this.$.yTicks.setRange(yMin, yMax);
     this.$.yTicks.set("count",
       +this.$.yTicks.tickCount || this.height / this.fontSize
     );
-    this.$.yTicks.generateTicks();
     
     //draw the y axis tics and labels
     ctx.save();
