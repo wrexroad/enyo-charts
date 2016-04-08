@@ -119,7 +119,7 @@ enyo.kind({
     tickVal = roundMin;
     while (tickVal <= roundMax) {
       this.ticks.push({
-        location: tickVal,
+        value: tickVal,
         label:
           tickVal.toFixed(bestStep.magnitude < 0 ? (-bestStep.magnitude) : 0)
       });
