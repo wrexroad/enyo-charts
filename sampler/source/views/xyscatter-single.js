@@ -12,7 +12,18 @@ enyo.kind({
       kind: "Chart.Cartesian", name: "chart",
       bgColor: "white",
       font: "sans-serif",
-      fontSize: 14
+      fontSize: 14,
+      axisTypes: {
+        y: {
+          type: "Linear",
+          tickCount: 10
+        },
+        x: {
+          type: "Date",
+          dateFormat: "%YYYY%/%MM%/%DD% %HH%:%mm%:%ss% %T%",
+          tickCount: null //defaults to auto calculated           
+        }
+      }
     },
     
     {kind: "FittableColumns", components: [
@@ -110,22 +121,22 @@ enyo.kind({
           {kind: "onyx.InputDecorator", components: [
           {
             kind: "onyx.Input", name: "xMin", attributes: {size: 5},
-            onchange: "draw", value: 0
+            onchange: "draw"
           },
           {
             kind: "onyx.Input", name: "xMax", attributes: {size: 5},
-            onchange: "draw", value: 100
+            onchange: "draw"
           }
         ]},
         {content: "Y Axis Range"},
           {kind: "onyx.InputDecorator", components: [
           {
             kind: "onyx.Input", name: "yMin", attributes: {size: 5},
-            onchange: "draw", value: 0
+            onchange: "draw"
           },
           {
             kind: "onyx.Input", name: "yMax", attributes: {size: 5},
-            onchange: "draw", value: 100
+            onchange: "draw"
           }
         ]},
       ]}
@@ -142,6 +153,12 @@ enyo.kind({
   },
   rendered: function() {
     this.inherited(arguments);
+    
+    //set an initial data range
+    this.$.yMin.value = 0;
+    this.$.yMax.value = 100;
+    this.$.xMax.value = +(new Date());
+    this.$.xMin.value = this.$.xMax.value - 86400000;
     
     this.generateData();
     
@@ -165,6 +182,7 @@ enyo.kind({
   },
   generateData: function() {
     var
+      start, stop, step,
       xVals = [],
       yVals = [];
     
@@ -173,9 +191,15 @@ enyo.kind({
     this.fill = {dot: false, line: false};
     
     //generate some points of sort of linear data
-    for (var i = 0; i < 100; i += (Math.random() * 2.5)) {
-      xVals.push(i);
-      yVals.push(((Math.random() > 0.5 ? -1 : 1) * Math.random() * 5) + i);
+    start = this.$.xMin.value;
+    stop = this.$.xMax.value;
+    step = (stop - start) / 100;
+    
+    for (var x = start, y = 50; x < stop; ) {
+      x += Math.random() * step;
+      y = ((Math.random() > 0.5 ? -1 : 1) * Math.random() * 5) + y;
+      xVals.push(x);
+      yVals.push(y);
     }
     //and fill the text boxes with them
     this.$.xVals.set("value", xVals.join(", "));
