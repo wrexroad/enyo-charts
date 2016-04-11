@@ -71,7 +71,6 @@ enyo.kind({
     for (tickVal = roundMin; tickVal <= roundMax; tickVal += step.size) {
       //truncate any unneeded digits to reduce floating point errors
       tickVal = +(tickVal.toFixed(fractionalDigits));
-      console.log(tickVal);
       
       //only add the tick if it is in range
       if (tickVal >= this.min && tickVal <= this.max) {
@@ -161,102 +160,19 @@ enyo.kind({
   kind: "Ticks",
   published: {
     timeZone: 0,
-    dateFormat: "%YYYY%-%MM%-%DD% %hh%:%mm%:%ss%.%ms% %AMPM% %T%"
+    dateFormat: ""
   },
-  constructor: function (opts) {
-    this.inherited(arguments);
-    
-    this.formatChanged();
-  },
+  components: [
+    {kind: "FormattedDate", name: "fDate"}
+  ],
+  bindings: [
+    {from: "timeZone", to: "$.fDate.timeZone"},
+    {from: "dateFormat", to: "$.fDate.format"}
+  ],
   labelWidth: function() {
     return this.dateFormat.length;
   },
-  formatCodes: {
-    "ampm" : function(date) {
-      return date.getUTCHours() > 12 ? "pm" : "am";
-    },
-    "AMPM" : function(date) {
-      return date.getUTCHours() > 12 ? "PM" : "AM";
-    },
-    "ms": function(date) {
-      return date.getUTCMilliseconds()
-    },
-    "ss": function(date) {
-      var seconds = date.getUTCSeconds();
-      return (seconds < 10 ? "0" : "") + seconds;
-    },
-    "mm": function(date) {
-      var min = date.getUTCMinutes();
-      return (min < 10 ? "0" : "") + min;
-    },
-    "HH": function(date) {
-      var hours = date.getUTCHours();
-      return (hours < 10 ? "0" : "") + hours;
-    },
-    "hh": function(date) {
-      var hours = date.getUTCHours();
-      hours -= (hours > 12 ? 12 : 0);
-      return (hours < 10 ? "0" : "") + hours;
-    },
-    "DD": function(date) {
-      var dom = date.getUTCDate();
-      return (dom < 10 ? "0" : "") + dom;
-    },
-    "DOW": function(date) {
-      return date.getUTCDay();
-    },
-    "DOY": function(date) {
-      var ms, day, zeros;
-      
-      //find out how many milliseconds have elapsed since the start of the year
-      ms = date - (+(new Date(date.getUTCFullYear(), 0, 0)));
   
-      //convert ms to full days that have elapsed
-      day = (ms / 86400000) >> 0;
-  
-      //get zeros for paddings
-      zeros = day < 10 ? "00" : day < 100 ? "0" : "";
-  
-      return zeros + day;
-    },
-    "MM": function(date) {
-      var month = date.getUTCMonth() + 1;
-      return (month < 10 ? "0" : "") + month;
-    },
-    "YYYY": function(date) {
-      return date.getUTCFullYear();
-    },
-    "YY": function(date) {
-      return date.getUTCFullYear() % 2000;
-    },
-    "T": function() {
-      return "GMT" + (this.timeZone < 0 ? "" : "+") + this.timeZone;
-    } 
-  },
-  formatChanged: function() {
-    //make sure format is a string because we are about
-    //to do some really stringy stuff to it
-    var format = ((this.dateFormat || "") + "");
-    
-    //split up the format string
-    this._format = format.split("%");
-  },
-  
-  dateToString: function(date) {
-    var convertedDate = [];
-    
-    //adjust the date based on the time zone
-    date.setUTCHours(date.getUTCHours() + this.timeZone);
-    
-    //convert any format codes to the date value
-    this._format.forEach(function(fmtCode) {
-      convertedDate.push(this.formatCodes[fmtCode] ?
-        this.formatCodes[fmtCode].call(this, date) : fmtCode
-      );
-    }, this);
-    
-    return convertedDate.join("");
-  },
   stepSizes: {
     fullday: 86400000,
     halfday: 43200000,
@@ -296,6 +212,7 @@ enyo.kind({
   },
   
   createLabel: function(value) {
-    return this.dateToString(new Date(value));
+    this.$.fDate.set("jsTime", value);
+    return this.$.fDate.formattedText;
   }
 });
