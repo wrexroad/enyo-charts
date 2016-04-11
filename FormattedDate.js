@@ -40,65 +40,150 @@ enyo.kind({
     this.set("jsTime", +date);
   },
   formatCodes: {
-    "ampm" : function(date) {
-      return date.getUTCHours() > 12 ? "pm" : "am";
+    "ampm" : {
+      stringDelta: 4, //differnce between the length of the code (includiing %%) and the resulting string
+      get: function(date) {
+        return date.getUTCHours() > 12 ? "pm" : "am";
+      },
+      set: function(date, val) {
+        date.setUTCHours(date.getUTCHours+(val.toLowerCase() == "am" ? 0 : 12));
+      }
     },
-    "AMPM" : function(date) {
-      return date.getUTCHours() > 12 ? "PM" : "AM";
+    "AMPM" : {
+      stringDelta: 4,
+      get: function(date) {
+        return date.getUTCHours() > 12 ? "PM" : "AM";
+      },
+      set: function(date, val) {
+        date.setUTCHours(date.getUTCHours+(val.toLowerCase() == "am" ? 0 : 12));
+      }
     },
-    "ms": function(date) {
-      return date.getUTCMilliseconds()
+    "ms": {
+      stringDelta: 2,
+      get: function(date) {
+        return date.getUTCMilliseconds();
+      },
+      set: function(date, val) {
+        date.setUTCMilliseconds(val);
+      }
     },
-    "ss": function(date) {
-      var seconds = date.getUTCSeconds();
-      return (seconds < 10 ? "0" : "") + seconds;
+    "ss": {
+      stringDelta: 2,
+      get: function(date) {
+        var seconds = date.getUTCSeconds();
+        return (seconds < 10 ? "0" : "") + seconds;
+      },
+      set: function(date, val) {
+        date.setUTCSeconds(val);
+      }
     },
-    "mm": function(date) {
-      var min = date.getUTCMinutes();
-      return (min < 10 ? "0" : "") + min;
+    "mm": {
+      stringDelta: 2,
+      get: function(date) {
+        var min = date.getUTCMinutes();
+        return (min < 10 ? "0" : "") + min;
+      },
+      set: function(date, val) {
+        date.setUTCMinutes(val);
+      }
     },
-    "HH": function(date) {
-      var hours = date.getUTCHours();
-      return (hours < 10 ? "0" : "") + hours;
+    "HH": {
+      stringDelta: 2,
+      get: function(date) {
+        var hours = date.getUTCHours();
+        return (hours < 10 ? "0" : "") + hours;
+      },
+      set: function(date, val) {
+        date.setUTCHours(val);
+      }
     },
-    "hh": function(date) {
-      var hours = date.getUTCHours();
-      hours -= (hours > 12 ? 12 : 0);
-      return (hours < 10 ? "0" : "") + hours;
+    "hh": {
+      stringDelta: 2,
+      get: function(date) {
+        var hours = date.getUTCHours();
+        hours -= (hours > 12 ? 12 : 0);
+        return (hours < 10 ? "0" : "") + hours;
+      },
+      set: function(date, val) {
+        date.setUTCHours(val);
+      }
     },
-    "DD": function(date) {
-      var dom = date.getUTCDate();
-      return (dom < 10 ? "0" : "") + dom;
+    "DD": {
+      stringDelta: 2,
+      get: function(date) {
+        var dom = date.getUTCDate();
+        return (dom < 10 ? "0" : "") + dom;
+      },
+      set: function(date, val) {
+        date.setUTCDate(val);
+      }
     },
-    "DOW": function(date) {
-      return date.getUTCDay();
+    "DOW": {
+      stringDelta: 4,
+      get: function(date) {
+        return date.getUTCDay();
+      },
+      set: function(date, val) {
+        return date.setUTCDay(val);
+      },
     },
-    "DOY": function(date) {
-      var ms, day, zeros;
-      
-      //find out how many milliseconds have elapsed since the start of the year
-      ms = date - (+(new Date(date.getUTCFullYear(), 0, 0)));
-  
-      //convert ms to full days that have elapsed
-      day = (ms / 86400000) >> 0;
-  
-      //get zeros for paddings
-      zeros = day < 10 ? "00" : day < 100 ? "0" : "";
-  
-      return zeros + day;
+    "DOY": {
+      stringDelta: 2,
+      get: function(date) {
+        var ms, day, zeros;
+        
+        //find out how many milliseconds have
+        //elapsed since the start of the year
+        ms = date - (+(new Date(date.getUTCFullYear(), 0, 0)));
+    
+        //convert ms to full days that have elapsed
+        day = (ms / 86400000) >> 0;
+    
+        //get zeros for paddings
+        zeros = day < 10 ? "00" : day < 100 ? "0" : "";
+    
+        return zeros + day;
+      },
+      set: function() {
+        
+      }
     },
-    "MM": function(date) {
-      var month = date.getUTCMonth() + 1;
-      return (month < 10 ? "0" : "") + month;
+    "MM": {
+      stringDelta: 2,
+      get: function(date) {
+        var month = date.getUTCMonth() + 1;
+        return (month < 10 ? "0" : "") + month;
+      },
+      set: function(date, val) {
+        date.setUTCMonth(val - 1);
+      }
     },
-    "YYYY": function(date) {
-      return date.getUTCFullYear();
+    "YYYY": {
+      stringDelta: 2,
+      get: function(date) {
+        return date.getUTCFullYear();
+      },
+      set: function(date, val) {
+        date.setUTCFullYear(val);
+      }
     },
-    "YY": function(date) {
-      return date.getUTCFullYear() % 2000;
+    "YY": {
+      stringDelta: 2,
+      get: function(date) {
+        return date.getUTCFullYear() % 2000;
+      },
+      set: function(date, val) {
+        date.setUTCFullYear(val + 2000);
+      }
     },
-    "T": function() {
-      return "GMT" + (this.timeZone < 0 ? "" : "+") + this.timeZone;
+    "T": {
+      stringDelta: -6,
+      get: function() {
+        return "GMT" + (this.timeZone < 0 ? "" : "+") + this.timeZone;
+      },
+      set: function(date, val) {
+        date.setUTCHours(date.getUTCHours + val);
+      }
     } 
   },
   
@@ -124,7 +209,7 @@ enyo.kind({
     this._format.forEach(function(fmtCode) {
 
       convertedDate.push(this.formatCodes[fmtCode] ?
-        this.formatCodes[fmtCode].call(this, date) : fmtCode
+        this.formatCodes[fmtCode].get.call(this, date) : fmtCode
       );
     }, this);
 
@@ -133,26 +218,33 @@ enyo.kind({
   
   stringToDate: function(dateString) {
     var
-      date = +(new Date()),
+      date = new Date(),
       stringIndex = 0,
+      twentyfourhour = true,
       dateCodes;
     
     //check for a few key words
     if (dateString.toLowerCase() == "now") {
-      return date;
+      return +date;
     } else if (dateString.toLowerCase() == "today") {
-      return ((date / 86400000) >> 0) * 86400000;
+      return ((+date / 86400000) >> 0) * 86400000;
     } else if (dateString.toLowerCase() == "yesterday") {
       return this.stringToDate("today") - 86400000;
     } else if (dateString.toLowerCase() == "tomorrow") {
       return this.stringToDate("today") + 86400000;
+    } else {
+      date = new Date(0);
     }
     
     //break the date format appart into elements
-    dateCodes = this.dateFormat.match("%");
+    dateCodes = this._format.match("%");
     
     dateCodes.forEach(function(code) {
-      
+      if (!this.formatCodes[code]) {
+        stringIndex += code.length;
+      } else {
+        stringIndex += (code.length - this.formatCodes[code].stringDelta);
+      }
     });   
   }
 });
