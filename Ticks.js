@@ -56,14 +56,43 @@ enyo.kind({
       ) + 1;
   },
   
-  generateTicks: function() {}
+  generateTicks: function() {
+    var step, roundMin, roundMax, tickVal, fractionalDigits;
+    this.ticks = [];
+    step = this.calculateStepSize();
+    
+    //round the min and max values to the selected step size
+    roundMin = ((this.min / step.size) >> 0) * step.size;
+    roundMax = (Math.ceil(this.max / step.size)) * (step.size);
+   
+    //if the step size is less than 1,
+    //we need to get the number of fractional digits we should preserve
+    fractionalDigits = step.size < 1 ? Math.ceil(-(Math.log10(step.size))) : 0;
+    for (tickVal = roundMin; tickVal <= roundMax; tickVal += step.size) {
+      //truncate any unneeded digits to reduce floating point errors
+      tickVal = +(tickVal.toFixed(fractionalDigits));
+      console.log(tickVal);
+      
+      //only add the tick if it is in range
+      if (tickVal >= this.min && tickVal <= this.max) {
+        this.ticks.push({
+          label: this.createLabel(tickVal),
+          value: tickVal
+        });
+      }
+    }
+  },
+  
+  calculateStepSize: function() {}
 });
 
 enyo.kind({
   name: "LinearTicks",
   kind: "Ticks",
   published: {
-    niceSteps: null
+    niceSteps: null,
+    magnitude: NaN,
+    multiplier: NaN
   },
   constructor: function (opts) {
     this.inherited(arguments);
@@ -71,16 +100,13 @@ enyo.kind({
     this.niceSteps = opts.niceSteps || [1, 2, 5];
   },
   
-  generateTicks: function() {
+  calculateStepSize: function() {
     var
       bestStep = {
         value: NaN,
-        error: Number.POSITIVE_INFINITY,
-        magnitude: NaN,
-        multiplier: NaN
+        error: Number.POSITIVE_INFINITY
       },
-      rawInterval, magnitude, multiplier, roundMin, roundMax,
-      tickVal, tickLabel;
+      rawInterval, magnitude, multiplier;
     
     function testStep(stepVal) {
       //scale the step value by the range magnitude 
@@ -88,15 +114,14 @@ enyo.kind({
       var stepError = Math.abs(this.count - (this.range / stepVal));
 
       if (stepError < bestStep.error) {
-        bestStep.value = stepVal;
+        bestStep.size = stepVal;
         bestStep.error = stepError;
-        bestStep.multiplier = multiplier;
-        bestStep.magnitude = magnitude;
+        this.stepMultiplier = multiplier;
+        this.stepMagnitude = magnitude;
       }
     }
     
-    //clear old ticks and make sure the niceSteps options are in an array
-    this.ticks = [];
+    //make sure the niceSteps options are in an array
     this.niceSteps = [].concat(this.niceSteps);
     
     //get the range's approximate magnitude
@@ -120,25 +145,14 @@ enyo.kind({
     this.niceSteps.forEach(testStep, this);
     
     //correct the multiplier if the rounding digit is fractional
-    multiplier = bestStep.magnitude < 0 ?
-      bestStep.multiplier * 10 : bestStep.multiplier; 
-   
-    //round the min and max values to the nice step interval
-    roundMin = ((this.min / multiplier) >> 0) * multiplier;
-    roundMax = Math.ceil(this.max / multiplier) * multiplier;
-
-    //generate the tick labels and locations
-    for (tickVal = roundMin; tickVal <= roundMax; tickVal += bestStep.value) {
-      //truncate any erroneous digits due to floating point errors
-      tickLabel =
-        tickVal.toFixed(bestStep.magnitude < 0 ? (-bestStep.magnitude) : 0);
-      tickVal = +tickLabel;
+    multiplier = this.stepMagnitude < 0 ?
+      this.stepMultiplier * 10 : this.stepMultiplier;
       
-      this.ticks.push({
-        value: tickVal,
-        label: tickLabel
-      });
-    }
+    return bestStep;
+  },
+  
+  createLabel: function(value) {
+    return (+value).toFixed(this.stepMagnitude < 0 ? (-this.stepMagnitude) : 0);
   }
 });
 
@@ -258,14 +272,14 @@ enyo.kind({
     quartsec: 250,
     millisec: 1
   },
-  generateTicks: function() {
+  calculateStepSize: function() {
     var
       bestStep = {
         name : "",
         size: NaN,
         error: Number.POSITIVE_INFINITY
       },
-      stepName, countError, roundMin, roundMax, tickVal;
+      stepName, countError;
     
     //calculate the number of tick marks we will get with each step size
     for (stepName in this.stepSizes) {
@@ -278,22 +292,10 @@ enyo.kind({
       }
     }
     
-    //round the min and max values to the selected step size
-    roundMin = ((this.min / bestStep.size) >> 0) * bestStep.size;
-    roundMax = (Math.ceil(this.max / bestStep.size)) * (bestStep.size);
-    
-    //generate converted date strings for each step between rounded min and max
-    this.ticks = [];
-    for (tickVal = roundMin; tickVal <= roundMax; tickVal += bestStep.size) {
-      //only add the tick if it is in range
-      if (tickVal >= this.min && tickVal <= this.max) {
-        this.ticks.push({
-          label: this.dateToString(new Date(tickVal)),
-          value: tickVal
-        });
-      }
-    }
-    
-    return this.ticks;
+    return bestStep;
+  },
+  
+  createLabel: function(value) {
+    return this.dateToString(new Date(value));
   }
 });
