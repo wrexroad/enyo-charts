@@ -29,7 +29,7 @@ enyo.kind({
         if (dir == 1) {
           return this.dateToString(val);
         } else if (dir == 2) {
-          return this.stringToDate(val);
+          return this.stringToDateStamp(val);
         }
       }
     }
@@ -41,7 +41,7 @@ enyo.kind({
   },
   formatCodes: {
     "ampm" : {
-      stringDelta: 4, //differnce between the length of the code (includiing %%) and the resulting string
+      length: 2, //length of resulting string
       get: function(date) {
         return date.getUTCHours() > 12 ? "pm" : "am";
       },
@@ -50,7 +50,7 @@ enyo.kind({
       }
     },
     "AMPM" : {
-      stringDelta: 4,
+      length: 2,
       get: function(date) {
         return date.getUTCHours() > 12 ? "PM" : "AM";
       },
@@ -59,7 +59,7 @@ enyo.kind({
       }
     },
     "ms": {
-      stringDelta: 2,
+      length: 2,
       get: function(date) {
         return date.getUTCMilliseconds();
       },
@@ -68,7 +68,7 @@ enyo.kind({
       }
     },
     "ss": {
-      stringDelta: 2,
+      length: 2,
       get: function(date) {
         var seconds = date.getUTCSeconds();
         return (seconds < 10 ? "0" : "") + seconds;
@@ -78,7 +78,7 @@ enyo.kind({
       }
     },
     "mm": {
-      stringDelta: 2,
+      length: 2,
       get: function(date) {
         var min = date.getUTCMinutes();
         return (min < 10 ? "0" : "") + min;
@@ -88,7 +88,7 @@ enyo.kind({
       }
     },
     "HH": {
-      stringDelta: 2,
+      length: 2,
       get: function(date) {
         var hours = date.getUTCHours();
         return (hours < 10 ? "0" : "") + hours;
@@ -98,7 +98,7 @@ enyo.kind({
       }
     },
     "hh": {
-      stringDelta: 2,
+      length: 2,
       get: function(date) {
         var hours = date.getUTCHours();
         hours -= (hours > 12 ? 12 : 0);
@@ -109,7 +109,7 @@ enyo.kind({
       }
     },
     "DD": {
-      stringDelta: 2,
+      length: 2,
       get: function(date) {
         var dom = date.getUTCDate();
         return (dom < 10 ? "0" : "") + dom;
@@ -119,7 +119,7 @@ enyo.kind({
       }
     },
     "DOW": {
-      stringDelta: 4,
+      length: 1,
       get: function(date) {
         return date.getUTCDay();
       },
@@ -128,7 +128,7 @@ enyo.kind({
       },
     },
     "DOY": {
-      stringDelta: 2,
+      length: 3,
       get: function(date) {
         var ms, day, zeros;
         
@@ -144,12 +144,13 @@ enyo.kind({
     
         return zeros + day;
       },
-      set: function() {
-        
+      set: function(date, val) {
+        date = new Date(date.getUTCFullYear(), 0, 0);
+        return date.setUTCDate(val);
       }
     },
     "MM": {
-      stringDelta: 2,
+      length: 2,
       get: function(date) {
         var month = date.getUTCMonth() + 1;
         return (month < 10 ? "0" : "") + month;
@@ -159,7 +160,7 @@ enyo.kind({
       }
     },
     "YYYY": {
-      stringDelta: 2,
+      length: 4,
       get: function(date) {
         return date.getUTCFullYear();
       },
@@ -168,7 +169,7 @@ enyo.kind({
       }
     },
     "YY": {
-      stringDelta: 2,
+      length: 2,
       get: function(date) {
         return date.getUTCFullYear() % 2000;
       },
@@ -177,23 +178,54 @@ enyo.kind({
       }
     },
     "T": {
-      stringDelta: -6,
+      length: 5,
       get: function() {
         return "GMT" + (this.timeZone < 0 ? "" : "+") + this.timeZone;
       },
       set: function(date, val) {
-        date.setUTCHours(date.getUTCHours + val);
+        date.setUTCHours(date.getUTCHours() + (+elementValue.substring(3)));
       }
     } 
   },
   
   formatChanged: function() {
+    var stringDelta = 0, fMarks = 0, formatElements;
+    
     //make sure format is a string because we are about
     //to do some really stringy stuff to it
-    var format = ((this.format || "") + "");
+    var format = ((this.format || "") + "").trim();
     
     //split up the format string
-    this._format = format.split("%");
+    this._format = {
+      str: format,
+      elements: format.split("%"),
+      offsets: {}
+    };
+    
+    //find the offset of all known format elements
+    this._format.elements.forEach(function(fmtCode) {
+      if (this.formatCodes[fmtCode]) {
+        //The offset is the location of where the first character of this date
+        //element will appear in the converted date string.
+        //Calculated as:
+        //  start of format code -
+        //  number of % so far -
+        //  diff in length between fmt and converted strings 
+        this._format.offsets[fmtCode] =
+          format.indexOf(fmtCode) - (1 + fMarks) - stringDelta;
+          
+        //track stringDelta as the diffence between the format string
+        //and the converted date string so far.
+        stringDelta += (this.formatCodes[fmtCode].length - fmtCode.length) + 1;
+        
+        //keep track of how many formatting marks we have found
+        //(2 per format code)
+        fMarks += 2;
+      } else {
+        //subtract the length of this unformatted section from stringDelta
+        stringDelta -= fmtCode.length;
+      }
+    }, this);
   },
   
   dateToString: function(date) {
@@ -206,7 +238,7 @@ enyo.kind({
     date.setUTCHours(date.getUTCHours() + this.timeZone);
 
     //convert any format codes to the date value
-    this._format.forEach(function(fmtCode) {
+    this._format.elements.forEach(function(fmtCode) {
 
       convertedDate.push(this.formatCodes[fmtCode] ?
         this.formatCodes[fmtCode].get.call(this, date) : fmtCode
@@ -216,12 +248,12 @@ enyo.kind({
     return convertedDate.join("");
   },
   
-  stringToDate: function(dateString) {
+  stringToDateStamp: function(dateString) {
     var
       date = new Date(),
-      stringIndex = 0,
-      twentyfourhour = true,
-      dateCodes;
+      elementValue;
+    
+    dateString = dateString.trim();
     
     //check for a few key words
     if (dateString.toLowerCase() == "now") {
@@ -229,22 +261,24 @@ enyo.kind({
     } else if (dateString.toLowerCase() == "today") {
       return ((+date / 86400000) >> 0) * 86400000;
     } else if (dateString.toLowerCase() == "yesterday") {
-      return this.stringToDate("today") - 86400000;
+      return this.stringToDateStamp("today") - 86400000;
     } else if (dateString.toLowerCase() == "tomorrow") {
-      return this.stringToDate("today") + 86400000;
+      return this.stringToDateStamp("today") + 86400000;
     } else {
       date = new Date(0);
     }
     
-    //break the date format appart into elements
-    dateCodes = this._format.match("%");
-    
-    dateCodes.forEach(function(code) {
-      if (!this.formatCodes[code]) {
-        stringIndex += code.length;
-      } else {
-        stringIndex += (code.length - this.formatCodes[code].stringDelta);
+    this._format.forEach(function(code) {
+      if (this.formatCodes[code]) {
+        elementValue =
+          dateString.substr(
+            this._format.offsets[code], this.formatCodes[code].length
+          );
+          
+        this.formatCodes[code].set.apply(this, date, elementValue);
       }
-    });   
+    });
+    
+    return +date;
   }
 });
