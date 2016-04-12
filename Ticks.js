@@ -7,7 +7,8 @@ enyo.kind({
     range: null,
     type: "",
     ticks: null,
-    count: 10
+    count: 10,
+    minorTickCount: 5
   },
   constructor: function() {
     this.inherited(arguments);
@@ -57,7 +58,7 @@ enyo.kind({
   },
   
   generateTicks: function() {
-    var step, roundMin, roundMax, tickVal, fractionalDigits;
+    var step, roundMin, roundMax, tickVal, fractionalDigits, minor_i, minorVal;
     this.ticks = [];
     step = this.calculateStepSize();
     
@@ -78,6 +79,19 @@ enyo.kind({
           label: this.createLabel(tickVal),
           value: tickVal
         });
+      }
+      
+      //draw add 5 minor ticks between here and the next major tick
+      if (this.minorTickCount) {
+        for (minor_i = 0; minor_i < this.minorTickCount; minor_i++) {
+          minorVal = tickVal + (minor_i * step.size / this.minorTickCount);
+          if (minorVal >= this.min && minorVal <= this.max) {
+           this.ticks.push({
+              value: minorVal,
+              minor: true
+            });
+          }
+        }
       }
     }
   },

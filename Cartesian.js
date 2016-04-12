@@ -142,11 +142,12 @@ enyo.kind({
     for (tick_i = 0; tick_i < ticks.length; tick_i++) {
       //get the formatted label and make sure it doesnt isnt a duplicate
       offset = -(ticks[tick_i].value - yMin) * this.ySpacingFactor;
-      
-      ctx.fillText(ticks[tick_i].label, -5, offset + 5);
+      if (ticks[tick_i].label) {
+        ctx.fillText(ticks[tick_i].label, -5, offset + 5);
+      }      
       ctx.beginPath();
       ctx.moveTo(0, offset);
-      ctx.lineTo(15, offset);
+      ctx.lineTo(ticks[tick_i].minor ? 5 : 15, offset);
       ctx.stroke();
     }
     ctx.restore();
@@ -160,9 +161,11 @@ enyo.kind({
     
     for (tick_i = 0; tick_i < ticks.length; tick_i++) {
       offset = (ticks[tick_i].value - xMin) * this.xSpacingFactor;
-      ctx.fillText(ticks[tick_i].label, offset, this.fontSize);
+      if (ticks[tick_i].label) {
+        ctx.fillText(ticks[tick_i].label, offset, this.fontSize);
+      }
       ctx.beginPath();
-      ctx.moveTo(offset, -15);
+      ctx.moveTo(offset, ticks[tick_i].minor ? -5 : -15);
       ctx.lineTo(offset, 0);
       ctx.stroke();
     }
