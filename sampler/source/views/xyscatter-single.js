@@ -21,7 +21,8 @@ enyo.kind({
         x: {
           type: "Date",
           dateFormat: "%DOY%/%YYYY% %HH%:%mm%:%ss% %T%",
-          tickCount: null //defaults to auto calculated           
+          tickCount: null, //defaults to auto calculated
+          minorTickCount: 10 //default is 5           
         }
       }
     },
