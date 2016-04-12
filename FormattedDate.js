@@ -183,13 +183,13 @@ enyo.kind({
         return "GMT" + (this.timeZone < 0 ? "" : "+") + this.timeZone;
       },
       set: function(date, val) {
-        date.setUTCHours(date.getUTCHours() + (+elementValue.substring(3)));
+        date.setUTCHours(date.getUTCHours() + (+val.substring(3)));
       }
     } 
   },
   
   formatChanged: function() {
-    var stringDelta = 0, fMarks = 0, formatElements;
+    var stringDelta = 0, fMarks = 0;
     
     //make sure format is a string because we are about
     //to do some really stringy stuff to it
