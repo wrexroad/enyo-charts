@@ -20,7 +20,7 @@ enyo.kind({
         },
         x: {
           type: "Date",
-          dateFormat: "%YYYY%/%MM%/%DD% %HH%:%mm%:%ss% %T%",
+          dateFormat: "%DOY%/%YYYY% %HH%:%mm%:%ss% %T%",
           tickCount: null //defaults to auto calculated           
         }
       }
@@ -70,7 +70,16 @@ enyo.kind({
             kind: "onyx.Slider", name: "dotSize", 
             value: 30, onChanging:"draw", onChange:"draw"
           }
-        ]}
+        ]},
+        {kind: "onyx.GroupboxHeader", content: "Date Format"},
+        {kind: "Group", components: [
+          {kind: "onyx.InputDecorator", components: [
+            {
+              kind: "onyx.Input", name: "dateFormat", onchange: "setDateFormat",
+              attributes: {size: 30}
+            }
+          ]}
+        ]},
       ]},
       {kind: "onyx.Groupbox", components: [
         {kind: "onyx.GroupboxHeader", content: "Sample Data"},
@@ -154,6 +163,9 @@ enyo.kind({
   rendered: function() {
     this.inherited(arguments);
     
+    //display the date format code
+    this.$.dateFormat.set("value", this.$.chart.axisTypes.x.dateFormat);
+    
     //set an initial data range
     this.$.yMin.value = 0;
     this.$.yMax.value = 100;
@@ -166,6 +178,11 @@ enyo.kind({
       this.$.width.set("value", this.width - 20);
     }
     
+    this.draw();
+  },
+  setDateFormat: function() {
+    console.log("dsa");
+    this.$.chart.$.xTicks.setDateFormat(this.$.dateFormat.value);
     this.draw();
   },
   setColor: function(inSender, inEvent) {
