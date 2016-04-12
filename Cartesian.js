@@ -32,6 +32,17 @@ enyo.kind({
     //This should get changed when data are added
     this.setAxisRange(-5, 5, -5, 5);
   },
+  changeAxisType: function(xy, axisKindObj) {
+    xy = (xy || "") + "";
+    if (xy != "x" && xy != "y") {return;}
+    
+    axisKindObj.name = xy + "Ticks";
+    axisKindObj.type = axisKindObj.type || "Linear";
+    axisKindObj.kind = axisKindObj.type + "Ticks";
+    
+    this.$[xy + "Ticks"].destroy();
+    this.createComponent(axisKindObj);
+  },
   setAxisRange: function(xMin, xMax, yMin, yMax) {
     this.xMin = isFinite(+xMin) ? +xMin : this.xMin;
     this.xMax = isFinite(+xMax) ? +xMax : this.xMax;
