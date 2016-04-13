@@ -72,6 +72,11 @@ enyo.kind({
     );
   },
   calculateMargins: function() {
+    //figure out the width of the y tick mark labels and set
+    // a mininum margin of 10 characters
+    var yLabelWidth = this.$.yTicks.labelWidth();
+    yLabelWidth = yLabelWidth > 10 ? yLabelWidth : 10;
+     
     this.set("decorMargin", {
       //room for the title
       top: this.fontSize * 3,
@@ -79,8 +84,8 @@ enyo.kind({
       //room for two lines of x axis lables
       bottom: this.fontSize << 1,
 
-      //y axis lables can be 10 charcters wide
-      left: this.decorCtx.measureText((new Array(10)).join('W')).width,
+      //convert the y label character width to pixels
+      left: this.decorCtx.measureText((new Array(yLabelWidth)).join('W')).width,
 
       right: 5
     });
@@ -125,7 +130,7 @@ enyo.kind({
       (this.width /
       (
         ctx.measureText(
-          new Array(this.$.xTicks.labelWidth()).join("W")
+          new Array(this.$.xTicks.labelWidth() || 0).join("W")
         ).width
       )) + 1
     );
