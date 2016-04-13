@@ -155,8 +155,7 @@ enyo.kind({
     this.$.xTicks.setRange(xMin, xMax);
     this.$.xTicks.set("tickCount",
       +this.$.xTicks.tickCount ||
-      (dataWidth /
-      (
+      (dataWidth / (
         ctx.measureText(
           new Array(this.$.xTicks.labelWidth() || 0).join("W")
         ).width

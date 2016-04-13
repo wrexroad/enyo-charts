@@ -7,7 +7,7 @@ enyo.kind({
     range: null,
     type: "",
     ticks: null,
-    count: 10,
+    tickCount: 10,
     minorTickCount: 5
   },
   constructor: function() {
@@ -23,7 +23,7 @@ enyo.kind({
   },
   
   observers: [
-    {path: "count", method:"generateTicks"}
+    {path: "tickCount", method:"generateTicks"}
   ],
   
   setRange: function(min, max) {
@@ -123,7 +123,7 @@ enyo.kind({
     function testStep(stepVal) {
       //scale the step value by the range magnitude 
       stepVal *= multiplier;
-      var stepError = Math.abs(this.count - (this.range / stepVal));
+      var stepError = Math.abs(this.tickCount - (this.range / stepVal));
 
       if (stepError < bestStep.error) {
         bestStep.size = stepVal;
@@ -138,7 +138,7 @@ enyo.kind({
     
     //get the range's approximate magnitude
     //and a multiplier to scale niceSteps to that range
-    rawInterval = this.range / this.count;
+    rawInterval = this.range / this.tickCount;
     magnitude = Math.log10(rawInterval) >> 0;
     multiplier = Math.pow(10, magnitude);
 
@@ -212,7 +212,7 @@ enyo.kind({
     
     //calculate the number of tick marks we will get with each step size
     for (stepName in this.stepSizes) {
-      countError = Math.abs(this.range / this.stepSizes[stepName] - this.count);
+      countError = Math.abs(this.range / this.stepSizes[stepName] - this.tickCount);
       
       if (countError < bestStep.error) {
         bestStep.name = stepName;
@@ -249,7 +249,7 @@ enyo.kind({
   constructor: function(opts) {
     this.inherited(arguments);
     this.stops = [].concat(opts.stops || []);
-    this.set("count", this.stops.length);
+    this.set("tickCount", this.stops.length);
   },
   labelWidth: function() {
     var maxWidth = 0;
