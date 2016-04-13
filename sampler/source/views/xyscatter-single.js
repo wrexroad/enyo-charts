@@ -10,13 +10,24 @@ enyo.kind({
     ]},
     {
       kind: "Chart.Cartesian", name: "chart",
-      bgColor: "white",
+      bgColor: "lightgrey",
       font: "sans-serif",
       fontSize: 14,
       axisTypes: {
-        y: {
+        yLeft: {
           type: "Linear",
-          tickCount: 10
+          tickCount: 10,
+          color: "green"
+        },
+        yRight: {
+          type: "Discrete",
+          stops: [
+            {label: "Upper Critical", value: 80, color: "red"},
+            {label: "Upper Warning", value: 60, color: "yellow"},
+            {label: "Lower Warning", value: 40, color: "yellow"},
+            {label: "Lower Critical", value: 20, color: "red"},
+          ],
+          fullLength: true
         },
         x: {
           type: "Date",
@@ -34,12 +45,12 @@ enyo.kind({
           {
             kind: "onyx.Button",
             style: "padding: 10px; background-color: red",
-            value: "red", active: true, content: "Red", ontap: "setColor"
+            value: "red", content: "Red", ontap: "setColor"
           },
           {
             kind: "onyx.Button",
             style: "padding: 10px; background-color: blue",
-            value: "blue", content: "Blue", ontap: "setColor"
+            value: "blue", content: "Blue", ontap: "setColor", active: true
           },
           {
             kind: "onyx.Button",
@@ -205,7 +216,7 @@ enyo.kind({
       yVals = [];
     
     //create a place to store the dot and line settings
-    this.color = "red";
+    this.color = "blue";
     this.fill = {dot: false, line: false};
     
     //generate some points of sort of linear data

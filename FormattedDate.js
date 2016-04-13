@@ -280,5 +280,19 @@ enyo.kind({
     });
     
     return +date;
+  },
+  
+  getConvertedStringLength: function() {
+    var totalLength = 0;
+    
+    this._format.elements.forEach(function(fmt_i) {
+      if (this.formatCodes[fmt_i]) {
+        totalLength += (+this.formatCodes[fmt_i].length);
+      } else {
+        totalLength += (+((fmt_i || "") + "").length);
+      }
+    }, this);
+    
+    return totalLength;
   }
 });

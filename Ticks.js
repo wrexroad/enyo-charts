@@ -16,7 +16,7 @@ enyo.kind({
     //make sure log10 is defined
     Math.log10 = Math.log10 || function(x) {
       return Math.log(x) / Math.LN10;
-    }; 
+    };
     
     //create a place to store generated ticks
     this.ticks = [];
@@ -83,7 +83,7 @@ enyo.kind({
       
       //draw add 5 minor ticks between here and the next major tick
       if (this.minorTickCount) {
-        for (minor_i = 0; minor_i < this.minorTickCount; minor_i++) {
+        for (minor_i = 1; minor_i < this.minorTickCount; minor_i++) {
           minorVal = tickVal + (minor_i * step.size / this.minorTickCount);
           if (minorVal >= this.min && minorVal <= this.max) {
            this.ticks.push({
@@ -184,7 +184,7 @@ enyo.kind({
     {from: "dateFormat", to: "$.fDate.format"}
   ],
   labelWidth: function() {
-    return this.dateFormat.length;
+    return this.$.fDate.getConvertedStringLength();
   },
   
   stepSizes: {
@@ -228,5 +228,48 @@ enyo.kind({
   createLabel: function(value) {
     this.$.fDate.set("jsTime", value);
     return this.$.fDate.formattedText;
+  }
+});
+
+enyo.kind({
+  name: "LocalDateTicks",
+  kind: "DateTicks",
+  constructor: function(opts) {
+    this.timeZone = opts.timeZone || (-(new Date()).getTimezoneOffset() / 60);
+    this.inherited(arguments);
+  }
+});
+
+enyo.kind({
+  name: "DiscreteTicks",
+  kind: "Ticks",
+  published: {
+    minorTickCount: 0,
+    stops: null
+  },
+  constructor: function(opts) {
+    this.inherited(arguments);
+    this.stops = [].concat(opts.stops || []);
+    this.set("count", this.stops.length);
+  },
+  labelWidth: function() {
+    var maxWidth = 0;
+    this.stops.forEach(function(stop_i) {
+      var stopLabelLength = (stop_i.label || "").length;
+      maxWidth = stopLabelLength > maxWidth ? stopLabelLength : maxWidth;
+    }, this);
+    return maxWidth;
+  },
+  generateTicks: function() {
+    this.ticks = [];
+    this.stops.forEach(function(stop_i) {
+      if (this.min <= stop_i.value && this.max >= stop_i.value) {
+       this.ticks.push({
+         label: stop_i.label,
+         value: stop_i.value,
+         color: stop_i.color
+       }); 
+      }
+    }, this);
   }
 });
