@@ -230,3 +230,12 @@ enyo.kind({
     return this.$.fDate.formattedText;
   }
 });
+
+enyo.kind({
+  name: "LocalDateTicks",
+  kind: "DateTicks",
+  constructor: function(opts) {
+    this.timeZone = opts.timeZone || (-(new Date()).getTimezoneOffset() / 60);
+    this.inherited(arguments);
+  }
+})
