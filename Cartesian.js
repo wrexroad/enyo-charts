@@ -206,7 +206,7 @@ enyo.kind({
       ticks = this.$.yRightTicks.ticks;
       for (tick_i = 0; tick_i < ticks.length; tick_i++) {
         ctx.strokeStyle =
-          ticks[tick_i].color || this.$.yLeftTicks.color || this.borderColor;
+          ticks[tick_i].color || this.$.yRightTicks.color || this.borderColor;
           
         //get the formatted label and make sure it doesnt isnt a duplicate
         offset = -(ticks[tick_i].value - yMin) * this.ySpacingFactor;
@@ -231,7 +231,7 @@ enyo.kind({
       
       for (tick_i = 0; tick_i < ticks.length; tick_i++) {
         ctx.strokeStyle =
-          ticks[tick_i].color || this.$.yLeftTicks.color || this.borderColor;
+          ticks[tick_i].color || this.$.xTicks.color || this.borderColor;
           
         offset = (ticks[tick_i].value - xMin) * this.xSpacingFactor;
         if (ticks[tick_i].label) {
