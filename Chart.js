@@ -99,6 +99,7 @@ enyo.kind({
       ctx = this.decorCtx,
       offset = 0,
       layers = this.layers,
+      margin = this.decorMargin,
       layerName, printedName, titleAreaWidth;
 
     ctx.save();
@@ -107,7 +108,7 @@ enyo.kind({
     ctx.textBaseline = "top";
 
     //print the main plot title
-    titleAreaWidth = this.width - this.decorMargin.left;
+    titleAreaWidth = this.width - margin.left - margin.right;
     ctx.font = (this.fontSize * 1.5) + "px " + this.font;
     ctx.fillStyle = "black";
     ctx.fillText(

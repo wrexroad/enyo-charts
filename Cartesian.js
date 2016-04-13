@@ -72,10 +72,26 @@ enyo.kind({
     );
   },
   calculateMargins: function() {
-    //figure out the width of the y tick mark labels and set
-    // a mininum margin of 10 characters
-    var yLabelWidth = this.$.yTicks.labelWidth();
-    yLabelWidth = yLabelWidth > 10 ? yLabelWidth : 10;
+    var
+      yTicksLeft, yTicksLeftWidth, yTicksRight, yTicksRightWidth,
+      testLabelLeft, testLabelRight;
+    
+    //yTicksLeft will default to yTicks if it isnt set
+    yTicksLeft = this.$.yTicksLeft || this.$.yTicks;
+    //if there are no right y ticks defined,
+    //just create a functino that will return a label length of 10
+    yTicksRight = this.$.yTicksRight || {labelWidth: function(){return 10;}};
+    
+    //figure out the width of the y tick mark labels
+    yTicksLeftWidth = yTicksLeft.labelWidth();
+    yTicksRightWidth = yTicksRight.labelWidth();
+    
+    //create the longest label possible containing either the number of
+    // characters in the tick label or 10 characters, whichever is larget
+    testLabelLeft =
+      new Array(yTicksLeftWidth > 10 ? yTicksLeftWidth : 10).join('W');
+    testLabelRight =
+      new Array(yTicksRightWidth > 10 ? yTicksRightWidth : 10).join('W');
      
     this.set("decorMargin", {
       //room for the title
@@ -84,10 +100,9 @@ enyo.kind({
       //room for two lines of x axis lables
       bottom: this.fontSize << 1,
 
-      //convert the y label character width to pixels
-      left: this.decorCtx.measureText((new Array(yLabelWidth)).join('W')).width,
-
-      right: 5
+      //convert the y label character widths to pixels
+      left: this.decorCtx.measureText(testLabelLeft).width,
+      right: this.decorCtx.measureText(testLabelRight).width,
     });
   },
   decorate: function() {
@@ -122,17 +137,17 @@ enyo.kind({
     ctx.strokeStyle = this.borderColor;
     ctx.fillStyle = this.borderColor;
     ctx.strokeRect(margin.left, margin.top, dataWidth, dataHeight);
-    
+
     //get the tick mark locations and labels for this range
     this.$.xTicks.setRange(xMin, xMax);
     this.$.xTicks.set("count",
       +this.$.xTicks.tickCount ||
-      (this.width /
+      (dataWidth /
       (
         ctx.measureText(
           new Array(this.$.xTicks.labelWidth() || 0).join("W")
         ).width
-      )) + 1
+      ))
     );
     
     this.$.yTicks.setRange(yMin, yMax);
