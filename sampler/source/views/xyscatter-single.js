@@ -10,13 +10,14 @@ enyo.kind({
     ]},
     {
       kind: "Chart.Cartesian", name: "chart",
-      bgColor: "white",
+      bgColor: "lightgrey",
       font: "sans-serif",
       fontSize: 14,
       axisTypes: {
         yLeft: {
           type: "Linear",
-          tickCount: 10
+          tickCount: 10,
+          color: "green"
         },
         yRight: {
           type: "Discrete",
