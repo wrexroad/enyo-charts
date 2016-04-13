@@ -238,4 +238,36 @@ enyo.kind({
     this.timeZone = opts.timeZone || (-(new Date()).getTimezoneOffset() / 60);
     this.inherited(arguments);
   }
-})
+});
+
+enyo.kind({
+  name: "DiscreteTicks",
+  kind: "Ticks",
+  published: {
+    minorTickCount: 0,
+    stops: null
+  },
+  constructor: function(opts) {
+    this.inherited(arguments);
+    this.stops = [].concat(opts.stops || []);
+    this.set("count", this.stops.length);
+  },
+  labelWidth: function() {
+    var maxWidth = 0;
+    this.stops.forEach(function(stop_i) {
+      maxWidth = stop_i.value > maxWidth ? stop_i.value : maxWidth;
+    }, this);
+    return maxWidth;
+  },
+  generateTicks: function() {
+    this.ticks = [];
+    this.stops.forEach(function(stop_i) {
+      if (this.min <= stop_i.value && this.max >= stop_i.value) {
+       this.ticks.push({
+         label: stop_i.label,
+         value: stop_i.value
+       }); 
+      }
+    }, this);
+  }
+});
