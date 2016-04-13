@@ -184,7 +184,7 @@ enyo.kind({
     {from: "dateFormat", to: "$.fDate.format"}
   ],
   labelWidth: function() {
-    return this.dateFormat.length;
+    return this.$.fDate.getConvertedStringLength();
   },
   
   stepSizes: {
@@ -255,7 +255,8 @@ enyo.kind({
   labelWidth: function() {
     var maxWidth = 0;
     this.stops.forEach(function(stop_i) {
-      maxWidth = stop_i.value > maxWidth ? stop_i.value : maxWidth;
+      var stopLabelLength = (stop_i.label || "").length;
+      maxWidth = stopLabelLength > maxWidth ? stopLabelLength : maxWidth;
     }, this);
     return maxWidth;
   },
