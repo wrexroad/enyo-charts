@@ -153,7 +153,7 @@ enyo.kind({
 
     //get the tick mark locations and labels for this range
     this.$.xTicks.setRange(xMin, xMax);
-    this.$.xTicks.set("count",
+    this.$.xTicks.set("tickCount",
       +this.$.xTicks.tickCount ||
       (dataWidth /
       (
@@ -162,15 +162,15 @@ enyo.kind({
         ).width
       ))
     );
-    
+
     this.$.yLeftTicks.setRange(yMin, yMax);
-    this.$.yLeftTicks.set("count",
-      +this.$.yLeftTicks.tickCount || this.height / this.fontSize
+    this.$.yLeftTicks.set("tickCount",
+      +this.$.yLeftTicks.ticktickCount || this.height / this.fontSize
     );
     
     if (this.$.yRightTicks) {
       this.$.yRightTicks.setRange(yMin, yMax);
-      this.$.yRightTicks.set("count",
+      this.$.yRightTicks.set("tickCount",
         +this.$.yRightTicks.tickCount || this.height / this.fontSize
       );
     }
@@ -240,7 +240,7 @@ enyo.kind({
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
       ticks = this.$.xTicks.ticks;
-      
+
       for (tick_i = 0; tick_i < ticks.length; tick_i++) {
         ctx.strokeStyle =
           ticks[tick_i].color || this.$.xTicks.color || this.borderColor;

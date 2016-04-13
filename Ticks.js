@@ -50,10 +50,9 @@ enyo.kind({
   },
   
   labelWidth: function() {
-    return 
-      Math.max(
-        Math.abs(Math.log10(this.min)) || 0,
-        Math.abs(Math.log10(this.max)) || 0
+    return Math.max(
+        Math.log10(Math.abs(this.min)) || 0,
+        Math.log10(Math.abs(this.max)) || 0
       ) + 1;
   },
   
@@ -116,7 +115,7 @@ enyo.kind({
   calculateStepSize: function() {
     var
       bestStep = {
-        value: NaN,
+        size: NaN,
         error: Number.POSITIVE_INFINITY
       },
       rawInterval, magnitude, multiplier;
