@@ -266,7 +266,8 @@ enyo.kind({
       if (this.min <= stop_i.value && this.max >= stop_i.value) {
        this.ticks.push({
          label: stop_i.label,
-         value: stop_i.value
+         value: stop_i.value,
+         color: stop_i.color
        }); 
       }
     }, this);

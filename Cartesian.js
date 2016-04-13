@@ -181,6 +181,10 @@ enyo.kind({
       ctx.translate(margin.left, dataHeight + margin.top);
       ticks = this.$.yLeftTicks.ticks;
       for (tick_i = 0; tick_i < ticks.length; tick_i++) {
+        //set the color for this tick, or for this axis, or the default color
+        ctx.strokeStyle =
+          ticks[tick_i].color || this.$.yLeftTicks.color || this.borderColor;
+       
         //get the formatted label and make sure it doesnt isnt a duplicate
         offset = -(ticks[tick_i].value - yMin) * this.ySpacingFactor;
         if (ticks[tick_i].label) {
@@ -201,7 +205,10 @@ enyo.kind({
       ctx.translate(margin.left + dataWidth, dataHeight + margin.top);
       ticks = this.$.yRightTicks.ticks;
       for (tick_i = 0; tick_i < ticks.length; tick_i++) {
-       //get the formatted label and make sure it doesnt isnt a duplicate
+        ctx.strokeStyle =
+          ticks[tick_i].color || this.$.yLeftTicks.color || this.borderColor;
+          
+        //get the formatted label and make sure it doesnt isnt a duplicate
         offset = -(ticks[tick_i].value - yMin) * this.ySpacingFactor;
         if (ticks[tick_i].label) {
           ctx.fillText(ticks[tick_i].label, 5, offset + 5);
@@ -223,6 +230,9 @@ enyo.kind({
       ticks = this.$.xTicks.ticks;
       
       for (tick_i = 0; tick_i < ticks.length; tick_i++) {
+        ctx.strokeStyle =
+          ticks[tick_i].color || this.$.yLeftTicks.color || this.borderColor;
+          
         offset = (ticks[tick_i].value - xMin) * this.xSpacingFactor;
         if (ticks[tick_i].label) {
           ctx.fillText(ticks[tick_i].label, offset, this.fontSize);
