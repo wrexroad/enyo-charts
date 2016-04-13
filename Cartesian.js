@@ -91,9 +91,9 @@ enyo.kind({
       testLabelLeft, testLabelRight;
     
     //if either the left or right y ticks are not defined,
-    //just create a function to return the minimal label width of 10 characters
+    //just create a function to return the minimal label width
     yLeftTicks = this.$.yLeftTicks || {labelWidth: function(){return 10;}};
-    yRightTicks = this.$.yRightTicks || {labelWidth: function(){return 10;}};
+    yRightTicks = this.$.yRightTicks || {labelWidth: function(){return 0;}};
     
     //figure out the width of the y tick mark labels
     yLeftTicksWidth = yLeftTicks.labelWidth();
@@ -104,7 +104,7 @@ enyo.kind({
     testLabelLeft =
       new Array(yLeftTicksWidth > 10 ? yLeftTicksWidth : 10).join('W');
     testLabelRight =
-      new Array(yRightTicksWidth > 10 ? yRightTicksWidth : 10).join('W');
+      new Array(yRightTicksWidth).join('W');
      
     this.set("decorMargin", {
       //room for the title
@@ -153,7 +153,7 @@ enyo.kind({
 
     //get the tick mark locations and labels for this range
     this.$.xTicks.setRange(xMin, xMax);
-    this.$.xTicks.set("count",
+    this.$.xTicks.set("tickCount",
       +this.$.xTicks.tickCount ||
       (dataWidth /
       (
@@ -162,15 +162,15 @@ enyo.kind({
         ).width
       ))
     );
-    
+
     this.$.yLeftTicks.setRange(yMin, yMax);
-    this.$.yLeftTicks.set("count",
-      +this.$.yLeftTicks.tickCount || this.height / this.fontSize
+    this.$.yLeftTicks.set("tickCount",
+      +this.$.yLeftTicks.ticktickCount || this.height / this.fontSize
     );
     
     if (this.$.yRightTicks) {
       this.$.yRightTicks.setRange(yMin, yMax);
-      this.$.yRightTicks.set("count",
+      this.$.yRightTicks.set("tickCount",
         +this.$.yRightTicks.tickCount || this.height / this.fontSize
       );
     }
@@ -240,7 +240,7 @@ enyo.kind({
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
       ticks = this.$.xTicks.ticks;
-      
+
       for (tick_i = 0; tick_i < ticks.length; tick_i++) {
         ctx.strokeStyle =
           ticks[tick_i].color || this.$.xTicks.color || this.borderColor;
