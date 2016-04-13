@@ -91,9 +91,9 @@ enyo.kind({
       testLabelLeft, testLabelRight;
     
     //if either the left or right y ticks are not defined,
-    //just create a function to return the minimal label width of 10 characters
+    //just create a function to return the minimal label width
     yLeftTicks = this.$.yLeftTicks || {labelWidth: function(){return 10;}};
-    yRightTicks = this.$.yRightTicks || {labelWidth: function(){return 10;}};
+    yRightTicks = this.$.yRightTicks || {labelWidth: function(){return 0;}};
     
     //figure out the width of the y tick mark labels
     yLeftTicksWidth = yLeftTicks.labelWidth();
@@ -104,7 +104,7 @@ enyo.kind({
     testLabelLeft =
       new Array(yLeftTicksWidth > 10 ? yLeftTicksWidth : 10).join('W');
     testLabelRight =
-      new Array(yRightTicksWidth > 10 ? yRightTicksWidth : 10).join('W');
+      new Array(yRightTicksWidth).join('W');
      
     this.set("decorMargin", {
       //room for the title
