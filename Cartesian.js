@@ -183,7 +183,7 @@ enyo.kind({
       for (tick_i = 0; tick_i < ticks.length; tick_i++) {
         //set the color for this tick, or for this axis, or the default color
         ctx.strokeStyle =
-          ticks[tick_i].color || this.$.yLeftTicks.color || this.borderColor;
+          ticks[tick_i].color || ticks.color || this.borderColor;
        
         //get the formatted label and make sure it doesnt isnt a duplicate
         offset = -(ticks[tick_i].value - yMin) * this.ySpacingFactor;
@@ -192,7 +192,13 @@ enyo.kind({
         }      
         ctx.beginPath();
         ctx.moveTo(0, offset);
-        ctx.lineTo(ticks[tick_i].minor ? 5 : 15, offset);
+        if (ticks[tick_i].minor) {
+          ctx.lineTo(5, offset);
+        } else if (!this.$.yLeftTicks.fullLength) {
+          ctx.lineTo(15, offset);
+        } else {
+          ctx.lineTo(dataWidth, offset);
+        }
         ctx.stroke();
       }
       ctx.restore();
@@ -215,7 +221,13 @@ enyo.kind({
         }      
         ctx.beginPath();
         ctx.moveTo(0, offset);
-        ctx.lineTo(ticks[tick_i].minor ? -5 : -15, offset);
+        if (ticks[tick_i].minor) {
+          ctx.lineTo(-5, offset);
+        } else if (!this.$.yRightTicks.fullLength) {
+          ctx.lineTo(-15, offset);
+        } else {
+          ctx.lineTo(-dataWidth, offset);
+        }
         ctx.stroke();
       }
       ctx.restore();
@@ -238,7 +250,14 @@ enyo.kind({
           ctx.fillText(ticks[tick_i].label, offset, this.fontSize);
         }
         ctx.beginPath();
-        ctx.moveTo(offset, ticks[tick_i].minor ? -5 : -15);
+        if (ticks[tick_i].minor) {
+          ctx.moveTo(offset, -5);
+        } else if (!this.$.xTicks.fullLength) {
+          ctx.moveTo(offset, -15);
+        } else {
+          ctx.moveTo(offset, -dataHeight);
+        }
+        
         ctx.lineTo(offset, 0);
         ctx.stroke();
       }
