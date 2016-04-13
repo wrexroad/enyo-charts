@@ -83,7 +83,7 @@ enyo.kind({
       
       //draw add 5 minor ticks between here and the next major tick
       if (this.minorTickCount) {
-        for (minor_i = 0; minor_i < this.minorTickCount; minor_i++) {
+        for (minor_i = 1; minor_i < this.minorTickCount; minor_i++) {
           minorVal = tickVal + (minor_i * step.size / this.minorTickCount);
           if (minorVal >= this.min && minorVal <= this.max) {
            this.ticks.push({
