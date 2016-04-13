@@ -45,12 +45,12 @@ enyo.kind({
           {
             kind: "onyx.Button",
             style: "padding: 10px; background-color: red",
-            value: "red", active: true, content: "Red", ontap: "setColor"
+            value: "red", content: "Red", ontap: "setColor"
           },
           {
             kind: "onyx.Button",
             style: "padding: 10px; background-color: blue",
-            value: "blue", content: "Blue", ontap: "setColor"
+            value: "blue", content: "Blue", ontap: "setColor", active: true
           },
           {
             kind: "onyx.Button",
