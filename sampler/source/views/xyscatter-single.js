@@ -14,9 +14,18 @@ enyo.kind({
       font: "sans-serif",
       fontSize: 14,
       axisTypes: {
-        y: {
+        yLeft: {
           type: "Linear",
           tickCount: 10
+        },
+        yRight: {
+          type: "Discrete",
+          stops: [
+            {label: "Upper Critical", value: 80, color: "red"},
+            {label: "Upper Warning", value: 60, color: "yellow"},
+            {label: "Lower Warning", value: 40, color: "yellow"},
+            {label: "Lower Critical", value: 20, color: "red"},
+          ]
         },
         x: {
           type: "Date",
