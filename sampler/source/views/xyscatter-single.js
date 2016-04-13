@@ -26,7 +26,8 @@ enyo.kind({
             {label: "Upper Warning", value: 60, color: "yellow"},
             {label: "Lower Warning", value: 40, color: "yellow"},
             {label: "Lower Critical", value: 20, color: "red"},
-          ]
+          ],
+          fullLength: true
         },
         x: {
           type: "Date",
@@ -215,7 +216,7 @@ enyo.kind({
       yVals = [];
     
     //create a place to store the dot and line settings
-    this.color = "red";
+    this.color = "blue";
     this.fill = {dot: false, line: false};
     
     //generate some points of sort of linear data
