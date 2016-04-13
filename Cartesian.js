@@ -8,21 +8,32 @@ enyo.kind({
   },
 
   constructor: function(opts) {
-    var axes = {};
+    var axes = opts.axisTypes || {};
     this.inherited(arguments);
 
-    //set the tick mark type
-    axes.x = (opts.axisTypes || {}).x || {};
+    //set the x axis tick mark type
+    axes.x = axes.x || {};
     axes.x.type = axes.x.type || "Linear";
     axes.x.name = "xTicks";
     axes.x.kind = axes.x.type + "Ticks";
-    axes.y = (opts.axisTypes || {}).y || {};
-    axes.y.type = axes.y.type || "Linear";
-    axes.y.name = "yTicks";
-    axes.y.kind = axes.y.type + "Ticks";
+    this.createComponent(axes.x);
     
-    this.createComponents([axes.x, axes.y]);
+    //try to get the left y axis. If its not defined,
+    //default to looking for a generic y axis
+    axes.yLeft = axes.yLeft || axes.y || {};
+    axes.yLeft.type = axes.yLeft.type || "Linear";
+    axes.yLeft.name = "yLeftTicks";
+    axes.yLeft.kind = axes.yLeft.type + "Ticks";
+    this.createComponent(axes.yLeft);
     
+    //get the right y axis if defined
+    if (axes.yRight) {
+      axes.yRight.type = axes.yRight.type || "Linear";
+      axes.yRight.name = "yRightTicks";
+      axes.yRight.kind = axes.yRight.type + "Ticks";
+      this.createComponent(axes.yRight);
+    }
+
     this.initValues();
   },
   initValues: function() {
@@ -34,7 +45,10 @@ enyo.kind({
   },
   changeAxisType: function(xy, axisKindObj) {
     xy = (xy || "") + "";
-    if (xy != "x" && xy != "y") {return;}
+    if (xy != "x" && xy != "y" && xy != "yLeft" && xy != "yRight") {return;}
+    
+    //if the generic y axis was defined, set yLeft instead
+    xy = xy === "y" ? "yLeft" : xy;
     
     axisKindObj.name = xy + "Ticks";
     axisKindObj.type = axisKindObj.type || "Linear";
@@ -73,25 +87,24 @@ enyo.kind({
   },
   calculateMargins: function() {
     var
-      yTicksLeft, yTicksLeftWidth, yTicksRight, yTicksRightWidth,
+      yLeftTicks, yLeftTicksWidth, yRightTicks, yRightTicksWidth,
       testLabelLeft, testLabelRight;
     
-    //yTicksLeft will default to yTicks if it isnt set
-    yTicksLeft = this.$.yTicksLeft || this.$.yTicks;
-    //if there are no right y ticks defined,
-    //just create a functino that will return a label length of 10
-    yTicksRight = this.$.yTicksRight || {labelWidth: function(){return 10;}};
+    //if either the left or right y ticks are not defined,
+    //just create a function to return the minimal label width of 10 characters
+    yLeftTicks = this.$.yLeftTicks || {labelWidth: function(){return 10;}};
+    yRightTicks = this.$.yRightTicks || {labelWidth: function(){return 10;}};
     
     //figure out the width of the y tick mark labels
-    yTicksLeftWidth = yTicksLeft.labelWidth();
-    yTicksRightWidth = yTicksRight.labelWidth();
+    yLeftTicksWidth = yLeftTicks.labelWidth();
+    yRightTicksWidth = yRightTicks.labelWidth();
     
     //create the longest label possible containing either the number of
     // characters in the tick label or 10 characters, whichever is larget
     testLabelLeft =
-      new Array(yTicksLeftWidth > 10 ? yTicksLeftWidth : 10).join('W');
+      new Array(yLeftTicksWidth > 10 ? yLeftTicksWidth : 10).join('W');
     testLabelRight =
-      new Array(yTicksRightWidth > 10 ? yTicksRightWidth : 10).join('W');
+      new Array(yRightTicksWidth > 10 ? yRightTicksWidth : 10).join('W');
      
     this.set("decorMargin", {
       //room for the title
@@ -150,47 +163,79 @@ enyo.kind({
       ))
     );
     
-    this.$.yTicks.setRange(yMin, yMax);
-    this.$.yTicks.set("count",
-      +this.$.yTicks.tickCount || this.height / this.fontSize
+    this.$.yLeftTicks.setRange(yMin, yMax);
+    this.$.yLeftTicks.set("count",
+      +this.$.yLeftTicks.tickCount || this.height / this.fontSize
     );
     
-    //draw the y axis tics and labels
-    ctx.save();
-    ctx.translate(margin.left, dataHeight + margin.top);
-    ticks = this.$.yTicks.ticks;
-    for (tick_i = 0; tick_i < ticks.length; tick_i++) {
-      //get the formatted label and make sure it doesnt isnt a duplicate
-      offset = -(ticks[tick_i].value - yMin) * this.ySpacingFactor;
-      if (ticks[tick_i].label) {
-        ctx.fillText(ticks[tick_i].label, -5, offset + 5);
-      }      
-      ctx.beginPath();
-      ctx.moveTo(0, offset);
-      ctx.lineTo(ticks[tick_i].minor ? 5 : 15, offset);
-      ctx.stroke();
+    if (this.$.yRightTicks) {
+      this.$.yRightTicks.setRange(yMin, yMax);
+      this.$.yRightTicks.set("count",
+        +this.$.yRightTicks.tickCount || this.height / this.fontSize
+      );
     }
-    ctx.restore();
-
-    //print the x ticks
-    ctx.save();
-    ctx.translate(margin.left, this.height - margin.bottom);
-    ctx.textAlign = "center";
-    ctx.textBaseline = "top";
-    ticks = this.$.xTicks.ticks;
     
-    for (tick_i = 0; tick_i < ticks.length; tick_i++) {
-      offset = (ticks[tick_i].value - xMin) * this.xSpacingFactor;
-      if (ticks[tick_i].label) {
-        ctx.fillText(ticks[tick_i].label, offset, this.fontSize);
+    //draw the left hand y axis tics and labels
+    if (this.$.yLeftTicks) {
+      ctx.save();
+      ctx.translate(margin.left, dataHeight + margin.top);
+      ticks = this.$.yLeftTicks.ticks;
+      for (tick_i = 0; tick_i < ticks.length; tick_i++) {
+        //get the formatted label and make sure it doesnt isnt a duplicate
+        offset = -(ticks[tick_i].value - yMin) * this.ySpacingFactor;
+        if (ticks[tick_i].label) {
+          ctx.fillText(ticks[tick_i].label, -5, offset + 5);
+        }      
+        ctx.beginPath();
+        ctx.moveTo(0, offset);
+        ctx.lineTo(ticks[tick_i].minor ? 5 : 15, offset);
+        ctx.stroke();
       }
-      ctx.beginPath();
-      ctx.moveTo(offset, ticks[tick_i].minor ? -5 : -15);
-      ctx.lineTo(offset, 0);
-      ctx.stroke();
+      ctx.restore();
     }
     
-    ctx.restore();
+    //draw the right hand y axis tics and labels
+    if (this.$.yRightTicks) {
+      ctx.save();
+      ctx.textAlign = "start";
+      ctx.translate(margin.left + dataWidth, dataHeight + margin.top);
+      ticks = this.$.yRightTicks.ticks;
+      for (tick_i = 0; tick_i < ticks.length; tick_i++) {
+       //get the formatted label and make sure it doesnt isnt a duplicate
+        offset = -(ticks[tick_i].value - yMin) * this.ySpacingFactor;
+        if (ticks[tick_i].label) {
+          ctx.fillText(ticks[tick_i].label, 5, offset + 5);
+        }      
+        ctx.beginPath();
+        ctx.moveTo(0, offset);
+        ctx.lineTo(ticks[tick_i].minor ? -5 : -15, offset);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+    
+    //print the x ticks
+    if (this.$.xTicks) {
+      ctx.save();
+      ctx.translate(margin.left, this.height - margin.bottom);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ticks = this.$.xTicks.ticks;
+      
+      for (tick_i = 0; tick_i < ticks.length; tick_i++) {
+        offset = (ticks[tick_i].value - xMin) * this.xSpacingFactor;
+        if (ticks[tick_i].label) {
+          ctx.fillText(ticks[tick_i].label, offset, this.fontSize);
+        }
+        ctx.beginPath();
+        ctx.moveTo(offset, ticks[tick_i].minor ? -5 : -15);
+        ctx.lineTo(offset, 0);
+        ctx.stroke();
+      }
+      
+      ctx.restore();
+    }
+    
     ctx.restore();
   },
   invertCoordinates: function(coords) {

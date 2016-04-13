@@ -16,7 +16,7 @@ enyo.kind({
     //make sure log10 is defined
     Math.log10 = Math.log10 || function(x) {
       return Math.log(x) / Math.LN10;
-    }; 
+    };
     
     //create a place to store generated ticks
     this.ticks = [];
