@@ -226,9 +226,10 @@ enyo.kind({
     
     this.draw();
   },
-  setDateFormat: function() {
+  setDateFormat: function(inSender, inEvent) {
     this.$.chart.$.xTicks.setDateFormat(this.$.dateFormat.value);
     this.draw();
+    return true;
   },
   setColor: function(inSender, inEvent) {
     this.color = inSender.value;
