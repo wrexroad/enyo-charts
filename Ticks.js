@@ -62,8 +62,13 @@ enyo.kind({
     step = this.calculateStepSize();
     
     //round the min and max values to the selected step size
-    roundMin = ((this.min / step.size) >> 0) * step.size;
-    roundMax = (Math.ceil(this.max / step.size)) * (step.size);
+    roundMin = Math.floor(this.min / step.size) * step.size;
+    roundMax = Math.ceil(this.max / step.size) * step.size;
+   
+    //make sure round min and max are different
+    if (roundMin == roundMax) {
+      roundMax++;
+    } 
    
     //if the step size is less than 1,
     //we need to get the number of fractional digits we should preserve
@@ -187,12 +192,20 @@ enyo.kind({
   },
   
   stepSizes: {
-    fullday: 86400000,
-    halfday: 43200000,
-    quartday: 21600000,
-    fullhour: 3600000,
-    halfhour: 1800000,
-    quarthour: 900000,
+    decade: 3.1536e+11,
+    year: 3.1536e+10,
+    halfyear: 1.5768e+10,
+    season: 7.884e+9,
+    month: 2.4192e+9,
+    fortnight: 1.2096e+9,
+    week: 6.048e+8,
+    threeday: 2.592e+8,
+    fullday: 8.64e+7,
+    halfday: 4.32e+7,
+    quartday: 2.16e+7,
+    fullhour: 3.6e+6,
+    halfhour: 1.8e+6,
+    quarthour: 9.0e+5,
     fullMin: 60000,
     halfMin: 30000,
     quartMin: 15000,
@@ -212,7 +225,8 @@ enyo.kind({
     
     //calculate the number of tick marks we will get with each step size
     for (stepName in this.stepSizes) {
-      countError = Math.abs(this.range / this.stepSizes[stepName] - this.tickCount);
+      countError =
+        Math.abs((this.range / this.stepSizes[stepName]) - this.tickCount);
       
       if (countError < bestStep.error) {
         bestStep.name = stepName;
@@ -220,7 +234,6 @@ enyo.kind({
         bestStep.error = countError;
       }
     }
-    
     return bestStep;
   },
   
