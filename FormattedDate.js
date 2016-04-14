@@ -155,7 +155,7 @@ enyo.kind({
       set: function(date, val) {
         var datePair = val.split("/");
         date.setUTCFullYear(datePair[1]);
-        date.setUTCDate((+datePair[0]) + 1);
+        date.setUTCDate((+datePair[0]));
       }
     },
     "YYYY": {
