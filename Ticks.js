@@ -23,7 +23,7 @@ enyo.kind({
   },
   
   observers: [
-    {path: "tickCount", method:"generateTicks"}
+    {path: ["tickCount", "minorTickCount"], method:"generateTicks"}
   ],
   
   setRange: function(min, max) {
@@ -264,7 +264,10 @@ enyo.kind({
   },
   constructor: function(opts) {
     this.inherited(arguments);
-    this.stops = [].concat(opts.stops || []);
+    this.setStops(opts.stops);
+  },
+  setStops: function(newStops) {
+    this.stops = [].concat(newStops || []);
     this.set("tickCount", this.stops.length);
   },
   labelWidth: function() {
