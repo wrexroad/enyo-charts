@@ -176,14 +176,14 @@ enyo.kind({
     dateFormat: ""
   },
   components: [
-    {kind: "FormattedDate", name: "fDate"}
+    {kind: "FormattedDate", name: "date"}
   ],
   bindings: [
-    {from: "timeZone", to: "$.fDate.timeZone"},
-    {from: "dateFormat", to: "$.fDate.format"}
+    {from: "timeZone", to: "$.date.timeZone"},
+    {from: "dateFormat", to: "$.date.format"}
   ],
   labelWidth: function() {
-    return this.$.fDate.getConvertedStringLength();
+    return this.$.date.getConvertedStringLength();
   },
   
   stepSizes: {
@@ -225,8 +225,8 @@ enyo.kind({
   },
   
   createLabel: function(value) {
-    this.$.fDate.set("jsTime", value);
-    return this.$.fDate.formattedText;
+    this.$.date.set("jsTime", value);
+    return this.$.date.formattedText;
   }
 });
 

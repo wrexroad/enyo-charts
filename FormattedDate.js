@@ -123,12 +123,20 @@ enyo.kind({
       get: function(date) {
         return date.getUTCDay();
       },
-      set: function(date, val) {
-        return date.setUTCDay(val);
-      },
+      set: function(){}
     },
-    "DOY": {
-      length: 3,
+    "MM": {
+      length: 2,
+      get: function(date) {
+        var month = date.getUTCMonth() + 1;
+        return (month < 10 ? "0" : "") + month;
+      },
+      set: function(date, val) {
+        date.setUTCMonth(val - 1);
+      }
+    },
+    "DOY/YYYY": {
+      length: 8,
       get: function(date) {
         var ms, day, zeros;
         
@@ -141,22 +149,13 @@ enyo.kind({
     
         //get zeros for paddings
         zeros = day < 10 ? "00" : day < 100 ? "0" : "";
-    
-        return zeros + day;
+        
+        return zeros + "" + day + "/" + date.getUTCFullYear();
       },
       set: function(date, val) {
-        date = new Date(date.getUTCFullYear(), 0, 0);
-        return date.setUTCDate(val);
-      }
-    },
-    "MM": {
-      length: 2,
-      get: function(date) {
-        var month = date.getUTCMonth() + 1;
-        return (month < 10 ? "0" : "") + month;
-      },
-      set: function(date, val) {
-        date.setUTCMonth(val - 1);
+        var datePair = val.split("/");
+        date.setUTCFullYear(datePair[1]);
+        date.setUTCDate((+datePair[0]) + 1);
       }
     },
     "YYYY": {
@@ -174,7 +173,7 @@ enyo.kind({
         return date.getUTCFullYear() % 2000;
       },
       set: function(date, val) {
-        date.setUTCFullYear(val + 2000);
+        this.formatCodes.YYYY.set(date, (val + 2000));
       }
     },
     "T": {
@@ -251,7 +250,7 @@ enyo.kind({
   stringToDateStamp: function(dateString) {
     var
       date = new Date(),
-      elementValue;
+      dateStamp, elementValue;
     
     dateString = dateString.trim();
     
@@ -268,18 +267,25 @@ enyo.kind({
       date = new Date(0);
     }
     
-    this._format.forEach(function(code) {
+    this._format.elements.forEach(function(code) {
       if (this.formatCodes[code]) {
         elementValue =
           dateString.substr(
             this._format.offsets[code], this.formatCodes[code].length
           );
           
-        this.formatCodes[code].set.apply(this, date, elementValue);
+        this.formatCodes[code].set.apply(this, [date, elementValue]);
       }
-    });
+    }, this);
     
-    return +date;
+    dateStamp = +date;
+    
+    //if we failed to get a date, try to use the javascript Date parse
+    if (!isFinite(dateStamp) || dateStamp < 0) {
+      dateStamp = +(new Date(dateString + ""));
+    }
+    
+    return dateStamp;
   },
   
   getConvertedStringLength: function() {

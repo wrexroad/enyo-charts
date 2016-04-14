@@ -31,7 +31,7 @@ enyo.kind({
         },
         x: {
           type: "Date",
-          dateFormat: "%DOY%/%YYYY% %HH%:%mm%:%ss% %T%",
+          dateFormat: "%DOY/YYYY% %HH%:%mm%:%ss% %T%",
           tickCount: null, //defaults to auto calculated
           minorTickCount: 10 //default is 5           
         }
@@ -141,22 +141,22 @@ enyo.kind({
         {content: "X Axis Range"},
           {kind: "onyx.InputDecorator", components: [
           {
-            kind: "onyx.Input", name: "xMin", attributes: {size: 5},
+            kind: "onyx.Input", name: "xMinDisp", attributes: {size: 15},
             onchange: "draw"
           },
           {
-            kind: "onyx.Input", name: "xMax", attributes: {size: 5},
+            kind: "onyx.Input", name: "xMaxDisp", attributes: {size: 15},
             onchange: "draw"
           }
         ]},
         {content: "Y Axis Range"},
           {kind: "onyx.InputDecorator", components: [
           {
-            kind: "onyx.Input", name: "yMin", attributes: {size: 5},
+            kind: "onyx.Input", name: "yMinDisp", attributes: {size: 15},
             onchange: "draw"
           },
           {
-            kind: "onyx.Input", name: "yMax", attributes: {size: 5},
+            kind: "onyx.Input", name: "yMaxDisp", attributes: {size: 15},
             onchange: "draw"
           }
         ]},
@@ -170,7 +170,41 @@ enyo.kind({
     ]}
   ],
   published: {
-    color: "red"
+    color: "blue",
+    xMin: null,
+    xMax: null,
+    yMin: null,
+    yMax: null
+  },
+  bindings: [
+    {
+      from: "xMin", to: "$.xMinDisp.value", oneWay: false,
+      transform: "transformDate"
+    },
+    {
+      from: "xMax", to: "$.xMaxDisp.value", oneWay: false,
+      transform:  "transformDate"
+    },
+    {from: "yMin", to: "$.yMinDisp.value", oneWay: false},
+    {from: "yMax", to: "$.yMaxDisp.value", oneWay: false}
+  ],
+  transformDate: function(value, dir) {
+    if (dir == 1) {
+      var dateString = this.$.chart.$.xTicks.$.date.dateToString(value) || "";
+      var inputSize = Math.max.apply(this, [
+        dateString.length,
+        this.$.xMinDisp.value.length,
+        this.$.xMaxDisp.value.length
+      ]);
+      this.$.xMinDisp.attributes.size = inputSize;
+      this.$.xMaxDisp.attributes.size = inputSize;
+      this.$.yMinDisp.attributes.size = inputSize;
+      this.$.yMaxDisp.attributes.size = inputSize;
+      
+      return dateString;
+    } else {
+      return this.$.chart.$.xTicks.$.date.stringToDateStamp(value);
+    }
   },
   rendered: function() {
     this.inherited(arguments);
@@ -179,10 +213,10 @@ enyo.kind({
     this.$.dateFormat.set("value", this.$.chart.axisTypes.x.dateFormat);
     
     //set an initial data range
-    this.$.yMin.value = 0;
-    this.$.yMax.value = 100;
-    this.$.xMax.value = +(new Date());
-    this.$.xMin.value = this.$.xMax.value - 86400000;
+    this.set("yMin", 0);
+    this.set("yMax", 100);
+    this.set("xMax", +(new Date()));
+    this.set("xMin", this.xMax - 86400000);
     
     this.generateData();
     
@@ -193,7 +227,6 @@ enyo.kind({
     this.draw();
   },
   setDateFormat: function() {
-    console.log("dsa");
     this.$.chart.$.xTicks.setDateFormat(this.$.dateFormat.value);
     this.draw();
   },
@@ -216,12 +249,11 @@ enyo.kind({
       yVals = [];
     
     //create a place to store the dot and line settings
-    this.color = "blue";
     this.fill = {dot: false, line: false};
     
     //generate some points of sort of linear data
-    start = this.$.xMin.value;
-    stop = this.$.xMax.value;
+    start = this.xMin;
+    stop = this.xMax;
     step = (stop - start) / 100;
     
     for (var x = start, y = 50; x < stop; ) {
@@ -276,10 +308,10 @@ enyo.kind({
     this.$.chart.draw(
       {
         title: this.$.title.value,
-        xMin: this.$.xMin.value,
-        xMax: this.$.xMax.value,
-        yMin: this.$.yMin.value,
-        yMax: this.$.yMax.value,
+        xMin: this.xMin,
+        xMax: this.xMax,
+        yMin: this.yMin,
+        yMax: this.yMax,
       },
       {datasets: datasets}
     );
