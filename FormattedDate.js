@@ -260,7 +260,6 @@ enyo.kind({
     } else if (dateString.toLowerCase() == "today") {
       return ((+date / 86400000) >> 0) * 86400000;
     } else if (dateString.toLowerCase() == "yesterday") {
-      console.log(this.stringToDateStamp("today") - 86400000);
       return this.stringToDateStamp("today") - 86400000;
     } else if (dateString.toLowerCase() == "tomorrow") {
       return this.stringToDateStamp("today") + 86400000;
@@ -280,7 +279,7 @@ enyo.kind({
     }, this);
     
     dateStamp = +date;
-    console.log(dateStamp)
+    
     //if we failed to get a date, try to use the javascript Date parse
     if (!isFinite(dateStamp) || dateStamp < 0) {
       dateStamp = +(new Date(dateString + ""));
