@@ -23,7 +23,7 @@ enyo.kind({
   },
   
   observers: [
-    {path: "tickCount", method:"generateTicks"}
+    {path: ["tickCount", "minorTickCount"], method:"generateTicks"}
   ],
   
   setRange: function(min, max) {
@@ -187,6 +187,9 @@ enyo.kind({
     {from: "timeZone", to: "$.date.timeZone"},
     {from: "dateFormat", to: "$.date.format"}
   ],
+  observers: [
+    {path: "dateFormat", method: "generateTicks"}
+  ],
   labelWidth: function() {
     return this.$.date.getConvertedStringLength();
   },
@@ -261,7 +264,10 @@ enyo.kind({
   },
   constructor: function(opts) {
     this.inherited(arguments);
-    this.stops = [].concat(opts.stops || []);
+    this.setStops(opts.stops);
+  },
+  setStops: function(newStops) {
+    this.stops = [].concat(newStops || []);
     this.set("tickCount", this.stops.length);
   },
   labelWidth: function() {
