@@ -164,13 +164,13 @@ enyo.kind({
 
     this.$.yLeftTicks.setRange(yMin, yMax);
     this.$.yLeftTicks.set("tickCount",
-      +this.$.yLeftTicks.ticktickCount || this.height / this.fontSize
+      +this.$.yLeftTicks.ticktickCount || this.height / (2 * this.fontSize)
     );
     
     if (this.$.yRightTicks) {
       this.$.yRightTicks.setRange(yMin, yMax);
       this.$.yRightTicks.set("tickCount",
-        +this.$.yRightTicks.tickCount || this.height / this.fontSize
+        +this.$.yRightTicks.tickCount || this.height / (2 * this.fontSize)
       );
     }
     
