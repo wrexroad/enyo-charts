@@ -187,6 +187,9 @@ enyo.kind({
     {from: "timeZone", to: "$.date.timeZone"},
     {from: "dateFormat", to: "$.date.format"}
   ],
+  observers: [
+    {path: "dateFormat", method: "generateTicks"}
+  ],
   labelWidth: function() {
     return this.$.date.getConvertedStringLength();
   },
