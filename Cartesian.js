@@ -43,6 +43,21 @@ enyo.kind({
     //This should get changed when data are added
     this.setAxisRange(-5, 5, -5, 5);
   },
+  toggleOverlay: function(activate) {
+    var overlay;
+    
+    if (activate) {
+      overlay = this.createComponent({
+        kind: "CartesianOverlay", name: "overlay", plotview: this
+      });
+      this.binding({from: "height", to: "$.overlay.chartHeight"});
+      this.binding({from: "width", to: "$.overlay.chartWidth"});
+    } else if (overlay = this.$.overlay) {
+      overlay.destroyRegions();
+      overlay.destroy();
+    }
+  },
+  
   changeAxisType: function(xy, axisKindObj) {
     xy = (xy || "") + "";
     if (xy != "x" && xy != "y" && xy != "yLeft" && xy != "yRight") {return;}

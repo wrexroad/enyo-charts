@@ -18,7 +18,8 @@ enyo.kind({
     axisRange: null,
     fullAxisRange: null,
     decorMargin: null,
-    layers: null
+    layers: null,
+    overlay: false
   },
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"},
@@ -36,7 +37,10 @@ enyo.kind({
         return Math.log(x) / Math.log(10);
       };
     }
-
+    
+    //turn on the overlay if it is set
+    this.toggleOverlay(this.overlay);
+    
     this.layers = {};
   },
   //functions directly related to generating the plot
@@ -352,5 +356,6 @@ enyo.kind({
   calculateSpacing: function() {},
   calculateMargins: function() {},
   invertCoordinates: function() {},
-  invertValue: function() {}
+  invertValue: function() {},
+  toggleOverlay: function(){}
 });
