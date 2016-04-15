@@ -4,7 +4,6 @@ enyo.kind({
   published: {
     bounds: null,
     plotView: null,
-    plotMargins: null,
     avtiveRegion: null,
     crosshairs: false,
     crosshairsActive: false,
@@ -16,7 +15,7 @@ enyo.kind({
     mark2: 0
   },
   observers: {
-    resize: ["plotMargins"]
+    resize: ["plotView.plotMargins"]
   },
   events: {
     onZoom: "",
@@ -296,7 +295,7 @@ enyo.kind({
       offset = this.offset,
       bounds = this.bounds;
 
-    if (!offset) {
+    if (!isFinite(offset)) {
       return null;
     } else {
       return {
@@ -337,7 +336,7 @@ enyo.kind({
     var
       trendlineObj, crosshairObj,
       bounds, left, right, width, top, bottom, height,
-      plotView, margins, dataRegion, shapes,
+      plotView, dataRegion, shapes,
       pointValue, x, y;
 
     if (this.needsUpdate) {
@@ -353,8 +352,8 @@ enyo.kind({
       bottom = bounds.bottom;
       height = bounds.height;
       
-      plotView = this.plotView;
-      margins = this.plotMargins;
+      plotView =
+        this.plotView || {invertCoordinates: function(val) {return val;}};
       dataRegion = this.$.dataRegion;
       shapes = dataRegion.$;
       crosshairObj = shapes.crosshairs;
