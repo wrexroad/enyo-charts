@@ -15,7 +15,7 @@ enyo.kind({
     mark2: 0
   },
   observers: {
-    resize: ["plotView.plotMargins"]
+    resize: ["chartWidth", "chartHeight", "plotView.plotMargins"]
   },
   events: {
     onZoom: "",
@@ -28,16 +28,17 @@ enyo.kind({
     this.inherited(arguments);
     this.holdPulseCount = 0;
     this.cancelTap = false;
-    
+
     //get the associated plotView
     this.plotView = this.owner;
 
     //start the crosshair animation
     this.updateCrosshairs();
+    this.resize();
   },
   resize: function(previous, current, property) {
     var bounds, region, coords;
-    
+
     //check if anything really changed
     if (
       previous && current &&
@@ -75,7 +76,7 @@ enyo.kind({
     
     //create crosshairs
     region.createComponent(
-      {kind: "btaps.Crosshairs", name: "crosshairs"}
+      {kind: "Overlay.Crosshairs", name: "crosshairs"}
     );
     region.$.crosshairs.labelColor = "green";
     region.$.crosshairs.lineColor = "#330000"; 
@@ -89,7 +90,7 @@ enyo.kind({
     //create trendline stuff
     region.createComponent(
       {
-        kind: "btaps.Trendline", name: "trendline",
+        kind: "Overlay.Trendline", name: "trendline",
         labelColor: "green", lineColor: "#330000"
       }
     );
@@ -145,7 +146,7 @@ enyo.kind({
     region.ondoubletap = "handleDoubleTap";
     region.render();
     
-    region = this.createRegion(bounds.leftRegion, "rightRegion");
+    region = this.createRegion(bounds.rightRegion, "rightRegion");
     region.ondrag = "zoomByAxis";
     region.onmousewheel = "zoomByWheel";
     region.ontap = "handleTap";
@@ -181,7 +182,8 @@ enyo.kind({
       style: 
         "position: absolute;" +
         "left:" + bounds.left + "px; " +
-        "top:" + bounds.top + "px;"
+        "top:" + bounds.top + "px; " +
+        "z-index: 99;"
     });
 
     return region;
@@ -198,11 +200,10 @@ enyo.kind({
   calculateBounds: function() {
     var
       plotView = this.plotView || {},
-      margins = plotView.plotMargins || null,
+      margins = plotView.decorMargin || null,
       chartHeight = this.chartHeight,
       chartWidth = this.chartWidth,
       bounds;
-      
     if(margins === null) {
       return null;
     }
@@ -639,4 +640,174 @@ enyo.kind({
     
     this.holdPulseCount++;
   }
+});
+
+enyo.kind({
+  name: 'Overlay.Trendline',
+  kind: 'enyo.canvas.Shape',
+  published: {
+		bounds: null,
+    labelText: "",
+    labelFont: '10pt "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace',
+    labelColor: "black",
+    lineWidth: 1,
+    lineColor: "balck"
+	},
+  constructor: function() {
+    this.inherited(arguments);
+    this.bounds = {
+      width: 0, height: 0, //size of plot
+      x1: 0, y1: 0,
+      x2: 0, y2: 0
+    };
+  },
+  equation: function () {
+    var
+      bounds = this.bounds || {},
+      x1 = bounds.x1,
+      x2 = bounds.x2,
+      y1 = bounds.y1,
+      y2 = bounds.y2,
+      m, b;
+      
+      m = (x1 == x2) ? NaN : (y2 - y1) / (x2 - x1);
+      b = y1 - (x1 * m);
+      
+      return {
+        slope: m,
+        yIntercept: b
+      };
+  },
+  createLabel: {
+    method: (function(coords) {
+      return (
+        "Δy: " + (coords.y2 - coords.y1).toPrecision(5) + ", " +
+        "Δx: " + (coords.x2 - coords.x1).toPrecision(5)
+      );
+    }),
+    context: this
+  },
+  renderSelf: function (ctx) {
+
+    //cache some values
+    var
+      bounds = this.bounds || {},
+      x1 = bounds.x1,
+      y1 = bounds.y1,
+      x2 = bounds.x2,
+      y2 = bounds.y2,
+      width = bounds.width,
+      lineWidth = this.lineWidth,
+      capWidth = lineWidth << 1,
+      equation = this.equation() || {},
+      slope = equation.slope,
+      yIntercept = equation.yIntercept,
+      textOffset;
+    
+    ctx.save();
+		ctx.beginPath();
+		ctx.strokeStyle = this.lineColor;
+		ctx.lineWidth = lineWidth;
+    
+    //draw the endpoints
+    ctx.moveTo(x1, y1); 
+    ctx.arc(x1, y1, capWidth, 0, Math.PI * 2);
+    ctx.moveTo(x2, y2);
+    ctx.arc(x2, y2, capWidth, 0, Math.PI * 2);
+    
+    //draw the line binding the two points
+		ctx.moveTo(x1, y1);
+		ctx.lineTo(x2, y2);
+    
+    //draw the projection line
+    if ((slope || slope !== 0) && (yIntercept || yIntercept !== 0) ) {
+      ctx.moveTo(0, yIntercept);
+		  ctx.lineTo(width, (slope * width) + yIntercept);
+    }
+    
+		ctx.stroke();
+    ctx.textAlign = "start";
+    if (slope < 0) {
+      textOffset = 10;
+    } else {
+      textOffset = -10;
+    } 
+    
+    ctx.fillStyle = this.labelColor;
+    ctx.font = this.labelFont;
+	  ctx.fillText(
+      this.createLabel.method.call(
+        this.createLabel.context, {x1: x1, x2: x2, y1: y1, y2: y2}
+      ),
+      ((x2 - x1)>>1) + x1 + textOffset,
+      ((y2 - y1)>>1) + y1 + textOffset
+    );
+  
+  	ctx.restore();
+	}
+});
+
+/* global enyo */
+/* global btapsData */
+
+enyo.kind({
+  name: 'Overlay.Crosshairs',
+  kind: 'enyo.canvas.Shape',
+  published: {
+		bounds: null,
+    labelText: "",
+    labelFont:'10pt "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace',
+    labelColor: "black",
+    lineWidth: 1,
+    lineColor: "balck"
+	},
+  constructor: function() {
+    this.inherited(arguments);
+    this.bounds = {
+      w: 0, h: 0, //width and height of the cross
+      x: 0, y: 0 //location of intersection
+    };
+  },
+  observers: [
+    {method: "renderSelf", path: ["labelText"]}
+  ],
+  componenets: [
+    {kind: "enyo.canvas.Line", name: "v"},
+    {kind: "enyo.canvas.Line", name: "h"},
+    {kind: "enyo.canvas.Text", name: "label"}
+  ],
+	renderSelf: function (ctx) {
+    //cache some values
+    var
+      bounds = this.bounds || {},
+      width = bounds.w,
+      height = bounds.h,
+      x = (bounds.x >> 0) + 0.5,
+      y = (bounds.y >> 0) + 0.5,
+      text = this.labelText;
+      
+		ctx.save();
+		ctx.beginPath();
+		ctx.strokeStyle = this.lineColor;
+		ctx.lineWidth = this.lineWidth;
+    
+    //draw the horizontal bar
+		ctx.moveTo(0, y);
+		ctx.lineTo(width, y);
+
+    //draw the vertical bar
+		ctx.moveTo(x, 0);
+		ctx.lineTo(x, height);
+    
+		ctx.stroke();
+    
+    //make sure label wont say "null" or "undefined" or some garbage like that
+    if (text || text === 0) {
+      ctx.fillStyle = this.labelColor;
+      ctx.font = this.labelFont;
+  	  ctx.fillText(text, x + 10, y - 10);
+    }
+    
+		ctx.restore();
+	}
 });

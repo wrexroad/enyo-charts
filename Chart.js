@@ -38,9 +38,6 @@ enyo.kind({
       };
     }
     
-    //turn on the overlay if it is set
-    this.toggleOverlay(this.overlay);
-    
     this.layers = {};
   },
   //functions directly related to generating the plot

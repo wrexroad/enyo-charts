@@ -9,7 +9,7 @@ enyo.kind({
       ]} 
     ]},
     {
-      kind: "Chart.Cartesian", name: "chart",
+      kind: "Chart.Cartesian", name: "chart", overlay: true,
       bgColor: "lightgrey",
       font: "sans-serif",
       fontSize: 14,
@@ -44,8 +44,19 @@ enyo.kind({
       ]}
     ]}
   ],
+  published: {
+    xMin: 0,
+    xMax: 0,
+    yMin: 0,
+    yMax: 0
+  },
   rendered: function() {
     this.inherited(arguments);
+    
+    this.xMax = +(new Date);
+    this.xMin = this.xMax - 86400000;
+    this.yMax = 100;
+    this.yMin = 0;
     
     this.width = this.width - 20;
     this.height = 400;
