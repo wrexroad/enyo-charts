@@ -68,7 +68,6 @@ enyo.kind({
     region.onenter = "cursorEntered";
     region.onleave = "cursorLeft";
     region.ontap = "handleTap";
-    region.ondoubletap = "handleDoubleTap";
     region.onmousewheel = "zoomByWheel";
     region.ondragfinish = "handleDrag";
     region.ondrag = "handleDrag";
@@ -148,19 +147,16 @@ enyo.kind({
     region.ondrag = "zoomByAxis";
     region.onmousewheel = "zoomByWheel";
     region.ontap = "handleTap";
-    region.ondoubletap = "handleDoubleTap";
     
     region = this.createRegion(bounds.rightRegion, "rightRegion");
     region.ondrag = "zoomByAxis";
     region.onmousewheel = "zoomByWheel";
     region.ontap = "handleTap";
-    region.ondoubletap = "handleDoubleTap";
 
     region = this.createRegion(bounds.bottomRegion, "bottomRegion");
     region.ondrag = "zoomByAxis";
     region.onmousewheel = "zoomByWheel";
     region.ontap = "handleTap";
-    region.ondoubletap = "handleDoubleTap";
     
     return true;
   },
@@ -172,7 +168,6 @@ enyo.kind({
     //create a canvas that we can use to draw over the plot
     region = this.createComponent({
       kind: "enyo.Canvas", name: name,
-      doubleTapEnabled: true,
       classes: "plot-overlay",
       attributes: {
         height: bounds.height,
@@ -553,10 +548,20 @@ enyo.kind({
     return true;
   },
   handleTap: function(inSender, inEvent) {
+    var now = +(new Date());
+    
     //see if something happened to make us ignore this tap
     if (this.cancelTap) {
       this.cancelTap = false;
       return false;
+    }
+    
+    //check if this is a double tap
+    if ((now - this.dblTapTmr) < 200) {
+      this.handleDoubleTap(inSender, inEvent);
+      return;
+    } else {
+      this.dblTapTmr = now;
     }
     
     if (this.zoomboxCoords) {
@@ -565,16 +570,16 @@ enyo.kind({
     }
   
     if (this.showCrosshairs && inSender.name == "dataRegion") {
-      
       this.markPlot(inSender, inEvent);
-      this.$.dataRegion.doubleTapEnabled =
-        !((this.trendlineCoods && (this.trendlineCoords.mark1 && !this.trendlineCoords.mark2)) || this.zoomboxCoords);
     }
   
-    //let the tap fall through to the underlying plot
-    return false;
+    return true;
   },
   handleDoubleTap: function(inSender, inEvent) {
+    //double tapping should trigger setting autoranging.
+    //We should clear out any trendlines or zoomboxes
+    this.zoomboxCoords = this.trendlineCoords = null;
+    
     if (inSender.name === "dataRegion") {
       this.doSetAutorange(inEvent);
     } else {
