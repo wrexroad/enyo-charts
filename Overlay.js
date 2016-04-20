@@ -249,15 +249,15 @@ enyo.kind({
   refresh: function() {
     var
       cursor = this.cursor,
-      dataRegion = this.$.dataRegion,
+      dataRegionBounds = this.bounds.dataRegion,
       ctx, zoom;
 
-    if (!dataRegion) { return; }
+    if (!dataRegionBounds) { return; }
     
-    ctx = dataRegion.node.getContext('2d');
+    ctx = this.$.dataRegion.node.getContext('2d');
     
     //clear off any old overlay data
-    ctx.clearRect(0, 0, dataRegion.node.width, dataRegion.node.height);
+    ctx.clearRect(0, 0, dataRegionBounds.width, dataRegionBounds.height);
     
     //draw zoom box if we are currently zooming
     if (zoom = this.zoomboxCoords) {
@@ -272,10 +272,10 @@ enyo.kind({
       ctx.save();
       ctx.strokeStyle = this.crosshairsColor;
       ctx.beginPath();
-      ctx.moveTo(0, this.cursor.y);
-      ctx.lineTo(this.bounds.dataRegion.width, this.cursor.y);
-      ctx.moveTo(this.cursor.x, 0);
-      ctx.lineTo(this.cursor.x, this.bounds.dataRegion.height);
+      ctx.moveTo(0, cursor.y);
+      ctx.lineTo(dataRegionBounds.width, cursor.y);
+      ctx.moveTo(cursor.x, 0);
+      ctx.lineTo(cursor.x, dataRegionBounds.height);
       ctx.stroke();
       ctx.restore();
     }
@@ -296,7 +296,7 @@ enyo.kind({
     
     return true;
   },
-  getRelativeCoords: function(inEvent) {
+  cursorMoved: function(inSender, inEvent) {
     var
       bounds = this.bounds,
       dataRegion = bounds.dataRegion,
@@ -326,12 +326,9 @@ enyo.kind({
     y = y < 0 ? 0 : y;
     y = y > dataRegion.width ? dataRegion.height : y;
     
-    return { x: x, y: y};
-  },
-  cursorMoved: function(inSender, inEvent) {
-    this.cursor = this.getRelativeCoords(inEvent);
+    this.cursor = { x: x, y: y};
     
-    if(this.zoomboxCoords) {
+    if (this.zoomboxCoords) {
       this.zoomByBox(inSender, inEvent);
     }
     
@@ -408,24 +405,24 @@ enyo.kind({
       width = regionAttributes.width,
       midX = width >> 1,
       midY = height >> 1,
-      relativeCoords = this.getRelativeCoords(inEvent),
+      cursor = this.cursor,
       scaleX = 1,
       scaleY = 1;
     
-    if (!relativeCoords) {
+    if (!cursor) {
       return;
     }
 
     if (zoomRegion === "leftRegion" && inEvent.ddy) {
       scaleY +=
         //direction and magnitude of scale factor
-        ((relativeCoords.y - inEvent.dy) > (height >> 1) ? -2 : 2) *
+        ((cursor.y - inEvent.dy) > (height >> 1) ? -2 : 2) *
         //proportion of axis scale factor 
         (inEvent.ddy / height);
       
     } else if (zoomRegion === "bottomRegion" && inEvent.ddx) {
       scaleX +=
-        ((relativeCoords.x - inEvent.dx) > (width >> 1) ? -2 : 2) *
+        ((cursor.x - inEvent.dx) > (width >> 1) ? -2 : 2) *
         ( inEvent.ddx / width);
     }
     
@@ -443,11 +440,11 @@ enyo.kind({
   zoomByBox: function(inSender, inEvent) {
     var 
       ctx = this.$.dataRegion.node.getContext('2d'),
-      coords = this.getRelativeCoords(inEvent),
+      cursor = this.cursor,
       plotView = this.plotView,
       start, end, xMin, xMax, yMin, yMax, t, l, w, h, dx, dy;
 
-    if (!coords) {
+    if (!cursor) {
       return true;
     }
 
@@ -456,18 +453,18 @@ enyo.kind({
       this.zoomboxCoords = {
         t: this.zoomboxCoords.t,
         l: this.zoomboxCoords.l,
-        w: coords.x - this.zoomboxCoords.l,
-        h: coords.y - this.zoomboxCoords.t
+        w: cursor.x - this.zoomboxCoords.l,
+        h: cursor.y - this.zoomboxCoords.t
       };
     } else if (inEvent.type === "holdpulse") {
       //create the box's top left corner at the cursor
-      this.zoomboxCoords = {t: coords.y, l: coords.x, w: 0, h: 0};
+      this.zoomboxCoords = {t: cursor.y, l: cursor.x, w: 0, h: 0};
     } else {
       this.holdPulseCount = 0;
       document.getElementById(this.id).style.cursor = "auto";
       
-      dx = coords.x - this.zoomboxCoords.l;
-      dy = coords.y - this.zoomboxCoords.t;
+      dx = cursor.x - this.zoomboxCoords.l;
+      dy = cursor.y - this.zoomboxCoords.t;
       
       //make sure the box is atleast 10px in one dimension
       if (dx > 10 || dy > 10) {
