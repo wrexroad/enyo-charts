@@ -7,7 +7,7 @@ enyo.kind({
     avtiveRegion: null,
     crosshairs: false,
     crosshairsActive: false,
-    zoombox: false,
+    zoombox: null,
     chartHeight: 0,
     chartWidth: 0,
     offset: 0,
@@ -61,10 +61,10 @@ enyo.kind({
     }
 
     //create data region
-    region = this.createRegion(bounds.dataRegion, "dataRegion");
+    region = this.createRegion(bounds.dataRegion, "dataRegion").render();
     region.onmove = "cursorMoved";
-    region.onenter = "activateCrosshairs";
-    region.onleave = "deactivateCrosshairs";
+    region.onenter = "cursorEntered";
+    region.onleave = "cursorLeft";
     region.ontap = "handleTap";
     region.ondoubletap = "handleDoubleTap";
     region.onmousewheel = "zoomByWheel";
@@ -72,23 +72,23 @@ enyo.kind({
     region.ondrag = "handleDrag";
     region.onholdpulse = "handlePulse";
     region.onrelease = "handleRelease";
-    region.render();
-    
+
+    /*
     //create crosshairs
     region.createComponent(
       {kind: "Overlay.Crosshairs", name: "crosshairs"}
     );
     region.$.crosshairs.labelColor = "green";
     region.$.crosshairs.lineColor = "#330000"; 
-    
-    //create a zoom box canvas element in dataRegion
+    */
+    /*//create a zoom box canvas element in dataRegion
     region.createComponent({
       kind: "enyo.canvas.Rectangle", name: "zb",
       outlineColor: "#330000", color: "", bounds: {}
-    });
+    });*/
     
     //create trendline stuff
-    region.createComponent(
+    /*region.createComponent(
       {
         kind: "Overlay.Trendline", name: "trendline",
         labelColor: "green", lineColor: "#330000"
@@ -98,6 +98,7 @@ enyo.kind({
       width: bounds.dataRegion.width,
       height: bounds.dataRegion.height
     };
+    
     if (typeof this.mark1 == "object") {
       coords = this.plotView.invertValue(this.mark1);
       region.$.trendline.bounds.x1 = coords.x;
@@ -137,31 +138,30 @@ enyo.kind({
       }),
       context: this
     };
-    
+    */
+
+
     //create zoom margins
     region = this.createRegion(bounds.leftRegion, "leftRegion");
     region.ondrag = "zoomByAxis";
     region.onmousewheel = "zoomByWheel";
     region.ontap = "handleTap";
     region.ondoubletap = "handleDoubleTap";
-    region.render();
     
     region = this.createRegion(bounds.rightRegion, "rightRegion");
     region.ondrag = "zoomByAxis";
     region.onmousewheel = "zoomByWheel";
     region.ontap = "handleTap";
     region.ondoubletap = "handleDoubleTap";
-    region.render();
 
     region = this.createRegion(bounds.bottomRegion, "bottomRegion");
     region.ondrag = "zoomByAxis";
     region.onmousewheel = "zoomByWheel";
     region.ontap = "handleTap";
     region.ondoubletap = "handleDoubleTap";
-    region.render();
     
     //update the trendline
-    this.needsUpdate = true;
+   // this.needsUpdate = true;
 
     return true;
   },
@@ -186,6 +186,7 @@ enyo.kind({
         "z-index: 99;"
     });
 
+    region.render();
     return region;
   },
   destroyRegions: function() {
@@ -247,6 +248,24 @@ enyo.kind({
 
     return bounds;
   },
+  refresh: function() {
+    var dataRegion, overlayCtx, plotView, zoom;
+
+    dataRegion = this.$.dataRegion;
+    if (!dataRegion) { return; }
+    ctx = dataRegion.node.getContext('2d');
+    
+    //clear off any old overlay data
+    ctx.clearRect(0, 0, dataRegion.node.width, dataRegion.node.height);
+    
+    //draw zoom box if we are currently zooming
+    if (zoom = this.zoombox) {
+      ctx.save();
+      ctx.strokeStyle = "#330000";
+      ctx.strokeRect(zoom.l, zoom.t, zoom.w, zoom.h);
+      ctx.restore();
+    }
+  },
   crosshairsChanged: function(inSender, inEvent) {
     if (!this.crosshairs && this.crosshairsActive) {
       this.deactivateCrosshairs();
@@ -287,29 +306,37 @@ enyo.kind({
     
     return true;
   },
-  getRelativeCoords: function(x, y) {
+  getRelativeCoords: function(inEvent) {
     var
-      owner = this.owner,
-      ownerowner = owner.owner,
-      ownerNode = owner.node,
-      ownerownerNode = ownerowner.node,
-      offset = this.offset,
-      bounds = this.bounds;
-
-    if (!isFinite(offset)) {
+      bounds = this.bounds,
+      dataRegion = bounds.dataRegion,
+      plotView = this.plotView,
+      currentNode = plotView.node,
+      x = inEvent.pageX - dataRegion.left,
+      y = inEvent.pageY - dataRegion.top;
+    
+    if (!isFinite(x + y)) {
       return null;
-    } else {
-      return {
-          x:
-            x -
-            bounds.leftRegion.right - offset.left -
-            ownerownerNode.offsetLeft - ownerNode.offsetLeft,
-          y:
-            y - 20 - //20px for the menu button
-            bounds.dataRegion.top - offset.top -
-            ownerownerNode.offsetTop - ownerNode.offsetTop
-      };
     }
+    
+    //subtract and element offsets from the provided coordinates
+    while (currentNode) {
+      x -= currentNode.offsetLeft;
+      y -= currentNode.offsetTop;
+      currentNode = currentNode.offsetParent;
+    }
+    
+    if (!isFinite(x + y)) {
+      return null;
+    }
+    
+    //make sure the resulting coordinates are within the plot area
+    x = Math.max(0, x);
+    x = Math.min(x, dataRegion.width);
+    y = Math.max(0, y);
+    y = Math.min(y, dataRegion.height);
+    
+    return { x: x, y: y };
   },
   cursorMoved: function(inSender, inEvent) {
     var coords;
@@ -319,7 +346,7 @@ enyo.kind({
     }
     
     if (this.crosshairs) {
-      coords = this.getRelativeCoords(inEvent.pageX, inEvent.pageY);
+      coords = this.getRelativeCoords(inEvent);
 
       if (!coords) {
         return true;
@@ -331,6 +358,20 @@ enyo.kind({
       this.cursorY = coords.y;
       this.needsUpdate = true;
     }
+    return true;
+  },
+  cursorEntered: function(inSender, inEvent) {
+    if (this.zoombox) {
+      this.zoomByBox(inSender, inEvent);
+    }
+    this.activateCrosshairs(inSender, inEvent);
+    return true;
+  },
+  cursorLeft: function(inSender, inEvent) {
+    if (this.zoombox) {
+      this.zoomByBox(inSender, inEvent);
+    }
+    this.deactivateCrosshairs(inSender, inEvent);
     return true;
   },
   updateCrosshairs: function(inSender, inEvent) {
@@ -418,7 +459,7 @@ enyo.kind({
       trendlineBounds.y2 = 0;
     } else {
       //calulate the coordinates and value of this point
-      coords = this.getRelativeCoords(inEvent.pageX, inEvent.pageY);
+      coords = this.getRelativeCoords(inEvent);
 
       if (!coords) {
         return false;
@@ -450,7 +491,7 @@ enyo.kind({
     var
       zoomRegion = inSender.name,
       cursorValue = this.plotView.invertCoordinates(
-        this.getRelativeCoords(inEvent.pageX, inEvent.pageY)
+        this.getRelativeCoords(inEvent)
       );
 
     if (!cursorValue) {
@@ -475,7 +516,7 @@ enyo.kind({
       width = regionAttributes.width,
       midX = width >> 1,
       midY = height >> 1,
-      relativeCoords = this.getRelativeCoords(inEvent.pageX, inEvent.pageY),
+      relativeCoords = this.getRelativeCoords(inEvent),
       scaleX = 1,
       scaleY = 1;
     
@@ -509,55 +550,49 @@ enyo.kind({
   },
   zoomByBox: function(inSender, inEvent) {
     var 
-      dataRegion = this.$.dataRegion,
-      box = dataRegion.$.zb,
-      coords = this.getRelativeCoords(inEvent.pageX, inEvent.pageY),
+      ctx = this.$.dataRegion.node.getContext('2d'),
+      coords = this.getRelativeCoords(inEvent),
       plotView = this.plotView,
-      bounds = box.bounds,
       start, end, xMin, xMax, yMin, yMax, t, l, w, h, dx, dy;
 
     if (!coords) {
       return true;
     }
 
-    if (inEvent.type === "move") {
+    if ("moveenterleave".indexOf(inEvent.type) > -1 ) {
       //set the new bounds to have the same t and l, but adjust the w and h
-      box.bounds = {
-        t: bounds.t,
-        l: bounds.l,
-        w: coords.x - bounds.l,
-        h: coords.y - bounds.t
+      this.zoombox = {
+        t: this.zoombox.t,
+        l: this.zoombox.l,
+        w: coords.x - this.zoombox.l,
+        h: coords.y - this.zoombox.t
       };
     } else if (inEvent.type === "holdpulse") {
       //create the box's top left corner at the cursor
-      box.bounds = {t: coords.y, l: coords.x, w: 0, h: 0};
+      this.zoombox = {t: coords.y, l: coords.x, w: 0, h: 0};
     } else {
-      this.zoombox = false;
       this.holdPulseCount = 0;
       document.getElementById(this.id).style.cursor = "auto";
       
-      dx = coords.x - bounds.l;
-      dy = coords.y - bounds.t;
+      dx = coords.x - this.zoombox.l;
+      dy = coords.y - this.zoombox.t;
       
-      //reset the box
-      box.bounds = {t: 0, l: 0, w: 0, h: 0};
-
       //make sure the box is atleast 10px in one dimension
       if (dx > 10 || dy > 10) {
-        t = bounds.t;
-        l = bounds.l;
-        w = bounds.w;
-        h = bounds.h;
+        t = this.zoombox.t;
+        l = this.zoombox.l;
+        w = this.zoombox.w;
+        h = this.zoombox.h;
         
         //get the min and max coordinates form the box bounds
         xMin = xMax = l;
-        if(bounds.w > 0) {
+        if(this.zoombox.w > 0) {
           xMax += w;
         } else {
           xMin += w;
         }
         yMin = yMax = t;
-        if(bounds.h > 0) {
+        if(this.zoombox.h > 0) {
           yMin += h;
         } else {
           yMax += h;
@@ -576,11 +611,12 @@ enyo.kind({
         this.doRange(
           {xMin: start.x, xMax: end.x, yMin: start.y, yMax: end.y}
         );
+       
+        //reset the box
+        this.zoombox = null;
       }
     }
-
-    dataRegion.update();
-
+    
     return true;
   },
   handleDrag: function(inSender, inEvent) {
