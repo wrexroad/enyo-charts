@@ -5,14 +5,18 @@ enyo.kind({
     bounds: null,
     plotView: null,
     avtiveRegion: null,
-    crosshairs: false,
-    crosshairsActive: false,
-    zoombox: null,
+    cursor: null,
+    showCrosshairs: true,
+    crosshairsColor: "#330000",
+    crosshairsLabel: "",
+    zoomboxCoords: null,
+    zoomboxColor: "#330000",
+    trendlineCoords: null,
+    trendlineColor: "green",
+    trendlineLabel: "",
     chartHeight: 0,
     chartWidth: 0,
     offset: 0,
-    mark1: 0,
-    mark2: 0
   },
   observers: {
     resize: ["chartWidth", "chartHeight", "plotView.plotMargins"]
@@ -32,8 +36,6 @@ enyo.kind({
     //get the associated plotView
     this.plotView = this.owner;
 
-    //start the crosshair animation
-    this.updateCrosshairs();
     this.resize();
   },
   resize: function(previous, current, property) {
@@ -160,9 +162,6 @@ enyo.kind({
     region.ontap = "handleTap";
     region.ondoubletap = "handleDoubleTap";
     
-    //update the trendline
-   // this.needsUpdate = true;
-
     return true;
   },
   createRegion: function(bounds, name) {
@@ -195,7 +194,6 @@ enyo.kind({
     (this.$.leftRegion || {destroy: function(){}}).destroy();
     (this.$.rightRegion || {destroy: function(){}}).destroy();
     (this.$.bottomRegion || {destroy: function(){}}).destroy();
-    this.crosshairsActive = false;
     return true;
   },
   calculateBounds: function() {
@@ -205,7 +203,7 @@ enyo.kind({
       chartHeight = this.chartHeight,
       chartWidth = this.chartWidth,
       bounds;
-    if(margins === null) {
+    if (margins === null) {
       return null;
     }
     
@@ -249,60 +247,52 @@ enyo.kind({
     return bounds;
   },
   refresh: function() {
-    var dataRegion, overlayCtx, plotView, zoom;
+    var
+      cursor = this.cursor,
+      dataRegion = this.$.dataRegion,
+      ctx, zoom;
 
-    dataRegion = this.$.dataRegion;
     if (!dataRegion) { return; }
+    
     ctx = dataRegion.node.getContext('2d');
     
     //clear off any old overlay data
     ctx.clearRect(0, 0, dataRegion.node.width, dataRegion.node.height);
     
     //draw zoom box if we are currently zooming
-    if (zoom = this.zoombox) {
+    if (zoom = this.zoomboxCoords) {
       ctx.save();
-      ctx.strokeStyle = "#330000";
+      ctx.strokeStyle = this.zoomboxColor;
       ctx.strokeRect(zoom.l, zoom.t, zoom.w, zoom.h);
       ctx.restore();
     }
-  },
-  crosshairsChanged: function(inSender, inEvent) {
-    if (!this.crosshairs && this.crosshairsActive) {
-      this.deactivateCrosshairs();
+    
+    //draw crosshairs is they are supposed to be showing
+    if (this.showCrosshairs && cursor && !cursor.outOfBounds) {
+      ctx.save();
+      ctx.strokeStyle = this.crosshairsColor;
+      ctx.beginPath();
+      ctx.moveTo(0, this.cursor.y);
+      ctx.lineTo(this.bounds.dataRegion.width, this.cursor.y);
+      ctx.moveTo(this.cursor.x, 0);
+      ctx.lineTo(this.cursor.x, this.bounds.dataRegion.height);
+      ctx.stroke();
+      ctx.restore();
     }
   },
   activateCrosshairs: function() {
     var dataRegion = this.$.dataRegion;
 
-    if(!this.crosshairs || !dataRegion) {
+    if(!this.showCrosshairs || !dataRegion) {
       return;
     }
 
-    this.crosshairsActive = true;
+    this.showCrosshairs = true;
   },
   deactivateCrosshairs: function(inSender, inEvent) {
-    var
-      dataRegion = this.$.dataRegion || {},
-      shapes = dataRegion.$;
-      
-    if (!shapes) {
-      return true;
-    }
-
-    this.crosshairsActive = false;
-    
-    shapes.crosshairs.bounds = {x: 0, y: 0, w: 0, h: 0};
-
-    //clear the trend line if it hasnt been anchored on both ends
-    if (this.mark1 && !this.mark2) {
-      this.mark1 = false;
-      shapes.trendline.bounds = {x1: 0, y1: 0, x2: 0, y2: 0};
-    }
-    
-    this.cursorX = 0;
-    this.cursorY = 0;
-    
-    this.needsUpdate = true;    
+        
+    this.showCrosshairs = false;
+    this.trendlineCoords = null;
     
     return true;
   },
@@ -331,168 +321,70 @@ enyo.kind({
     }
     
     //make sure the resulting coordinates are within the plot area
-    x = Math.max(0, x);
-    x = Math.min(x, dataRegion.width);
-    y = Math.max(0, y);
-    y = Math.min(y, dataRegion.height);
+    x = x < 0 ? 0 : x;
+    x = x > dataRegion.width ? dataRegion.width : x;
+    y = y < 0 ? 0 : y;
+    y = y > dataRegion.width ? dataRegion.height : y;
     
-    return { x: x, y: y };
+    return { x: x, y: y};
   },
   cursorMoved: function(inSender, inEvent) {
-    var coords;
+    this.cursor = this.getRelativeCoords(inEvent);
     
-    if(this.zoombox) {
+    if(this.zoomboxCoords) {
       this.zoomByBox(inSender, inEvent);
     }
     
-    if (this.crosshairs) {
-      coords = this.getRelativeCoords(inEvent);
-
-      if (!coords) {
-        return true;
-      }
-
-      //make sure the crosshairs are active for this plot
-      this.crosshairsActive = true;
-      this.cursorX = coords.x;
-      this.cursorY = coords.y;
-      this.needsUpdate = true;
-    }
     return true;
   },
   cursorEntered: function(inSender, inEvent) {
-    if (this.zoombox) {
-      this.zoomByBox(inSender, inEvent);
-    }
-    this.activateCrosshairs(inSender, inEvent);
+    //this.activateCrosshairs(inSender, inEvent);
+    this.cursorMoved(inSender, inEvent);
+    
     return true;
   },
   cursorLeft: function(inSender, inEvent) {
-    if (this.zoombox) {
-      this.zoomByBox(inSender, inEvent);
-    }
-    this.deactivateCrosshairs(inSender, inEvent);
+    //this.deactivateCrosshairs(inSender, inEvent);
+    this.cursorMoved(inSender, inEvent);
+    this.cursor.outOfBounds = true;
     return true;
-  },
-  updateCrosshairs: function(inSender, inEvent) {
-    var
-      trendlineObj, crosshairObj,
-      bounds, left, right, width, top, bottom, height,
-      plotView, dataRegion, shapes,
-      pointValue, x, y;
-
-    if (this.needsUpdate) {
-      x = this.cursorX;
-      y = this.cursorY;
-      bounds = (this.bounds || {}).dataRegion;
-      if (!bounds) {return;}
-      
-      left   = bounds.left;
-      right  = bounds.right;
-      width  = bounds.width;
-      top    = bounds.top;
-      bottom = bounds.bottom;
-      height = bounds.height;
-      
-      plotView =
-        this.plotView || {invertCoordinates: function(val) {return val;}};
-      dataRegion = this.$.dataRegion;
-      shapes = dataRegion.$;
-      crosshairObj = shapes.crosshairs;
-      trendlineObj = shapes.trendline;
-      pointValue = plotView.invertCoordinates({x: x, y: y});
-
-      if(this.crosshairs) {
-        crosshairObj.bounds = {
-          w: this.crosshairsActive ? dataRegion.attributes.width : 0,
-          h: dataRegion.attributes.height,
-          x: x,
-          y: y
-        };
-        crosshairObj.labelText =
-          this.crosshairsActive ? 
-          ("y: " + (+pointValue.y || 0).toPrecision(5) + ", " +
-          "t: " + pointValue.x) : "";
-      }
-
-      if (this.mark1 && !this.mark2) {
-        trendlineObj.bounds.x2 = x;
-        trendlineObj.bounds.y2 = y;
-      }
-    
-      dataRegion.update();
-      this.needsUpdate = false;
-    }
-
-    window.requestAnimationFrame(this.updateCrosshairs.bind(this));
-  },
-  updateTrendline: function() {
-    var
-      dataRegion = this.$.dataRegion,
-      coords;
-    
-    if (typeof this.mark1 == "object") {
-      coords = this.plotView.invertValue(this.mark1);
-      dataRegion.$.trendline.bounds.x1 = coords.x;
-      dataRegion.$.trendline.bounds.y1 = coords.y;
-    }
-    if (typeof this.mark2 == "object") {
-      coords = this.plotView.invertValue(this.mark2);
-      dataRegion.$.trendline.bounds.x2 = coords.x;
-      dataRegion.$.trendline.bounds.y2 = coords.y;
-    }
-    this.needsUpdate = true;
   },
   markPlot: function(inSender, inEvent) {
     var
-      dataRegion = this.$.dataRegion,
-      trendlineBounds = dataRegion.$.trendline.bounds,
-      coords, pointValue;
+      trendline = this.trendlineCoords,
+      coords = this.cursor,
+      x, y, pointValue;
 
     //clear the trend line if it is already fully set
-    if (this.mark1 && this.mark2) {
-      this.mark1 = false;
-      this.mark2 = false;
-      trendlineBounds.x1 = 0;
-      trendlineBounds.y1 = 0;
-      trendlineBounds.x2 = 0;
-      trendlineBounds.y2 = 0;
+    if (trendline.mark1 && trendline.mark2) {
+      this.trendlineCoords = null;
     } else {
       //calulate the coordinates and value of this point
-      coords = this.getRelativeCoords(inEvent);
+      x = coords.x;
+      y = coords.y;
+      
+      if (!isFinite(x + y)) {return false;}
 
-      if (!coords) {
-        return false;
-      }
-
-      pointValue = 
-        this.plotView.invertCoordinates({x: coords.x,  y: coords.y});
-      if (!this.mark1) {
+      pointValue = this.plotView.invertCoordinates({x: x,  y: y});
+      
+      if (!trendline.mark1) {
         //neither mark is net. Start the trend line
-        this.mark1 = pointValue;
-        trendlineBounds.x1 = coords.x;
-        trendlineBounds.y1 = coords.y;
+        this.trendline.mark1 = {value: pointValue, x: x, y: y};
+        
         //trendline.bounds = trendlineBounds;
       } else {
         //set the second mark to end the trendline
-        this.mark2 = pointValue;
-        trendlineBounds.x2 = coords.x;
-        trendlineBounds.y2 = coords.y;
+        this.trendline.mark2 = {value: pointValue, x: x, y: y};
         //trendline.bounds = trendlineBounds;
       }
     }
-
-    //fire the mousemove event to redraw the crosshair and trendline
-    this.needsUpdate = true;
 
     return true;
   },
   zoomByWheel: function(inSender, inEvent){
     var
       zoomRegion = inSender.name,
-      cursorValue = this.plotView.invertCoordinates(
-        this.getRelativeCoords(inEvent)
-      );
+      cursorValue = this.cursor;
 
     if (!cursorValue) {
       return true;
@@ -561,38 +453,38 @@ enyo.kind({
 
     if ("moveenterleave".indexOf(inEvent.type) > -1 ) {
       //set the new bounds to have the same t and l, but adjust the w and h
-      this.zoombox = {
-        t: this.zoombox.t,
-        l: this.zoombox.l,
-        w: coords.x - this.zoombox.l,
-        h: coords.y - this.zoombox.t
+      this.zoomboxCoords = {
+        t: this.zoomboxCoords.t,
+        l: this.zoomboxCoords.l,
+        w: coords.x - this.zoomboxCoords.l,
+        h: coords.y - this.zoomboxCoords.t
       };
     } else if (inEvent.type === "holdpulse") {
       //create the box's top left corner at the cursor
-      this.zoombox = {t: coords.y, l: coords.x, w: 0, h: 0};
+      this.zoomboxCoords = {t: coords.y, l: coords.x, w: 0, h: 0};
     } else {
       this.holdPulseCount = 0;
       document.getElementById(this.id).style.cursor = "auto";
       
-      dx = coords.x - this.zoombox.l;
-      dy = coords.y - this.zoombox.t;
+      dx = coords.x - this.zoomboxCoords.l;
+      dy = coords.y - this.zoomboxCoords.t;
       
       //make sure the box is atleast 10px in one dimension
       if (dx > 10 || dy > 10) {
-        t = this.zoombox.t;
-        l = this.zoombox.l;
-        w = this.zoombox.w;
-        h = this.zoombox.h;
+        t = this.zoomboxCoords.t;
+        l = this.zoomboxCoords.l;
+        w = this.zoomboxCoords.w;
+        h = this.zoomboxCoords.h;
         
         //get the min and max coordinates form the box bounds
         xMin = xMax = l;
-        if(this.zoombox.w > 0) {
+        if(this.zoomboxCoords.w > 0) {
           xMax += w;
         } else {
           xMin += w;
         }
         yMin = yMax = t;
-        if(this.zoombox.h > 0) {
+        if(this.zoomboxCoords.h > 0) {
           yMin += h;
         } else {
           yMax += h;
@@ -613,7 +505,7 @@ enyo.kind({
         );
        
         //reset the box
-        this.zoombox = null;
+        this.zoomboxCoords = null;
       }
     }
     
@@ -627,7 +519,7 @@ enyo.kind({
     }
     
     //dont drag if zooming
-    if (this.zoombox) {
+    if (this.zoomboxCoords) {
       return true;
     } 
     
@@ -643,15 +535,16 @@ enyo.kind({
       return false;
     }
     
-    if (this.zoombox) {
+    if (this.zoomboxCoords) {
       this.zoomByBox(inSender, inEvent);
       return false;
     }
   
-    if (this.crosshairs && inSender.name == "dataRegion") {
+    if (this.showCrosshairs && inSender.name == "dataRegion") {
       
       this.markPlot(inSender, inEvent);
-      this.$.dataRegion.doubleTapEnabled = !(this.mark1 && !this.mark2);
+      this.$.dataRegion.doubleTapEnabled =
+        !((this.trendlineCoords.mark1 && !this.trendlineCoords.mark2) || this.zoomboxCoords);
     }
   
     //let the tap fall through to the underlying plot
@@ -669,7 +562,7 @@ enyo.kind({
     
     if (this.holdPulseCount == 1) {
       //we already had one pulse, this is the second
-      this.zoombox = true;
+      this.zoomboxCoords = true;
       document.getElementById(this.id).style.cursor = "crosshair";
       this.zoomByBox(inSender, inEvent);
     }
