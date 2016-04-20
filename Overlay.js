@@ -347,35 +347,27 @@ enyo.kind({
     return true;
   },
   markPlot: function(inSender, inEvent) {
-    var
-      trendline = this.trendlineCoords,
-      coords = this.cursor,
-      x, y, pointValue;
-
-    //clear the trend line if it is already fully set
-    if (trendline.mark1 && trendline.mark2) {
-      this.trendlineCoords = null;
+    if (!this.trendlineCoords) {
+      //no marks have been set yet
+      this.trendlineCoords = {
+        mark1: {
+          x: this.cursor.x,
+          y: this.cursor.y,
+          value: this.plotView.invertCoordinates(this.cursor)
+        }
+      };
+    } else if (this.trendlineCoords.mark1 && !this.trendlineCoords.mark2) {
+      //save the second point of the trendline
+      this.trendlineCoords.mark2 = {
+        x: this.cursor.x,
+        y: this.cursor.y,
+        value: this.plotView.invertCoordinates(this.cursor)
+      };
     } else {
-      //calulate the coordinates and value of this point
-      x = coords.x;
-      y = coords.y;
-      
-      if (!isFinite(x + y)) {return false;}
-
-      pointValue = this.plotView.invertCoordinates({x: x,  y: y});
-      
-      if (!trendline.mark1) {
-        //neither mark is net. Start the trend line
-        this.trendline.mark1 = {value: pointValue, x: x, y: y};
-        
-        //trendline.bounds = trendlineBounds;
-      } else {
-        //set the second mark to end the trendline
-        this.trendline.mark2 = {value: pointValue, x: x, y: y};
-        //trendline.bounds = trendlineBounds;
-      }
+      //both points were previously set, clear them
+      this.trendlineCoords = null;
     }
-
+    
     return true;
   },
   zoomByWheel: function(inSender, inEvent){
@@ -541,7 +533,7 @@ enyo.kind({
       
       this.markPlot(inSender, inEvent);
       this.$.dataRegion.doubleTapEnabled =
-        !((this.trendlineCoords.mark1 && !this.trendlineCoords.mark2) || this.zoomboxCoords);
+        !((this.trendlineCoods && (this.trendlineCoords.mark1 && !this.trendlineCoords.mark2)) || this.zoomboxCoords);
     }
   
     //let the tap fall through to the underlying plot
