@@ -65,6 +65,8 @@ enyo.kind({
       overlay.destroyRegions();
       overlay.destroy();
     }
+    
+    this.inherited(arguments);
   },
   
   changeAxisType: function(xy, axisKindObj) {

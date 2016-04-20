@@ -345,6 +345,18 @@ enyo.kind({
   decorate: function() {
     this.printTitle();
   },
+  toggleOverlay: function(){
+    //start the overlay refresh loop
+    function refreshOverlay() {
+      if (this.overlay) {
+        window.requestAnimationFrame(refreshOverlay.bind(this));
+        this.$.overlay.refresh();
+      }
+    }
+    if (this.overlay) {
+      refreshOverlay.call(this);
+    } 
+  },
   getRangeFromData: function() {},
   drawLinear: function() {},
   drawParabola: function() {},
@@ -353,6 +365,5 @@ enyo.kind({
   calculateSpacing: function() {},
   calculateMargins: function() {},
   invertCoordinates: function() {},
-  invertValue: function() {},
-  toggleOverlay: function(){}
+  invertValue: function() {}
 });
