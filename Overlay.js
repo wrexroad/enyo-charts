@@ -250,7 +250,7 @@ enyo.kind({
     var
       cursor = this.cursor,
       dataRegionBounds = this.bounds.dataRegion,
-      ctx, zoom;
+      ctx, zoom, mark1, mark2, m, b;
 
     if (!dataRegionBounds) { return; }
     
@@ -277,6 +277,41 @@ enyo.kind({
       ctx.moveTo(cursor.x, 0);
       ctx.lineTo(cursor.x, dataRegionBounds.height);
       ctx.stroke();
+      ctx.restore();
+    }
+    
+    //draw the trendline if any points are set
+    if (this.trendlineCoords) {
+      ctx.save();
+      
+      //since the trendlineCoordinates object exists,
+      //we know we at least have 1 point set
+      mark1 = this.trendlineCoords.mark1;
+      
+      //if there isnt a second point set, use the current cursor coordinates
+      mark2 = this.trendlineCoords.mark2 || {
+        x: this.cursor.x,
+        y: this.cursor.y,
+        value: this.plotView.invertCoordinates(this.cursor)
+      };
+      
+      //calculat the line that connects the two points
+      m = (mark2.y - mark1.y) / (mark2.x - mark1.x);
+      b = mark1.y - (mark1.x * m);
+      
+      //draw the connecting line
+      ctx.strokeStyle = ctx.fillStyle = this.trendlineColor;
+      ctx.beginPath();
+      ctx.moveTo(0, b);
+      ctx.lineTo(dataRegionBounds.width, dataRegionBounds.width * m + b);
+      ctx.stroke();
+      
+      //make a dot at eaech point
+      ctx.beginPath();
+      ctx.arc(mark1.x, mark1.y, ctx.lineWidth << 1, 0, Math.PI * 2);
+      ctx.arc(mark2.x, mark2.y, ctx.lineWidth << 1, 0, Math.PI * 2);
+      ctx.fill();
+      
       ctx.restore();
     }
   },
