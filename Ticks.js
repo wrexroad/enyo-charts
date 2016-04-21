@@ -99,7 +99,7 @@ enyo.kind({
       }
     }
   },
-  
+  createLabel: function(val, opts) {return (+val).toFixed(5)},
   calculateStepSize: function() {}
 });
 
@@ -168,7 +168,7 @@ enyo.kind({
     return bestStep;
   },
   
-  createLabel: function(value) {
+  createLabel: function(value, opts) {
     return (+value).toFixed(this.stepMagnitude < 0 ? (-this.stepMagnitude) : 0);
   }
 });
@@ -178,7 +178,8 @@ enyo.kind({
   kind: "Ticks",
   published: {
     timeZone: 0,
-    dateFormat: ""
+    dateFormat: "",
+    shortDateFormat: ""
   },
   components: [
     {kind: "FormattedDate", name: "date"}
@@ -240,8 +241,17 @@ enyo.kind({
     return bestStep;
   },
   
-  createLabel: function(value) {
+  createLabel: function(value, opts) {
+    var dateObj = this.$.date;
+    
+    if ((opts || {}).short) {
+      dateObj.set("format", this.shortDateFormat); 
+    }
+    
     this.$.date.set("jsTime", value);
+
+    dateObj.set("format", this.dateFormat);
+    
     return this.$.date.formattedText;
   }
 });
