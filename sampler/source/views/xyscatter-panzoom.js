@@ -48,10 +48,25 @@ enyo.kind({
     ]}
   ],
   published: {
-    xMin: 0,
-    xMax: 0,
-    yMin: 0,
-    yMax: 0
+    xMin: NaN,
+    xMax: NaN,
+    yMin: NaN,
+    yMax: NaN,
+    autoRange: true
+  },
+  handlers: {
+    onNewRange: "setAxisRange",
+  },
+  setAxisRange: function(inSender, inEvent) {
+    (["xMin", "xMax", "yMin", "yMax"]).forEach(function(i) {
+      if (inEvent.hasOwnProperty(i)) {
+        this[i] = +inEvent[i];
+      }
+    }, this);
+    
+    this.draw();
+    
+    return true;
   },
   rendered: function() {
     this.inherited(arguments);
