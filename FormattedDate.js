@@ -118,6 +118,16 @@ enyo.kind({
         date.setUTCDate(val);
       }
     },
+    "DDDDD": {
+      length: 5,
+      get: function(date) {
+        //Calculate the number of complete days represented by this timestamp
+        return (+date/86400000) >> 0;
+      },
+      set: function(date, val) {
+        date.setUTCDate(val);
+      }
+    },
     "DOW": {
       length: 1,
       get: function(date) {
