@@ -245,7 +245,9 @@ enyo.kind({
     var
       cursor = this.cursor,
       dataRegionBounds = this.bounds.dataRegion,
-      ctx, zoom, mark1, mark2, m, b;
+      trendline = this.trendlineCoords,
+      plotView = this.plotView,
+      ctx, zoom, mark1, mark2, m, b, dx, dy, label;
 
     if (!dataRegionBounds) { return; }
     
@@ -276,18 +278,18 @@ enyo.kind({
     }
     
     //draw the trendline if any points are set
-    if (this.trendlineCoords) {
+    if (trendline) {
       ctx.save();
       
       //since the trendlineCoordinates object exists,
       //we know we at least have 1 point set
-      mark1 = this.trendlineCoords.mark1;
+      mark1 = trendline.mark1;
       
       //if there isnt a second point set, use the current cursor coordinates
-      mark2 = this.trendlineCoords.mark2 || {
+      mark2 = trendline.mark2 || {
         x: this.cursor.x,
         y: this.cursor.y,
-        value: this.plotView.invertCoordinates(this.cursor)
+        value: plotView.invertCoordinates(this.cursor)
       };
       
       //calculat the line that connects the two points
@@ -306,6 +308,25 @@ enyo.kind({
       ctx.arc(mark1.x, mark1.y, ctx.lineWidth << 1, 0, Math.PI * 2);
       ctx.arc(mark2.x, mark2.y, ctx.lineWidth << 1, 0, Math.PI * 2);
       ctx.fill();
+      
+      //draw the trendline label
+      ctx.textAlign = "start";
+      ctx.font = plotView.fontSize + "px " + plotView.font;
+      dx = mark2.value.x - mark1.value.x;
+      dy = mark2.value.y - mark1.value.y;
+      
+      label =
+        "Δy: " + (dy).toPrecision(5) + ", " +
+        //check for more than one day
+        "Δt: " + /*(dx > 86400 ? ((dx / 86400) >> 0) + "d " : "") +*/ dx;
+      
+      textOffset = m < 0 ? 10 : -10;
+      
+      ctx.fillText(
+        label,
+        ((mark2.x - mark1.x) >> 1) + mark1.x + textOffset,
+        ((mark2.y - mark1.y) >> 1) + mark1.y + textOffset
+      );
       
       ctx.restore();
     }
