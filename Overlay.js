@@ -247,7 +247,7 @@ enyo.kind({
       dataRegionBounds = this.bounds.dataRegion,
       trendline = this.trendlineCoords,
       plotView = this.plotView,
-      ctx, zoom, mark1, mark2, m, b, dx, dy, label;
+      ctx, zoom, mark1, mark2, m, b, dx, dy, label, textOffset;
 
     if (!dataRegionBounds) { return; }
     
@@ -316,9 +316,8 @@ enyo.kind({
       dy = mark2.value.y - mark1.value.y;
       
       label =
-        "Δy: " + plotView.$.yLeftTicks.createLabel(dy, {short: true}) + ", " +
-        //check for more than one day
-        "Δx: " + /*(dx > 86400 ? ((dx / 86400) >> 0) + "d " : "") +*/ plotView.$.xTicks.createLabel(dx, {short: true});
+        "Δy: " + plotView.$.yLeftTicks.createLabel(dy, {short: true}) +
+        ", " +  "Δx: " + plotView.$.xTicks.createLabel(dx, {short: true});
       
       textOffset = m < 0 ? 10 : -10;
       
