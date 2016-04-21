@@ -288,7 +288,6 @@ enyo.kind({
   cursorMoved: function(inSender, inEvent) {
     
     this.cursor = this.getRelativeCoords(inEvent);
-    
     if (this.zoomboxCoords) {
       this.zoomByBox(inSender, inEvent);
     }
@@ -497,6 +496,10 @@ enyo.kind({
   },
   handleDrag: function(inSender, inEvent) {
     this.cancelTap = true;
+    
+    //update the cursor position
+    this.cursorMoved(inSender, inEvent);
+    
     //make sure there is movement in at least one direction
     if (!inEvent.ddx && !inEvent.ddy) {
       return true;
