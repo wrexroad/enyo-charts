@@ -583,7 +583,7 @@ enyo.kind({
     }
     
     //check if this is a double tap
-    if ((now - this.dblTapTmr) < 200) {
+    if ((now - this.dblTapTmr) < 300) {
       this.handleDoubleTap(inSender, inEvent);
       return;
     } else {
