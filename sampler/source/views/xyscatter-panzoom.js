@@ -31,7 +31,10 @@ enyo.kind({
         },
         x: {
           type: "Date",
+          //dateFormat is used for displaying tick marks
           dateFormat: "%DOY/YYYY% %HH%:%mm%:%ss% %T%",
+          //shortDateFormat is used for displaying plot coordinates and deltas
+          shortDateFormat: "%DDDDD%d %HH%:%mm%:%ss%",
           tickCount: null, //defaults to auto calculated
           minorTickCount: 10 //default is 5           
         }
