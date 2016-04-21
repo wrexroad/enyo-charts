@@ -316,9 +316,9 @@ enyo.kind({
       dy = mark2.value.y - mark1.value.y;
       
       label =
-        "Δy: " + (dy).toPrecision(5) + ", " +
+        "Δy: " + plotView.$.yLeftTicks.createLabel(dy, {short: true}) + ", " +
         //check for more than one day
-        "Δt: " + /*(dx > 86400 ? ((dx / 86400) >> 0) + "d " : "") +*/ dx;
+        "Δx: " + /*(dx > 86400 ? ((dx / 86400) >> 0) + "d " : "") +*/ plotView.$.xTicks.createLabel(dx, {short: true});
       
       textOffset = m < 0 ? 10 : -10;
       
