@@ -18,7 +18,8 @@ enyo.kind({
     axisRange: null,
     fullAxisRange: null,
     decorMargin: null,
-    layers: null
+    layers: null,
+    overlay: false
   },
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"},
@@ -36,7 +37,7 @@ enyo.kind({
         return Math.log(x) / Math.log(10);
       };
     }
-
+    
     this.layers = {};
   },
   //functions directly related to generating the plot
@@ -343,6 +344,18 @@ enyo.kind({
   },
   decorate: function() {
     this.printTitle();
+  },
+  toggleOverlay: function(){
+    //start the overlay refresh loop
+    function refreshOverlay() {
+      if (this.overlay) {
+        window.requestAnimationFrame(refreshOverlay.bind(this));
+        this.$.overlay.refresh();
+      }
+    }
+    if (this.overlay) {
+      refreshOverlay.call(this);
+    } 
   },
   getRangeFromData: function() {},
   drawLinear: function() {},

@@ -17,7 +17,8 @@ enyo.kind({
       fit: true,
       components: [
         {kind: "XYScatterSingle"},
-        {kind: "XYScatterMulti"}
+        {kind: "XYScatterMulti"},
+        {kind: "XYScatterPanZoom"}
       ]
     }
 	],

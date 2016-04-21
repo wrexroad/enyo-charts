@@ -36,6 +36,12 @@ enyo.kind({
 
     this.initValues();
   },
+  rendered: function() {
+    this.inherited(arguments);
+    
+    //turn on the overlay if it is set
+    this.toggleOverlay(this.overlay);
+  },
   initValues: function() {
     this.inherited(arguments);
 
@@ -43,6 +49,26 @@ enyo.kind({
     //This should get changed when data are added
     this.setAxisRange(-5, 5, -5, 5);
   },
+  toggleOverlay: function(activate) {
+    var overlay;
+    
+    if (activate) {
+      overlay = this.createComponent({
+        kind: "CartesianOverlay", name: "overlay", plotview: this
+      });
+
+      this.binding({from: "height", to: "$.overlay.chartHeight"});
+      this.binding({from: "width", to: "$.overlay.chartWidth"});
+      
+      overlay.render();
+    } else if (overlay = this.$.overlay) {
+      overlay.destroyRegions();
+      overlay.destroy();
+    }
+    
+    this.inherited(arguments);
+  },
+  
   changeAxisType: function(xy, axisKindObj) {
     xy = (xy || "") + "";
     if (xy != "x" && xy != "y" && xy != "yLeft" && xy != "yRight") {return;}
@@ -117,6 +143,10 @@ enyo.kind({
       left: this.decorCtx.measureText(testLabelLeft).width,
       right: this.decorCtx.measureText(testLabelRight).width,
     });
+    
+    if (this.overlay) {
+      this.$.overlay.resize();
+    }
   },
   decorate: function() {
     var
