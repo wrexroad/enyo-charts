@@ -244,6 +244,7 @@ enyo.kind({
   refresh: function() {
     var
       cursor = this.cursor,
+      pointValue = this.plotView.invertCoordinates(cursor) || {x: NaN, y: NaN},
       dataRegionBounds = this.bounds.dataRegion,
       trendline = this.trendlineCoords,
       plotView = this.plotView,
@@ -274,6 +275,20 @@ enyo.kind({
       ctx.moveTo(cursor.x, 0);
       ctx.lineTo(cursor.x, dataRegionBounds.height);
       ctx.stroke();
+      
+      //draw crosshair label
+      //make sure label wont say "null" or "undefined" or some garbage like that
+      ctx.fillStyle = this.crosshairsColor;
+      ctx.font = plotView.fontSize + "px " + plotView.font;
+  	  ctx.fillText(
+        "x: " + plotView.$.xTicks.createLabel(pointValue.x) + ",",
+        cursor.x + 10, cursor.y - (2 * plotView.fontSize)
+      );
+      ctx.fillText(
+        "y: " + plotView.$.yLeftTicks.createLabel(pointValue.y),
+        cursor.x + 10, cursor.y - plotView.fontSize
+      );
+      
       ctx.restore();
     }
     
@@ -286,11 +301,7 @@ enyo.kind({
       mark1 = trendline.mark1;
       
       //if there isnt a second point set, use the current cursor coordinates
-      mark2 = trendline.mark2 || {
-        x: this.cursor.x,
-        y: this.cursor.y,
-        value: plotView.invertCoordinates(this.cursor)
-      };
+      mark2 = trendline.mark2 || {x: cursor.x, y: cursor.y, value: pointValue};
       
       //calculat the line that connects the two points
       m = (mark2.y - mark1.y) / (mark2.x - mark1.x);
@@ -316,8 +327,8 @@ enyo.kind({
       dy = mark2.value.y - mark1.value.y;
       
       label =
-        "Δy: " + plotView.$.yLeftTicks.createLabel(dy, {short: true}) +
-        ", " +  "Δx: " + plotView.$.xTicks.createLabel(dx, {short: true});
+        "Δy: " + plotView.$.yLeftTicks.createLabel(dy, {short: true}) + ", " +
+        "Δx: " + plotView.$.xTicks.createLabel(dx, {short: true});
       
       textOffset = m < 0 ? 10 : -10;
       
