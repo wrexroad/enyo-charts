@@ -22,11 +22,7 @@ enyo.kind({
     resize: ["chartWidth", "chartHeight", "plotView.plotMargins"]
   },
   events: {
-    onZoom: "",
-    onPan: "",
-    onRange: "",
-    onSetAutorange: "",
-    onSetAxisRange: ""
+    onNewRange: ""
   },
   rendered: function() {
     this.inherited(arguments);
@@ -290,6 +286,16 @@ enyo.kind({
     return true;
   },
   cursorMoved: function(inSender, inEvent) {
+    
+    this.cursor = this.getRelativeCoords(inEvent);
+    
+    if (this.zoomboxCoords) {
+      this.zoomByBox(inSender, inEvent);
+    }
+    
+    return true;
+  },
+  getRelativeCoords: function(inEvent) {
     var
       bounds = this.bounds,
       dataRegion = bounds.dataRegion,
@@ -319,13 +325,7 @@ enyo.kind({
     y = y < 0 ? 0 : y;
     y = y > dataRegion.width ? dataRegion.height : y;
     
-    this.cursor = { x: x, y: y};
-    
-    if (this.zoomboxCoords) {
-      this.zoomByBox(inSender, inEvent);
-    }
-    
-    return true;
+    return {x: x, y: y};
   },
   cursorEntered: function(inSender, inEvent) {
     //this.activateCrosshairs(inSender, inEvent);
@@ -366,13 +366,15 @@ enyo.kind({
   zoomByWheel: function(inSender, inEvent){
     var
       zoomRegion = inSender.name,
-      cursorValue = this.cursor;
+      cursorValue = this.plotView.invertCoordinates(
+        this.getRelativeCoords(inEvent)
+      );
 
     if (!cursorValue) {
       return true;
     }
 
-    this.doZoom({
+    this.rangeFromZoom({
       scaleX: zoomRegion !== "leftRegion" && zoomRegion !== "rightRegion" ?
         (inEvent.wheelDeltaY > 0 ? 0.9 : 1.1) : 1,
       scaleY: zoomRegion !== "bottomRegion" ?
@@ -390,30 +392,30 @@ enyo.kind({
       width = regionAttributes.width,
       midX = width >> 1,
       midY = height >> 1,
-      cursor = this.cursor,
+      coords = this.getRelativeCoords(inEvent),
       scaleX = 1,
       scaleY = 1;
     
-    if (!cursor) {
+    if (!coords) {
       return;
     }
 
     if (zoomRegion === "leftRegion" && inEvent.ddy) {
       scaleY +=
         //direction and magnitude of scale factor
-        ((cursor.y - inEvent.dy) > (height >> 1) ? -2 : 2) *
+        ((coords.y - inEvent.dy) > (height >> 1) ? -2 : 2) *
         //proportion of axis scale factor 
         (inEvent.ddy / height);
       
     } else if (zoomRegion === "bottomRegion" && inEvent.ddx) {
       scaleX +=
-        ((cursor.x - inEvent.dx) > (width >> 1) ? -2 : 2) *
+        ((coords.x - inEvent.dx) > (width >> 1) ? -2 : 2) *
         ( inEvent.ddx / width);
     }
     
     //make sure we aren't just scaling eveything by 1
     if (scaleX != 1 || scaleY != 1) {
-      this.doZoom({
+      this.rangeFromZoom({
         scaleX: scaleX,
         scaleY: scaleY,
         centerValue: this.plotView.invertCoordinates({x: midX, y: midY})  
@@ -482,7 +484,7 @@ enyo.kind({
           y: yMax
         });
 
-        this.doRange(
+        this.doNewRange(
           {xMin: start.x, xMax: end.x, yMin: start.y, yMax: end.y}
         );
        
@@ -506,9 +508,70 @@ enyo.kind({
     } 
     
     //not a zoom box so we must be panning
-    this.doPan(inEvent);
+    this.rangeFromPan(inEvent);
     
     return true;
+  },
+  rangeFromZoom: function(zoom) {
+    var
+      range = {},
+      scaleX = zoom.scaleX,
+      scaleY = zoom.scaleY,
+      plotView = this.plotView,
+      center, min, max;
+
+    //y axis value (not pixel coordinate) of the cursor
+    if (scaleY != 1) {
+      center = zoom.centerValue.y;
+      min = (center - ((center - plotView.yMin) * scaleY)) || 0;
+      max = (center + ((plotView.yMax - center) * scaleY)) || 0;
+    
+      range.yMin = min;
+      range.yMax = max;
+    }
+
+    if (scaleX != 1) {
+      center = zoom.centerValue.x;
+      min = center - ((center - plotView.xMin) * scaleX);
+      max = center + ((plotView.xMax - center) * scaleX);
+      
+      if (min != plotView.xMin || max != plotView.xMax) {
+        range.xMin = min;
+        range.xMax = max;
+      }
+    }
+    
+    this.doNewRange(range);
+  },
+  rangeFromPan: function(pan) {
+    var
+      range = {},
+      xDirection = pan.xDirection,
+      yDirection = pan.yDirection,
+      ddx = pan.ddx,
+      ddy = pan.ddy,
+      x = pan.pageX,
+      y = pan.pageY,
+      plotView = this.plotView,
+      start = plotView.invertCoordinates(
+        {x: (x - xDirection * ddx),y: (y - yDirection * ddy)}
+      ),
+      end = plotView.invertCoordinates(
+        {x: x, y: y}
+      ),
+      deltaX, deltaY;
+
+    deltaX = xDirection * (end.x - start.x);
+    range.xMin = plotView.xMin - deltaX;
+    range.xMax = plotView.xMax - deltaX;
+
+    if (!this.autoranging) {
+      deltaY = yDirection * (end.y - start.y);
+      range.yMin = plotView.yMin - deltaY;
+      range.yMax = plotView.yMax - deltaY;
+    }
+
+    this.doNewRange(range);
   },
   handleTap: function(inSender, inEvent) {
     var now = +(new Date());
@@ -544,9 +607,15 @@ enyo.kind({
     this.zoomboxCoords = this.trendlineCoords = null;
     
     if (inSender.name === "dataRegion") {
-      this.doSetAutorange(inEvent);
+      //double tapping the data region should trigger y axis autoranging.
+      //do this by clearing any previously set y-axis range
+      this.doNewRange({yMin: NaN, yMax: NaN});
+    } else if (inSender.name === "bottomRegion") {
+      this.plotView.openAxisSettings("x");
+    } else if (inSender.name === "leftRegion") {
+      this.plotView.openAxisSettings("yLeft");
     } else {
-      this.doSetAxisRange(inSender.name === "bottomRegion" ? "x" : "y");
+      this.plotView.openAxisSettings("yRight");
     }
   },
   handlePulse: function(inSender, inEvent) {
