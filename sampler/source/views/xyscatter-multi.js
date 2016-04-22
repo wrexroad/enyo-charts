@@ -116,10 +116,13 @@ enyo.kind({
     this.$.chart.set("width", 400);
     this.$.chart.set("height", 400);
     
-    this.$.chart.draw(
-      {xMin: -1, xMax: 1, yMin: -1, yMax: 1},
-      {datasets: this.datasets}
-    );
+    this.$.chart.configurePlot({
+      xMin: -1, xMax: 1, yMin: -1, yMax: 1,
+      datasets: this.datasets
+    });
+    
+    this.$.chart.draw();
+    
     
     this.updateStats();
   },

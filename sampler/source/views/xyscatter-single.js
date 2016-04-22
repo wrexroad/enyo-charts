@@ -324,16 +324,16 @@ enyo.kind({
     this.$.chart.set("width", this.$.width.value);
     this.$.chart.set("height", this.$.height.value);
     
-    this.$.chart.draw(
-      {
-        title: this.$.title.value,
-        xMin: this.xMin,
-        xMax: this.xMax,
-        yMin: this.yMin,
-        yMax: this.yMax,
-      },
-      {datasets: datasets}
-    );
+    this.$.chart.configurePlot({
+      title: this.$.title.value,
+      xMin: this.xMin,
+      xMax: this.xMax,
+      yMin: this.yMin,
+      yMax: this.yMax,
+      datasets: datasets
+    });
+    
+    this.$.chart.draw();
     
     this.resize();
   }

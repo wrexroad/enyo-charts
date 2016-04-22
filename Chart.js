@@ -3,6 +3,7 @@ enyo.kind({
   kind: "Scroller",
 
   published: {
+    plotTitle: "",
     width: 0,
     height: 0,
     bgImg: "", //id of <img> tag to be used as a background
@@ -19,7 +20,8 @@ enyo.kind({
     fullAxisRange: null,
     decorMargin: null,
     layers: null,
-    overlay: false
+    overlay: false,
+    animate: false
   },
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"},
@@ -58,6 +60,10 @@ enyo.kind({
     exportCanvas.render();
     
     this.initValues();
+    
+    if (this.animate) {
+      this.refreshDraw();
+    }
   },
   createDataCanvas: function(varName, options) {
     var
@@ -307,7 +313,33 @@ enyo.kind({
     this.activeLayerNames = {};
     this.labels = null;
   },
-  draw: function(plotOptions, plottables, antialiasing) {
+  configurePlot: function(plotOptions) {
+    plotOptions = plotOptions || {};
+    
+    for (var opt in plotOptions) {
+      if (plotOptions.hasOwnProperty(opt)) {
+        this.set(opt, plotOptions[opt]);
+      }
+    }
+  },
+  startAnimation: function() {
+    this.animate = true;
+    this.refreshDraw();
+  },
+  stopAnimation: function() {
+    this.animate = false;
+  },
+  refreshDraw: function() {
+    if (this.animate){
+      window.requestAnimationFrame(this.refreshOverlay.bind(this));
+      this.draw();
+      if (this.overlay) {
+        this.$.overlay.refresh();
+      }
+    }
+     
+  },
+  draw: function() {
     var
       decorWidth = this.width,
       decorHeight = this.height,
@@ -338,9 +370,6 @@ enyo.kind({
       canvas.setAttribute("width", dataWidth);
       canvas.update();
     }
-    
-    //update the plot title parameter
-    this.plotTitle = (plotOptions || {}).title || this.plotTitle || "";
   },
   decorate: function() {
     this.printTitle();
