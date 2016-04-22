@@ -19,14 +19,6 @@ enyo.kind({
         panelID: "1",
         ontap: "switchPanel"
       }]
-    },
-    {kind: "onyx.Toolbar", components: [{
-        kind: "onyx.Button",
-        style: "width: 95%",
-        content: "Scatter (Pan/Zoom)",
-        panelID: "2",
-        ontap: "switchPanel"
-      }]
     }
   ],
   events: {
