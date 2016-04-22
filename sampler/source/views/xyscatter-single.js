@@ -2,6 +2,9 @@ enyo.kind({
   name: "XYScatterSingle",
   kind: "Scroller",
   classes: "chart-panel",
+  handlers: {
+    onNewRange: "setAxisRange",
+  },
   components: [
     {kind: "onyx.Toolbar", components: [
       {kind: "onyx.InputDecorator", components: [
@@ -10,6 +13,7 @@ enyo.kind({
     ]},
     {
       kind: "Chart.Cartesian", name: "chart",
+      overlay: true, //enable/disable the mouse/gesture controlled overlay
       bgColor: "lightgrey",
       font: "sans-serif",
       fontSize: 14,
@@ -31,7 +35,10 @@ enyo.kind({
         },
         x: {
           type: "Date",
+          //dateFormat is used for displaying tick marks
           dateFormat: "%DOY/YYYY% %HH%:%mm%:%ss% %T%",
+          //shortDateFormat is used for displaying plot coordinates and deltas
+          shortDateFormat: "%DDDDD%d %HH%:%mm%:%ss%",
           tickCount: null, //defaults to auto calculated
           minorTickCount: 10 //default is 5           
         }
@@ -142,22 +149,22 @@ enyo.kind({
           {kind: "onyx.InputDecorator", components: [
           {
             kind: "onyx.Input", name: "xMinDisp", attributes: {size: 15},
-            onchange: "draw"
+            onchange: "setAxisRange"
           },
           {
             kind: "onyx.Input", name: "xMaxDisp", attributes: {size: 15},
-            onchange: "draw"
+            onchange: "setAxisRange"
           }
         ]},
         {content: "Y Axis Range"},
           {kind: "onyx.InputDecorator", components: [
           {
             kind: "onyx.Input", name: "yMinDisp", attributes: {size: 15},
-            onchange: "draw"
+            onchange: "setAxisRange"
           },
           {
             kind: "onyx.Input", name: "yMaxDisp", attributes: {size: 15},
-            onchange: "draw"
+            onchange: "setAxisRange"
           }
         ]},
       ]}
@@ -203,8 +210,19 @@ enyo.kind({
       
       return dateString;
     } else {
-      return this.$.chart.$.xTicks.$.date.stringToDateStamp(value);
+      return this.$.chart.$.xTicks.parseLabel(value);
     }
+  },
+  setAxisRange: function(inSender, inEvent) {
+    (["xMin", "xMax", "yMin", "yMax"]).forEach(function(i) {
+      if (inEvent.hasOwnProperty(i)) {
+        this[i] = +inEvent[i];
+      }
+    }, this);
+    
+    this.draw();
+    
+    return true;
   },
   rendered: function() {
     this.inherited(arguments);

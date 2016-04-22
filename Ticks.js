@@ -100,6 +100,7 @@ enyo.kind({
     }
   },
   createLabel: function(val, opts) {return (+val).toFixed(5)},
+  parseLabel: function(val, opts) {return (+val)},
   calculateStepSize: function() {}
 });
 
@@ -245,7 +246,7 @@ enyo.kind({
     var dateObj = this.$.date;
     
     if ((opts || {}).short) {
-      dateObj.set("format", this.shortDateFormat); 
+      dateObj.set("format", this.shortDateFormat || this.dateFormat); 
     }
     
     this.$.date.set("jsTime", value);
@@ -253,6 +254,9 @@ enyo.kind({
     dateObj.set("format", this.dateFormat);
     
     return this.$.date.formattedText;
+  },
+  parseLabel: function(value, opts) {
+    return this.$.date.stringToDateStamp(value);
   }
 });
 

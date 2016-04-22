@@ -16,8 +16,39 @@ enyo.kind({
     trendlineLabel: "",
     chartHeight: 0,
     chartWidth: 0,
-    offset: 0,
+    offset: 0
   },
+  components: [{
+    name: "axisSettings", kind: "enyo.Popup",
+    modal: true, centered: true, classes: "popup",
+    components: [
+      {tag: "label", components: [
+        {content: "X-Axis:"},
+        {
+          name: "xMinInput", kind: "enyo.Input", type: "text",
+          classes: "enyo-selectable"
+        },
+        {
+          name: "xMaxInput", kind: "enyo.Input", type: "text",
+          classes: "enyo-selectable"
+        }
+      ]},
+      {tag: "label", components: [
+        {content: "Y-Axis:"},
+        {
+          name: "yMinInput", kind: "enyo.Input", type: "text",
+          classes: "enyo-selectable"
+        },
+        {
+          name: "yMaxInput", kind: "enyo.Input", type: "text",
+          classes: "enyo-selectable"
+        }
+      ]},
+      {components:[
+        {kind: "enyo.Button", content: "Set", ontap: "closeAxisSettings"}
+      ]}
+    ]
+  }],
   observers: {
     resize: ["chartWidth", "chartHeight", "plotView.plotMargins"]
   },
@@ -208,7 +239,7 @@ enyo.kind({
       //make sure label wont say "null" or "undefined" or some garbage like that
       ctx.fillStyle = this.crosshairsColor;
       ctx.font = plotView.fontSize + "px " + plotView.font;
-  	  ctx.fillText(
+      ctx.fillText(
         "x: " + plotView.$.xTicks.createLabel(pointValue.x) + ",",
         cursor.x + 10, cursor.y - (2 * plotView.fontSize)
       );
@@ -614,11 +645,11 @@ enyo.kind({
       //do this by clearing any previously set y-axis range
       this.doNewRange({yMin: NaN, yMax: NaN});
     } else if (inSender.name === "bottomRegion") {
-      this.plotView.openAxisSettings("x");
+      this.openAxisSettings("x");
     } else if (inSender.name === "leftRegion") {
-      this.plotView.openAxisSettings("yLeft");
+      this.openAxisSettings("yLeft");
     } else {
-      this.plotView.openAxisSettings("yRight");
+      this.openAxisSettings("yRight");
     }
   },
   handlePulse: function(inSender, inEvent) {
@@ -632,5 +663,35 @@ enyo.kind({
     }
     
     this.holdPulseCount++;
+  },
+  openAxisSettings: function() {
+    var plotView = this.plotView;
+
+    this.$.axisSettings.set("showing", true);
+    this.$.xMinInput.set(
+      "value", plotView.$.xTicks.createLabel(plotView.xMin)
+    );
+    this.$.xMaxInput.set(
+      "value", plotView.$.xTicks.createLabel(plotView.xMax)
+    );
+    this.$.yMinInput.set(
+      "value", plotView.$.yLeftTicks.createLabel(plotView.yMin)
+    );
+    this.$.yMaxInput.set(
+      "value", plotView.$.yLeftTicks.createLabel(plotView.yMax)
+    );
+    
+  },
+  closeAxisSettings: function() {
+    var plotView = this.plotView;
+
+    this.doNewRange({
+      xMin: plotView.$.xTicks.parseLabel(this.$.xMinInput.value),
+      xMax: plotView.$.xTicks.parseLabel(this.$.xMaxInput.value),
+      yMin: plotView.$.yLeftTicks.parseLabel(this.$.yMinInput.value),
+      yMax: plotView.$.yLeftTicks.parseLabel(this.$.yMaxInput.value)
+    });
+    
+    this.$.axisSettings.set("showing", false);
   }
 });
