@@ -246,7 +246,7 @@ enyo.kind({
     var dateObj = this.$.date;
     
     if ((opts || {}).short) {
-      dateObj.set("format", this.shortDateFormat); 
+      dateObj.set("format", this.shortDateFormat || this.dateFormat); 
     }
     
     this.$.date.set("jsTime", value);
