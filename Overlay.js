@@ -399,6 +399,9 @@ enyo.kind({
       cursorValue = this.plotView.invertCoordinates(
         this.getRelativeCoords(inEvent)
       );
+    
+    //scroll wheel should not actually scroll the page
+    inEvent.preventDefault();
 
     if (!cursorValue) {
       return true;
