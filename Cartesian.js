@@ -51,7 +51,7 @@ enyo.kind({
   },
   toggleOverlay: function(activate) {
     var overlay;
-    
+
     if (activate) {
       overlay = this.createComponent({
         kind: "CartesianOverlay", name: "overlay", plotview: this
@@ -61,12 +61,10 @@ enyo.kind({
       this.binding({from: "width", to: "$.overlay.chartWidth"});
       
       overlay.render();
-    } else if (overlay = this.$.overlay) {
+    } else if ((overlay = this.$.overlay)) {
       overlay.destroyRegions();
       overlay.destroy();
     }
-    
-    this.inherited(arguments);
   },
   
   changeAxisType: function(xy, axisKindObj) {
@@ -409,25 +407,19 @@ enyo.kind({
   
     ctx.restore();
   },
-  
-  draw: function(plotOptions, plottables, antialiasing) {
-    plotOptions = plotOptions || {};
-    plottables = plottables || {};
-    
+  draw: function() {
     var
-      datasets = plottables.datasets,
-      equations = plottables.equations,
-      xMin = +plotOptions.xMin,
-      xMax = +plotOptions.xMax,
-      yMin = +plotOptions.yMin,
-      yMax = +plotOptions.yMax;
+      //make sure the datasets and equations are in arrays
+      datasets = this.datasets || [],
+      equations = this.equations || [],
+      //and range values are numbers
+      xMin = +this.xMin,
+      xMax = +this.xMax,
+      yMin = +this.yMin,
+      yMax = +this.yMax;
 
     //do any generic Chart setup
     this.inherited(arguments);
-    
-    //make sure the datasets and equations are in arrays
-    datasets = [].concat(datasets || []);
-    equations = [].concat(equations || []);
     
     if (!(datasets.length + equations.length)) {
       return;
@@ -467,7 +459,7 @@ enyo.kind({
       }
       
       //draw the dataset onto the canvas
-      this.drawDataset(dataset, this.layers[name + "_layer"].ctx, antialiasing);
+      this.drawDataset(dataset, this.layers[name + "_layer"].ctx);
       
       //remeber what we plotted this time
       this.activeLayerNames[name + "_layer"] = true;
@@ -493,14 +485,14 @@ enyo.kind({
     //add the plot border and tic marks
     this.decorate();
   },
-  drawDataset: function(dataset, ctx, antialiasing) {
+  drawDataset: function(dataset, ctx) {
     var
       opts = dataset.options || {},
       data = dataset.data || {},
       coords = data.coords || [],
       lineWidth = +((opts.lines || {}).size),
       dotWidth = +((opts.dots || {}).size),
-      subpixel = antialiasing ? 0.5 : 0,
+      subpixel = this.antialiasing ? 0.5 : 0,
       dot;
       
       //bail out if there are no data to plot

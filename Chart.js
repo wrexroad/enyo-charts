@@ -3,6 +3,7 @@ enyo.kind({
   kind: "Scroller",
 
   published: {
+    plotTitle: "",
     width: 0,
     height: 0,
     bgImg: "", //id of <img> tag to be used as a background
@@ -58,6 +59,8 @@ enyo.kind({
     exportCanvas.render();
     
     this.initValues();
+    
+    this.draw();
   },
   createDataCanvas: function(varName, options) {
     var
@@ -307,7 +310,16 @@ enyo.kind({
     this.activeLayerNames = {};
     this.labels = null;
   },
-  draw: function(plotOptions, plottables, antialiasing) {
+  configurePlot: function(plotOptions) {
+    plotOptions = plotOptions || {};
+    
+    for (var opt in plotOptions) {
+      if (plotOptions.hasOwnProperty(opt)) {
+        this.set(opt, plotOptions[opt]);
+      }
+    }
+  },
+  draw: function() {
     var
       decorWidth = this.width,
       decorHeight = this.height,
@@ -316,6 +328,11 @@ enyo.kind({
       dataHeight = decorHeight - margin.top - margin.bottom,
       layer_i, canvas;
 
+    window.requestAnimationFrame(this.draw.bind(this));
+    
+    //bail out if there is no decoration canvas
+    if (!decorWidth || !decorHeight) {return;}
+    
     //clear the canvases
     this.wipePlot();
     this.activeLayerNames = {};
@@ -338,24 +355,9 @@ enyo.kind({
       canvas.setAttribute("width", dataWidth);
       canvas.update();
     }
-    
-    //update the plot title parameter
-    this.plotTitle = (plotOptions || {}).title || this.plotTitle || "";
   },
   decorate: function() {
     this.printTitle();
-  },
-  toggleOverlay: function(){
-    //start the overlay refresh loop
-    function refreshOverlay() {
-      if (this.overlay) {
-        window.requestAnimationFrame(refreshOverlay.bind(this));
-        this.$.overlay.refresh();
-      }
-    }
-    if (this.overlay) {
-      refreshOverlay.call(this);
-    } 
   },
   getRangeFromData: function() {},
   drawLinear: function() {},

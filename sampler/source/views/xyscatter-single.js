@@ -82,12 +82,12 @@ enyo.kind({
           {content: "Line Width"},
           {
             kind: "onyx.Slider", name: "lineSize", 
-            value: 3, onChanging:"draw", onChange:"draw"
+            value: 3, onChanging:"updatePlot", onChange:"updatePlot"
           },
           {content: "Dot Width"},
           {
             kind: "onyx.Slider", name: "dotSize", 
-            value: 30, onChanging:"draw", onChange:"draw"
+            value: 30, onChanging:"updatePlot", onChange:"updatePlot"
           }
         ]},
         {kind: "onyx.GroupboxHeader", content: "Date Format"},
@@ -105,14 +105,14 @@ enyo.kind({
         {kind: "onyx.InputDecorator", components: [{
           kind: "onyx.Input", name: "datasetName",
           value: "Dataset 1",
-          onchange: "draw"
+          onchange: "updatePlot"
         }]},
         {style: "display: inline-block; width: 49%", components: [
           {content: "X"},
           {
             kind: "onyx.TextArea", name: "xVals",
             attributes: {cols: 10, rows: 7},
-            onchange: "draw"
+            onchange: "updatePlot"
           }
         ]},
         {style: "display: inline-block; width: 49%", components: [
@@ -120,7 +120,7 @@ enyo.kind({
           {
             kind: "onyx.TextArea", name: "yVals",
             attributes: {cols: 10, rows: 7},
-            onchange: "draw"
+            onchange: "updatePlot"
           }
         ]}
       ]},
@@ -129,20 +129,20 @@ enyo.kind({
         {kind: "onyx.InputDecorator", components: [
           {
             kind: "onyx.Input", name: "title",
-            onchange: "draw", value: "Single Dataset Plot"
+            onchange: "updatePlot", value: "Single Dataset Plot"
           }
         ]},
         {content: "Canvas Size"},
         {kind: "onyx.InputDecorator", components: [
           {
             kind: "onyx.Input", name: "width", attributes: {size: 5},
-            onchange: "draw", value: 400
+            onchange: "updatePlot", value: 400
           },
           {content: "x"},
           {tag: "br"},
           {
             kind: "onyx.Input", name: "height", attributes: {size: 5},
-            onchange: "draw", value: 400
+            onchange: "updatePlot", value: 400
           }
         ]},
         {content: "X Axis Range"},
@@ -220,7 +220,7 @@ enyo.kind({
       }
     }, this);
     
-    this.draw();
+    this.updatePlot();
     
     return true;
   },
@@ -242,23 +242,23 @@ enyo.kind({
       this.$.width.set("value", this.width - 20);
     }
     
-    this.draw();
+    this.updatePlot();
   },
   setDateFormat: function(inSender, inEvent) {
     this.$.chart.$.xTicks.setDateFormat(this.$.dateFormat.value);
-    this.draw();
+    this.updatePlot();
     return true;
   },
   setColor: function(inSender, inEvent) {
     this.color = inSender.value;
-    this.draw();
+    this.updatePlot();
     return true;
   },
   toggleFill: function(inSender, inEvernt) {
     inSender.addRemoveClass("active");
     this.fill[inSender.linedot] = !this.fill[inSender.linedot];
     
-    this.draw();
+    this.updatePlot();
     return true;
   },
   generateData: function() {
@@ -285,7 +285,7 @@ enyo.kind({
     this.$.xVals.set("value", xVals.join(", "));
     this.$.yVals.set("value", yVals.join(", "));
   },
-  draw: function() {
+  updatePlot: function() {
 
     var
       //turn the x and y values into an array
@@ -324,16 +324,14 @@ enyo.kind({
     this.$.chart.set("width", this.$.width.value);
     this.$.chart.set("height", this.$.height.value);
     
-    this.$.chart.draw(
-      {
-        title: this.$.title.value,
-        xMin: this.xMin,
-        xMax: this.xMax,
-        yMin: this.yMin,
-        yMax: this.yMax,
-      },
-      {datasets: datasets}
-    );
+    this.$.chart.configurePlot({
+      title: this.$.title.value,
+      xMin: this.xMin,
+      xMax: this.xMax,
+      yMin: this.yMin,
+      yMax: this.yMax,
+      datasets: datasets
+    });
     
     this.resize();
   }
