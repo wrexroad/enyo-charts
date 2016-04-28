@@ -47,7 +47,7 @@ enyo.kind({
     this.inherited(arguments);
     
     this.initVals();
-    this.draw();
+    this.updatePlot();
   },
   initVals: function() {
     this.$.chart.plotTitle = "Approximation of Pi";
@@ -57,7 +57,7 @@ enyo.kind({
   },
   reset: function(inSender, inEvent) {
     this.initVals();
-    this.draw();
+    this.updatePlot();
     return true;
   },
   toggleAnimation: function() {
@@ -77,7 +77,7 @@ enyo.kind({
     
     //create some new data and draw it
     this.addDataset();
-    this.draw();
+    this.updatePlot();
   },
   addDataset: function() {
     var
@@ -112,7 +112,7 @@ enyo.kind({
       }
     });
   },
-  draw: function() {
+  updatePlot: function() {
     this.$.chart.set("width", 400);
     this.$.chart.set("height", 400);
     
@@ -120,9 +120,6 @@ enyo.kind({
       xMin: -1, xMax: 1, yMin: -1, yMax: 1,
       datasets: this.datasets
     });
-    
-    this.$.chart.draw();
-    
     
     this.updateStats();
   },
