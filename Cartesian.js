@@ -51,7 +51,7 @@ enyo.kind({
   },
   toggleOverlay: function(activate) {
     var overlay;
-    
+
     if (activate) {
       overlay = this.createComponent({
         kind: "CartesianOverlay", name: "overlay", plotview: this
@@ -61,12 +61,10 @@ enyo.kind({
       this.binding({from: "width", to: "$.overlay.chartWidth"});
       
       overlay.render();
-    } else if (overlay = this.$.overlay) {
+    } else if ((overlay = this.$.overlay)) {
       overlay.destroyRegions();
       overlay.destroy();
     }
-    
-    this.inherited(arguments);
   },
   
   changeAxisType: function(xy, axisKindObj) {
@@ -409,7 +407,7 @@ enyo.kind({
   
     ctx.restore();
   },
-  draw: function() {    
+  draw: function() {
     var
       //make sure the datasets and equations are in arrays
       datasets = this.datasets || [],

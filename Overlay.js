@@ -64,6 +64,7 @@ enyo.kind({
     this.plotView = this.owner;
 
     this.resize();
+    this.refresh();
   },
   resize: function(previous, current, property) {
     var bounds, region, coords;
@@ -299,6 +300,9 @@ enyo.kind({
       
       ctx.restore();
     }
+    
+    //do it again!
+    window.requestAnimationFrame(this.refresh.bind(this));
   },
   activateCrosshairs: function() {
     var dataRegion = this.$.dataRegion;

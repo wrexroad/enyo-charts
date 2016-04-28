@@ -20,8 +20,7 @@ enyo.kind({
     fullAxisRange: null,
     decorMargin: null,
     layers: null,
-    overlay: false,
-    animate: false
+    overlay: false
   },
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"},
@@ -61,9 +60,7 @@ enyo.kind({
     
     this.initValues();
     
-    if (this.animate) {
-      this.refreshDraw();
-    }
+    this.draw();
   },
   createDataCanvas: function(varName, options) {
     var
@@ -322,23 +319,6 @@ enyo.kind({
       }
     }
   },
-  startAnimation: function() {
-    this.animate = true;
-    this.refreshDraw();
-  },
-  stopAnimation: function() {
-    this.animate = false;
-  },
-  refreshDraw: function() {
-    if (this.animate){
-      window.requestAnimationFrame(this.refreshOverlay.bind(this));
-      this.draw();
-      if (this.overlay) {
-        this.$.overlay.refresh();
-      }
-    }
-     
-  },
   draw: function() {
     var
       decorWidth = this.width,
@@ -348,6 +328,11 @@ enyo.kind({
       dataHeight = decorHeight - margin.top - margin.bottom,
       layer_i, canvas;
 
+    window.requestAnimationFrame(this.draw.bind(this));
+    
+    //bail out if there is no decoration canvas
+    if (!decorWidth || !decorHeight) {return;}
+    
     //clear the canvases
     this.wipePlot();
     this.activeLayerNames = {};
@@ -373,18 +358,6 @@ enyo.kind({
   },
   decorate: function() {
     this.printTitle();
-  },
-  toggleOverlay: function(){
-    //start the overlay refresh loop
-    function refreshOverlay() {
-      if (this.overlay) {
-        window.requestAnimationFrame(refreshOverlay.bind(this));
-        this.$.overlay.refresh();
-      }
-    }
-    if (this.overlay) {
-      refreshOverlay.call(this);
-    } 
   },
   getRangeFromData: function() {},
   drawLinear: function() {},
