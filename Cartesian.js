@@ -112,7 +112,7 @@ enyo.kind({
   calculateMargins: function() {
     var
       yLeftTicks, yLeftTicksWidth, yRightTicks, yRightTicksWidth,
-      testLabelLeft, testLabelRight;
+      testLabelLeft, testLabelRight, oldMargins;
     
     //if either the left or right y ticks are not defined,
     //just create a function to return the minimal label width
@@ -129,7 +129,9 @@ enyo.kind({
       new Array(yLeftTicksWidth > 10 ? yLeftTicksWidth : 10).join('W');
     testLabelRight =
       new Array(yRightTicksWidth).join('W');
-     
+    
+    oldMargins = this.decorMargin;
+    
     this.set("decorMargin", {
       //room for the title
       top: this.fontSize * 3,
@@ -143,7 +145,10 @@ enyo.kind({
     });
     
     if (this.overlay) {
-      this.$.overlay.resize();
+     this.$.overlay.set("marginLeft", this.decorMargin.left); 
+     this.$.overlay.set("marginRight", this.decorMargin.right);
+     this.$.overlay.set("marginTop", this.decorMargin.top);
+     this.$.overlay.set("marginBottom", this.decorMargin.bottom); 
     }
   },
   decorate: function() {
@@ -416,7 +421,8 @@ enyo.kind({
       xMin = +this.xMin,
       xMax = +this.xMax,
       yMin = +this.yMin,
-      yMax = +this.yMax;
+      yMax = +this.yMax,
+      range;
 
     //do any generic Chart setup
     this.inherited(arguments);
@@ -426,17 +432,25 @@ enyo.kind({
     }
 
     //make sure we have a valid range
-    if (!isFinite(xMin + xMax) || !isFinite(yMin + yMax)) {
+    if (!isFinite(xMin + xMax)) {
       if (datasets.length) {
-        var newRange = this.getRangeFromData(datasets);
+        range = this.getRangeFromData(datasets, 0);
         xMin =
-          isFinite(+plotOptions.xMin) ? +plotOptions.xMin : +newRange.xMin;
+          isFinite(xMin) ? xMin : +range.min;
         xMax =
-          isFinite(+plotOptions.xMax) ? +plotOptions.xMax : +newRange.xMax;
+          isFinite(xMax) ? xMax : +range.max;
+      }
+    }
+    
+    if (!isFinite(yMin + yMax)) {
+      if (datasets.length) {
+        range = this.getRangeFromData(
+          datasets, 1, {axis: 0, min: xMin, max: xMax}
+        );
         yMin =
-          isFinite(+plotOptions.yMin) ? +plotOptions.yMin : +newRange.yMin;
+          isFinite(yMin) ? yMin : +range.min;
         yMax =
-          isFinite(+plotOptions.yMax) ? +plotOptions.yMax : +newRange.yMax;
+          isFinite(yMax) ? yMax : +range.max;
       }
     }
     
@@ -602,56 +616,5 @@ enyo.kind({
       ctx.stroke(); 
     }    
     ctx.restore();
-  },
-  getRangeFromData: function(datasets) {
-    var
-      xMin = Number.POSITIVE_INFINITY,
-      xMax = Number.NEGATIVE_INFINITY,
-      yMin = Number.POSITIVE_INFINITY,
-      yMax = Number.NEGATIVE_INFINITY,
-      buffer, xVals, yVals;
-    
-    datasets.forEach(function(dataset) {
-      //no range was given, so dig through the coordinates and figure it out
-      if (!dataset.data.range) {
-        xVals = [];
-        yVals = [];
-        dataset.data.coords.forEach(function(coord) {
-          if (isFinite(+coord[0])) {xVals.push(+coord[0]);}
-          if (isFinite(+coord[1])) {yVals.push(+coord[1]);}
-        });
-        
-        dataset.data.range = [[],[]];
-        dataset.data.range[0][0] = Math.min.apply(this, xVals);
-        dataset.data.range[0][1] = Math.max.apply(this, xVals);
-        dataset.data.range[1][0] = Math.min.apply(this, yVals);
-        dataset.data.range[1][1] = Math.max.apply(this, yVals); 
-      }
-      
-      //see if this dataset contains a global extreme
-      if (dataset.data.range[0][0] < xMin) {
-        xMin = +dataset.data.range[0][0];
-      }
-      if (dataset.data.range[0][1] > xMax) {
-        xMax = +dataset.data.range[0][1];
-      }
-      if (dataset.data.range[1][0] < yMin) {
-        yMin = +dataset.data.range[1][0];
-      }
-      if (dataset.data.range[1][1] > yMax) {
-        yMax = +dataset.data.range[1][1];
-      }
-    }, this);
-    
-    //we dont want the plot to have the min and max point pressed right up 
-    //against the boarder, add a 10% buffer
-    buffer = (yMax - yMin) * 0.1;
-    
-    return {
-      xMin : xMin,
-      xMax : xMax,
-      yMin : yMin - buffer,
-      yMax : yMax + buffer
-    }
-  },
+  }
 });

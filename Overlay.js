@@ -16,7 +16,11 @@ enyo.kind({
     trendlineLabel: "",
     chartHeight: 0,
     chartWidth: 0,
-    offset: 0
+    offset: 0,
+    marginLeft: 0,
+    marginRight: 0,
+    marginTop: 0,
+    marginBottom: 0
   },
   components: [{
     name: "axisSettings", kind: "enyo.Popup",
@@ -50,7 +54,10 @@ enyo.kind({
     ]
   }],
   observers: {
-    resize: ["chartWidth", "chartHeight", "plotView.plotMargins"]
+    resize: [
+      "chartWidth", "chartHeight",
+      "marginTop", "marginBottom", "marginLeft", "marginRight"
+    ]
   },
   events: {
     onNewRange: ""
@@ -154,46 +161,49 @@ enyo.kind({
   calculateBounds: function() {
     var
       plotView = this.plotView || {},
-      margins = plotView.decorMargin || null,
       chartHeight = this.chartHeight,
       chartWidth = this.chartWidth,
+      marginTop = this.marginTop,
+      marginBottom = this.marginBottom,
+      marginLeft = this.marginLeft,
+      marginRight = this.marginRight,
       bounds;
-    if (margins === null) {
+    if (!isFinite(marginTop + marginBottom + marginLeft + marginRight)) {
       return null;
     }
     
     bounds = {
       leftRegion: {
         left: 0,
-        right: margins.left,
-        top: margins.top,
-        bottom: chartHeight - margins.bottom,
-        width: margins.left,
-        height: chartHeight - margins.top - margins.bottom
+        right: marginLeft,
+        top: marginTop,
+        bottom: chartHeight - marginBottom,
+        width: marginLeft,
+        height: chartHeight - marginTop - marginBottom
       },
       rightRegion: {
-        left: chartWidth - margins.right,
+        left: chartWidth - marginRight,
         right: chartWidth,
-        top: margins.top,
-        bottom: chartHeight - margins.bottom,
-        width: margins.right,
-        height: chartHeight - margins.top - margins.bottom
+        top: marginTop,
+        bottom: chartHeight - marginBottom,
+        width: marginRight,
+        height: chartHeight - marginTop - marginBottom
       },
       bottomRegion: {
-        left: margins.left,
-        right: chartWidth - margins.right,
-        top: chartHeight - margins.bottom,
+        left: marginLeft,
+        right: chartWidth - marginRight,
+        top: chartHeight - marginBottom,
         bottom: chartHeight,
-        width: chartWidth - margins.left - margins.right,
-        height: margins.bottom
+        width: chartWidth - marginLeft - marginRight,
+        height: marginBottom
       },
       dataRegion: {
-        left: margins.left,
-        right: chartWidth - margins.right,
-        top: margins.top,
-        bottom: chartHeight - margins.bottom,
-        width: chartWidth - margins.left - margins.right,
-        height: chartHeight - margins.top - margins.bottom
+        left: marginLeft,
+        right: chartWidth - marginRight,
+        top: marginTop,
+        bottom: chartHeight - marginBottom,
+        width: chartWidth - marginLeft - marginRight,
+        height: chartHeight - marginTop - marginBottom
       }
     };
 
@@ -208,7 +218,8 @@ enyo.kind({
       dataRegionBounds = this.bounds.dataRegion,
       trendline = this.trendlineCoords,
       plotView = this.plotView,
-      ctx, zoom, mark1, mark2, m, b, dx, dy, label, textOffset;
+      mark1Coords, mark2Coords, mark1Value, mark2Value,
+      m, b, dx, dy, label, textOffset, ctx, zoom;
 
     if (!dataRegionBounds) { return; }
     
@@ -258,14 +269,16 @@ enyo.kind({
       
       //since the trendlineCoordinates object exists,
       //we know we at least have 1 point set
-      mark1 = trendline.mark1;
+      mark1Coords = plotView.invertValue(trendline.mark1);
+      mark1Value = trendline.mark1;
       
       //if there isnt a second point set, use the current cursor coordinates
-      mark2 = trendline.mark2 || {x: cursor.x, y: cursor.y, value: pointValue};
+      mark2Coords = plotView.invertValue(trendline.mark2) || cursor;
+      mark2Value = trendline.mark2 || plotView.invertCoordinates(cursor);
       
       //calculat the line that connects the two points
-      m = (mark2.y - mark1.y) / (mark2.x - mark1.x);
-      b = mark1.y - (mark1.x * m);
+      m = (mark2Coords.y - mark1Coords.y) / (mark2Coords.x - mark1Coords.x);
+      b = mark1Coords.y - (mark1Coords.x * m);
       
       //draw the connecting line
       ctx.strokeStyle = ctx.fillStyle = this.trendlineColor;
@@ -276,15 +289,15 @@ enyo.kind({
       
       //make a dot at eaech point
       ctx.beginPath();
-      ctx.arc(mark1.x, mark1.y, ctx.lineWidth << 1, 0, Math.PI * 2);
-      ctx.arc(mark2.x, mark2.y, ctx.lineWidth << 1, 0, Math.PI * 2);
+      ctx.arc(mark1Coords.x, mark1Coords.y, ctx.lineWidth << 1, 0, Math.PI * 2);
+      ctx.arc(mark2Coords.x, mark2Coords.y, ctx.lineWidth << 1, 0, Math.PI * 2);
       ctx.fill();
       
       //draw the trendline label
       ctx.textAlign = "start";
       ctx.font = plotView.fontSize + "px " + plotView.font;
-      dx = mark2.value.x - mark1.value.x;
-      dy = mark2.value.y - mark1.value.y;
+      dx = mark2Value.x - mark1Value.x;
+      dy = mark2Value.y - mark1Value.y;
       
       label =
         "Δy: " + plotView.$.yLeftTicks.createLabel(dy, {short: true}) + ", " +
@@ -294,8 +307,8 @@ enyo.kind({
       
       ctx.fillText(
         label,
-        ((mark2.x - mark1.x) >> 1) + mark1.x + textOffset,
-        ((mark2.y - mark1.y) >> 1) + mark1.y + textOffset
+        ((mark2Coords.x - mark1Coords.x) >> 1) + mark1Coords.x + textOffset,
+        ((mark2Coords.y - mark1Coords.y) >> 1) + mark1Coords.y + textOffset
       );
       
       ctx.restore();
@@ -377,19 +390,11 @@ enyo.kind({
     if (!this.trendlineCoords) {
       //no marks have been set yet
       this.trendlineCoords = {
-        mark1: {
-          x: this.cursor.x,
-          y: this.cursor.y,
-          value: this.plotView.invertCoordinates(this.cursor)
-        }
+        mark1: this.plotView.invertCoordinates(this.cursor)
       };
     } else if (this.trendlineCoords.mark1 && !this.trendlineCoords.mark2) {
       //save the second point of the trendline
-      this.trendlineCoords.mark2 = {
-        x: this.cursor.x,
-        y: this.cursor.y,
-        value: this.plotView.invertCoordinates(this.cursor)
-      };
+      this.trendlineCoords.mark2 = this.plotView.invertCoordinates(this.cursor);
     } else {
       //both points were previously set, clear them
       this.trendlineCoords = null;
@@ -472,7 +477,7 @@ enyo.kind({
       return true;
     }
 
-    if ("moveenterleave".indexOf(inEvent.type) > -1 ) {
+    if ("moveenterleavedrag".indexOf(inEvent.type) > -1 ) {
       //set the new bounds to have the same t and l, but adjust the w and h
       this.zoomboxCoords = {
         t: this.zoomboxCoords.t,
@@ -533,20 +538,22 @@ enyo.kind({
     return true;
   },
   handleDrag: function(inSender, inEvent) {
+    var trendline, mark1, mark2;
+    
     this.cancelTap = true;
     
     //update the cursor position
     this.cursorMoved(inSender, inEvent);
     
     //make sure there is movement in at least one direction
-    if (!inEvent.ddx && !inEvent.ddy) {
+    if (!(inEvent.ddx + inEvent.ddy)) {
       return true;
     }
     
     //dont drag if zooming
     if (this.zoomboxCoords) {
       return true;
-    } 
+    }
     
     //not a zoom box so we must be panning
     this.rangeFromPan(inEvent);
