@@ -112,7 +112,7 @@ enyo.kind({
   calculateMargins: function() {
     var
       yLeftTicks, yLeftTicksWidth, yRightTicks, yRightTicksWidth,
-      testLabelLeft, testLabelRight;
+      testLabelLeft, testLabelRight, oldMargins;
     
     //if either the left or right y ticks are not defined,
     //just create a function to return the minimal label width
@@ -129,7 +129,9 @@ enyo.kind({
       new Array(yLeftTicksWidth > 10 ? yLeftTicksWidth : 10).join('W');
     testLabelRight =
       new Array(yRightTicksWidth).join('W');
-     
+    
+    oldMargins = this.decorMargin;
+    
     this.set("decorMargin", {
       //room for the title
       top: this.fontSize * 3,
@@ -143,7 +145,10 @@ enyo.kind({
     });
     
     if (this.overlay) {
-      this.$.overlay.resize();
+     this.$.overlay.set("marginLeft", this.decorMargin.left); 
+     this.$.overlay.set("marginRight", this.decorMargin.right);
+     this.$.overlay.set("marginTop", this.decorMargin.top);
+     this.$.overlay.set("marginBottom", this.decorMargin.bottom); 
     }
   },
   decorate: function() {
