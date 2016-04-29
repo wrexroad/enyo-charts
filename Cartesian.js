@@ -421,7 +421,8 @@ enyo.kind({
       xMin = +this.xMin,
       xMax = +this.xMax,
       yMin = +this.yMin,
-      yMax = +this.yMax;
+      yMax = +this.yMax,
+      range;
 
     //do any generic Chart setup
     this.inherited(arguments);
@@ -431,17 +432,25 @@ enyo.kind({
     }
 
     //make sure we have a valid range
-    if (!isFinite(xMin + xMax) || !isFinite(yMin + yMax)) {
+    if (!isFinite(xMin + xMax)) {
       if (datasets.length) {
-        var newRange = this.getRangeFromData(datasets);
+        range = this.getRangeFromData(datasets, 0);
         xMin =
-          isFinite(xMin) ? xMin : +newRange.xMin;
+          isFinite(xMin) ? xMin : +range.min;
         xMax =
-          isFinite(xMax) ? xMax : +newRange.xMax;
+          isFinite(xMax) ? xMax : +range.max;
+      }
+    }
+    
+    if (!isFinite(yMin + yMax)) {
+      if (datasets.length) {
+        range = this.getRangeFromData(
+          datasets, 1, {axis: 0, min: xMin, max: xMax}
+        );
         yMin =
-          isFinite(yMin) ? yMin : +newRange.yMin;
+          isFinite(yMin) ? yMin : +range.min;
         yMax =
-          isFinite(yMax) ? yMax : +newRange.yMax;
+          isFinite(yMax) ? yMax : +range.max;
       }
     }
     
@@ -608,55 +617,56 @@ enyo.kind({
     }    
     ctx.restore();
   },
-  getRangeFromData: function(datasets) {
+  getRangeFromData: function(datasets, axis, bounds) {
     var
-      xMin = Number.POSITIVE_INFINITY,
-      xMax = Number.NEGATIVE_INFINITY,
-      yMin = Number.POSITIVE_INFINITY,
-      yMax = Number.NEGATIVE_INFINITY,
-      buffer, xVals, yVals;
+      min = Number.POSITIVE_INFINITY,
+      max = Number.NEGATIVE_INFINITY,
+      buffer, vals;
+    
+    //we can indicate that only datapoints within a range of a cetrain axis
+    //should be allowed to be considered for the new range
+    bounds = bounds || {};
+    
+    //axis has to be a number indicating which
+    //element of the data point to look at
+    axis = +axis;
+    if (!isFinite(axis)) {
+      return;
+    }
     
     datasets.forEach(function(dataset) {
       //no range was given, so dig through the coordinates and figure it out
       if (!dataset.data.range) {
-        xVals = [];
-        yVals = [];
+        vals = [];
         dataset.data.coords.forEach(function(coord) {
-          if (isFinite(+coord[0])) {xVals.push(+coord[0]);}
-          if (isFinite(+coord[1])) {yVals.push(+coord[1]);}
+          if (!(
+            isFinite(bounds.axis + bounds.min + bounds.max) &&
+            (+coord[bounds.axis] > bounds.max ||
+              bounds.min > +coord[bounds.axis])
+          )) {
+            if (isFinite(+coord[axis])) {vals.push(+coord[axis]);}
+          }
         });
-        
         dataset.data.range = [[],[]];
-        dataset.data.range[0][0] = Math.min.apply(this, xVals);
-        dataset.data.range[0][1] = Math.max.apply(this, xVals);
-        dataset.data.range[1][0] = Math.min.apply(this, yVals);
-        dataset.data.range[1][1] = Math.max.apply(this, yVals); 
+        dataset.data.range[axis][0] = Math.min.apply(this, vals);
+        dataset.data.range[axis][1] = Math.max.apply(this, vals); 
       }
       
       //see if this dataset contains a global extreme
-      if (dataset.data.range[0][0] < xMin) {
-        xMin = +dataset.data.range[0][0];
+      if (dataset.data.range[axis][0] < min) {
+        min = +dataset.data.range[axis][0];
       }
-      if (dataset.data.range[0][1] > xMax) {
-        xMax = +dataset.data.range[0][1];
-      }
-      if (dataset.data.range[1][0] < yMin) {
-        yMin = +dataset.data.range[1][0];
-      }
-      if (dataset.data.range[1][1] > yMax) {
-        yMax = +dataset.data.range[1][1];
+      if (dataset.data.range[axis][1] > max) {
+        max = +dataset.data.range[axis][1];
       }
     }, this);
     
     //we dont want the plot to have the min and max point pressed right up 
     //against the boarder, add a 10% buffer
-    buffer = (yMax - yMin) * 0.1;
-    
+    buffer = (max - min) * 0.1;
     return {
-      xMin : xMin,
-      xMax : xMax,
-      yMin : yMin - buffer,
-      yMax : yMax + buffer
-    }
+      min : min - buffer,
+      max : max + buffer
+    };
   },
 });
