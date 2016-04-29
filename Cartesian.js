@@ -435,13 +435,13 @@ enyo.kind({
       if (datasets.length) {
         var newRange = this.getRangeFromData(datasets);
         xMin =
-          isFinite(+plotOptions.xMin) ? +plotOptions.xMin : +newRange.xMin;
+          isFinite(xMin) ? xMin : +newRange.xMin;
         xMax =
-          isFinite(+plotOptions.xMax) ? +plotOptions.xMax : +newRange.xMax;
+          isFinite(xMax) ? xMax : +newRange.xMax;
         yMin =
-          isFinite(+plotOptions.yMin) ? +plotOptions.yMin : +newRange.yMin;
+          isFinite(yMin) ? yMin : +newRange.yMin;
         yMax =
-          isFinite(+plotOptions.yMax) ? +plotOptions.yMax : +newRange.yMax;
+          isFinite(yMax) ? yMax : +newRange.yMax;
       }
     }
     
