@@ -477,7 +477,7 @@ enyo.kind({
       return true;
     }
 
-    if ("moveenterleave".indexOf(inEvent.type) > -1 ) {
+    if ("moveenterleavedrag".indexOf(inEvent.type) > -1 ) {
       //set the new bounds to have the same t and l, but adjust the w and h
       this.zoomboxCoords = {
         t: this.zoomboxCoords.t,
@@ -553,7 +553,7 @@ enyo.kind({
     //dont drag if zooming
     if (this.zoomboxCoords) {
       return true;
-    } 
+    }
     
     //not a zoom box so we must be panning
     this.rangeFromPan(inEvent);
