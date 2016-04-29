@@ -89,10 +89,10 @@ enyo.kind({
     this.createComponent(axisKindObj);
   },
   setAxisRange: function(inSender, inEvent) {
-    this.xMin = isFinite(+xMin) ? +xMin : this.xMin;
-    this.xMax = isFinite(+xMax) ? +xMax : this.xMax;
-    this.yMin = isFinite(+yMin) ? +yMin : this.yMin;
-    this.yMax = isFinite(+yMax) ? +yMax : this.yMax;
+    this.xMin = isFinite(+inEvent.xMin) ? +inEvent.xMin : this.xMin;
+    this.xMax = isFinite(+inEvent.xMax) ? +inEvent.xMax : this.xMax;
+    this.yMin = isFinite(+inEvent.yMin) ? +inEvent.yMin : this.yMin;
+    this.yMax = isFinite(+inEvent.yMax) ? +inEvent.yMax : this.yMax;
     
     //figure out the transform matrix and create a point inverting function
     this.calculateSpacing();
