@@ -359,7 +359,58 @@ enyo.kind({
   decorate: function() {
     this.printTitle();
   },
-  getRangeFromData: function() {},
+  getRangeFromData: function(datasets, axis, bounds) {
+    var
+      min = Number.POSITIVE_INFINITY,
+      max = Number.NEGATIVE_INFINITY,
+      buffer, vals;
+    
+    //we can indicate that only datapoints within a range of a cetrain axis
+    //should be allowed to be considered for the new range
+    bounds = bounds || {};
+    
+    //axis has to be a number indicating which
+    //element of the data point to look at
+    axis = +axis;
+    if (!isFinite(axis)) {
+      return;
+    }
+    
+    datasets.forEach(function(dataset) {
+      //no range was given, so dig through the coordinates and figure it out
+      if (!dataset.data.range) {
+        vals = [];
+        dataset.data.coords.forEach(function(coord) {
+          if (!(
+            isFinite(bounds.axis + bounds.min + bounds.max) &&
+            (+coord[bounds.axis] > bounds.max ||
+              bounds.min > +coord[bounds.axis])
+          )) {
+            if (isFinite(+coord[axis])) {vals.push(+coord[axis]);}
+          }
+        });
+        dataset.data.range = [[],[]];
+        dataset.data.range[axis][0] = Math.min.apply(this, vals);
+        dataset.data.range[axis][1] = Math.max.apply(this, vals); 
+      }
+      
+      //see if this dataset contains a global extreme
+      if (dataset.data.range[axis][0] < min) {
+        min = +dataset.data.range[axis][0];
+      }
+      if (dataset.data.range[axis][1] > max) {
+        max = +dataset.data.range[axis][1];
+      }
+    }, this);
+    
+    //we dont want the plot to have the min and max point pressed right up 
+    //against the boarder, add a 10% buffer
+    buffer = (max - min) * 0.1;
+    return {
+      min : min - buffer,
+      max : max + buffer
+    };
+  },
   drawLinear: function() {},
   drawParabola: function() {},
   drawData: function() {},
