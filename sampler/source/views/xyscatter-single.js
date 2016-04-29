@@ -2,9 +2,6 @@ enyo.kind({
   name: "XYScatterSingle",
   kind: "Scroller",
   classes: "chart-panel",
-  handlers: {
-    onNewRange: "setAxisRange",
-  },
   components: [
     {kind: "onyx.Toolbar", components: [
       {kind: "onyx.InputDecorator", components: [

@@ -6,6 +6,10 @@ enyo.kind({
     xSpacingFactor: 1,
     ySpacingFactor: 1
   },
+  
+  handlers: {
+    onNewRange: "setAxisRange",
+  },
 
   constructor: function(opts) {
     var axes = opts.axisTypes || {};
@@ -47,7 +51,10 @@ enyo.kind({
 
     //chose a default range for this plot.
     //This should get changed when data are added
-    this.setAxisRange(-5, 5, -5, 5);
+    this.xMin = -5;
+    this.xMax = 5;
+    this.yMin = -5
+    this.yMax = 5;
   },
   toggleOverlay: function(activate) {
     var overlay;
@@ -81,7 +88,7 @@ enyo.kind({
     this.$[xy + "Ticks"].destroy();
     this.createComponent(axisKindObj);
   },
-  setAxisRange: function(xMin, xMax, yMin, yMax) {
+  setAxisRange: function(inSender, inEvent) {
     this.xMin = isFinite(+xMin) ? +xMin : this.xMin;
     this.xMax = isFinite(+xMax) ? +xMax : this.xMax;
     this.yMin = isFinite(+yMin) ? +yMin : this.yMin;
@@ -455,7 +462,7 @@ enyo.kind({
     }
     
     //calculate the pixel spacing before anything else is done
-    this.setAxisRange(xMin, xMax, yMin, yMax);
+    this.calculateSpacing();
     
     //draw each dataset and equation
     datasets.forEach(function(dataset) {
