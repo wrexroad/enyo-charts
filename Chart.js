@@ -16,11 +16,12 @@ enyo.kind({
     decorCtx: null,
     exportCtx: null,
     formatters: null,
-    axisRange: null,
-    fullAxisRange: null,
     decorMargin: null,
     layers: null,
-    overlay: false
+    overlay: false,
+    currentRange: null,
+    targetRange: null,
+    easingFunction: null
   },
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"},
@@ -315,9 +316,28 @@ enyo.kind({
     
     for (var opt in plotOptions) {
       if (plotOptions.hasOwnProperty(opt)) {
-        this.set(opt, plotOptions[opt]);
+        if (opt == "axisRange") {
+          this.setAxisRange(null, plotOptions[opt]);
+        } else {
+          this.set(opt, plotOptions[opt]);
+        }
       }
     }
+  },
+  setAxisRange: function(inSender, inEvent) {
+    var axisRange;
+    
+    for (var opt in inEvent) {
+      if (inEvent.hasOwnProperty(opt)) {
+        this.targetRange[opt] = inEvent[opt];
+      }
+    }
+    
+    if (!inEvent.easingStart) {
+      this.currentRange = this.targetRange;
+    }
+    
+    this.calculateSpacing();
   },
   draw: function() {
     var
@@ -427,7 +447,6 @@ enyo.kind({
   drawLinear: function() {},
   drawParabola: function() {},
   drawData: function() {},
-  setAxisRange: function() {},
   calculateSpacing: function() {},
   calculateMargins: function() {},
   invertCoordinates: function() {},

@@ -565,14 +565,15 @@ enyo.kind({
       range = {},
       scaleX = zoom.scaleX,
       scaleY = zoom.scaleY,
-      plotView = this.plotView,
+      plotView = this.plotView || {},
+      plotRange = plotView.currentRange,
       center, min, max;
 
     //y axis value (not pixel coordinate) of the cursor
     if (scaleY != 1) {
       center = zoom.centerValue.y;
-      min = (center - ((center - plotView.yMin) * scaleY)) || 0;
-      max = (center + ((plotView.yMax - center) * scaleY)) || 0;
+      min = (center - ((center - plotRange.yMin) * scaleY)) || 0;
+      max = (center + ((plotRange.yMax - center) * scaleY)) || 0;
     
       range.yMin = min;
       range.yMax = max;
@@ -580,10 +581,10 @@ enyo.kind({
 
     if (scaleX != 1) {
       center = zoom.centerValue.x;
-      min = center - ((center - plotView.xMin) * scaleX);
-      max = center + ((plotView.xMax - center) * scaleX);
+      min = center - ((center - plotRange.xMin) * scaleX);
+      max = center + ((plotRange.xMax - center) * scaleX);
       
-      if (min != plotView.xMin || max != plotView.xMax) {
+      if (min != plotRange.xMin || max != plotRange.xMax) {
         range.xMin = min;
         range.xMax = max;
       }
@@ -600,7 +601,8 @@ enyo.kind({
       ddy = pan.ddy,
       x = pan.pageX,
       y = pan.pageY,
-      plotView = this.plotView,
+      plotView = this.plotView || {},
+      plotRange = plotView.currentRange,
       start = plotView.invertCoordinates(
         {x: (x - xDirection * ddx),y: (y - yDirection * ddy)}
       ),
@@ -610,13 +612,13 @@ enyo.kind({
       deltaX, deltaY;
 
     deltaX = xDirection * (end.x - start.x);
-    range.xMin = plotView.xMin - deltaX;
-    range.xMax = plotView.xMax - deltaX;
+    range.xMin = plotRange.xMin - deltaX;
+    range.xMax = plotRange.xMax - deltaX;
 
     if (!this.autoranging) {
       deltaY = yDirection * (end.y - start.y);
-      range.yMin = plotView.yMin - deltaY;
-      range.yMax = plotView.yMax - deltaY;
+      range.yMin = plotRange.yMin - deltaY;
+      range.yMax = plotRange.yMax - deltaY;
     }
 
     this.doNewRange(range);
@@ -679,20 +681,22 @@ enyo.kind({
     this.holdPulseCount++;
   },
   openAxisSettings: function() {
-    var plotView = this.plotView;
+    var
+      plotView = this.plotView || {},
+      plotRange = plotView.currentRange;
 
     this.$.axisSettings.set("showing", true);
     this.$.xMinInput.set(
-      "value", plotView.$.xTicks.createLabel(plotView.xMin)
+      "value", plotView.$.xTicks.createLabel(plotRange.xMin)
     );
     this.$.xMaxInput.set(
-      "value", plotView.$.xTicks.createLabel(plotView.xMax)
+      "value", plotView.$.xTicks.createLabel(plotRange.xMax)
     );
     this.$.yMinInput.set(
-      "value", plotView.$.yLeftTicks.createLabel(plotView.yMin)
+      "value", plotView.$.yLeftTicks.createLabel(plotRange.yMin)
     );
     this.$.yMaxInput.set(
-      "value", plotView.$.yLeftTicks.createLabel(plotView.yMax)
+      "value", plotView.$.yLeftTicks.createLabel(plotRange.yMax)
     );
     
   },

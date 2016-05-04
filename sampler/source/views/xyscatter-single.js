@@ -323,10 +323,12 @@ enyo.kind({
     
     this.$.chart.configurePlot({
       title: this.$.title.value,
-      xMin: this.xMin,
-      xMax: this.xMax,
-      yMin: this.yMin,
-      yMax: this.yMax,
+      axisRange: {
+        xMin: this.xMin,
+        xMax: this.xMax,
+        yMin: this.yMin,
+        yMax: this.yMax
+      },
       datasets: datasets
     });
     
