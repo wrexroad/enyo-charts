@@ -445,13 +445,10 @@ enyo.kind({
     }
     
     if (!isFinite(yMin + yMax)) {
-      console.log(1)
       if (datasets.length) {
-        console.log(range)
         range = this.getRangeFromData(
           datasets, 1, {axis: 0, min: xMin, max: xMax}
         );
-        console.log(range)
         yMin = isFinite(yMin) ? yMin : +range.min;
         yMax = isFinite(yMax) ? yMax : +range.max;
         this.setAxisRange(this, {yMin: yMin, yMax: yMax});
