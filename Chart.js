@@ -351,7 +351,10 @@ enyo.kind({
     
     if (inEvent.easingStart) {
       //we are going to start easing,
-      //so remember what the current starting range is
+      //remember the starting time...
+      this.targetRange.easingStart = inEvent.easingStart;
+      
+      //...and the current starting range
       for (axis = 0; axis < this.currentRange.length; axis++) {
         if (this.currentRange[axis].length) {
           this.startRange[axis] = [
@@ -378,6 +381,7 @@ enyo.kind({
       }
     }
     
+    console.log(this.startRange, this.currentRange, this.targetRange)
     this.calculateSpacing();
     
     return true;

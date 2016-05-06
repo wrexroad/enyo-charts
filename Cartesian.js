@@ -413,11 +413,9 @@ enyo.kind({
       equations = this.equations || [],
       range = this.currentRange || {},
       xMin = +range[0][0],
-      xMax = +range[0][1],
-      yMin = +range[1][0],
-      yMax = +range[1][1];
+      xMax = +range[0][1];
     
-    //make sure we have a good x axis range
+    //If x axis range is not already set, get it from the data
     if (!isFinite(xMin + xMax)) {
       if (datasets.length) {
         range = this.getRangeFromData(datasets, 0);
@@ -426,6 +424,7 @@ enyo.kind({
       }
     }
     
+    //get the y axis range from the datapoints in the x axis range
     range = this.getRangeFromData(datasets, 1, {axis: 0, min: xMin, max: xMax});
     
     this.setAxisRange(null,{
@@ -459,31 +458,30 @@ enyo.kind({
     //based on how long it has been since we started the easing
     if ((easeStart = this.targetRange.easingStart)) {
       easeProgress = enyo.easedLerp(easeStart, 250, enyo.easing.cubicOut);
+      
       if (easeProgress > 0.9) {
         //close enough, just jump to the targetRange
         this.targetRange.easingStart = null;
-        this.currentRange = {
-          xMin: this.targetRange[0][0],
-          xMax: this.targetRange[0][1],
-          yMin: this.targetRange[1][0],
-          yMax: this.targetRange[1][1]
-        }
+        this.currentRange = [
+          [this.targetRange[0][0], this.targetRange[0][1]],
+          [this.targetRange[1][0], this.targetRange[1][1]]
+        ];
       } else {
-        //console.log(this.targetRange , this.startRange, easeProgress);
-        this.currentRange = {
-          xMin:
+        console.log(this.targetRange, this.currentRange, this.startRange, easeProgress);
+        this.currentRange = [
+          [
             this.startRange[0][0] +
-            ((this.targetRange[0][0] - this.startRange) * easeProgress),
-          xMax:
+              ((this.targetRange[0][0] - this.startRange[0][0]) * easeProgress),
             this.startRange[0][1] +
-            (this.targetRange[0][1] - this.startRange) * easeProgress,
-          yMin:
+              (this.targetRange[0][1] - this.startRange[0][1]) * easeProgress
+          ],
+          [
             this.startRange[1][0] +
-            (this.targetRange[1][0] - this.startRange) * easeProgress,
-          yMax:
+              (this.targetRange[1][0] - this.startRange[1][0]) * easeProgress,
             this.startRange[1][1] +
-            (this.targetRange[1][1] - this.startRange) * easeProgress
-        }
+              (this.targetRange[1][1] - this.startRange[1][1]) * easeProgress
+          ]
+        ];
       }
     }
     
