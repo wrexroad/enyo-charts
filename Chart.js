@@ -19,6 +19,7 @@ enyo.kind({
     decorMargin: null,
     layers: null,
     overlay: false,
+    startRange: null,
     currentRange: null,
     targetRange: null,
     easingFunction: null
@@ -317,7 +318,7 @@ enyo.kind({
     for (var opt in plotOptions) {
       if (plotOptions.hasOwnProperty(opt)) {
         if (opt == "axisRange") {
-          this.setAxisRange(null, plotOptions[opt]);
+          this.setAxisRange(null, {range: plotOptions[opt]});
         } else {
           this.set(opt, plotOptions[opt]);
         }
@@ -325,19 +326,64 @@ enyo.kind({
     }
   },
   setAxisRange: function(inSender, inEvent) {
-    var axisRange;
+    var
+      newRange = inEvent.range || [],
+      axis;
+    //make sure there is a valid range
+    if (!newRange.length) {
+      return;
+    }
     
-    for (var opt in inEvent) {
-      if (inEvent.hasOwnProperty(opt)) {
-        this.targetRange[opt] = inEvent[opt];
+    //set the targetRange
+    for (axis = 0; axis < newRange.length; axis++) {
+      if (newRange[axis].length) {
+        //make sure target range has been initialized for this axis
+        this.targetRange[axis] = [
+          isFinite(+newRange[axis][0]) ?
+            newRange[axis][0] :
+            (this.targetRange[axis] || [])[0],
+          isFinite(+newRange[axis][1]) ?
+            newRange[axis][1] :
+            (this.targetRange[axis] || [])[1]  
+        ];
       }
     }
     
-    if (!inEvent.easingStart) {
-      this.currentRange = this.targetRange;
+    if (inEvent.easingStart) {
+      //we are going to start easing,
+      //so remember what the current starting range is
+      for (axis = 0; axis < this.currentRange.length; axis++) {
+        if (this.currentRange[axis].length) {
+          this.startRange[axis] = [
+            isFinite(+this.currentRange[axis][0]) ?
+              this.currentRange[axis][0] :
+              (this.startRange[axis] || [])[0],
+            isFinite(+this.currentRange[axis][1]) ?
+              this.currentRange[axis][1] :
+              (this.startRange[axis] || [])[1]  
+          ];
+        }
+      }
+    } else {
+      //not easing, copy the targetRange to the currentRange
+      for (axis = 0; axis < this.currentRange.length; axis++) {
+        this.currentRange[axis] = [
+          isFinite(+this.targetRange[axis][0]) ?
+            this.targetRange[axis][0] :
+            (this.currentRange[axis] || [])[0],
+          isFinite(+this.targetRange[axis][1]) ?
+            this.targetRange[axis][1] :
+            (this.currentRange[axis] || [])[1]  
+        ];
+      }
     }
     
     this.calculateSpacing();
+    
+    return true;
+  },
+  getAxisRange: function() {
+    return this.currentRange.xMin;
   },
   draw: function() {
     var

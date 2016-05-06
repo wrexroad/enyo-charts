@@ -9,6 +9,7 @@ enyo.kind({
   
   handlers: {
     onNewRange: "setAxisRange",
+    onAutorange: "autorangeAxis"
   },
 
   constructor: function(opts) {
@@ -51,12 +52,9 @@ enyo.kind({
 
     //chose a default range for this plot.
     //This should get changed when data are added
-    this.currentRange = this.targetRange = {
-      xMin: -5,
-      xMax: 5,
-      yMin: -5,
-      yMax: 5
-    };
+    this.startRange = [[-5,5],[-5,5]];
+    this.targetRange = [[-5,5],[-5,5]];
+    this.currentRange = [[-5,5],[-5,5]];
   },
   toggleOverlay: function(activate) {
     var overlay;
@@ -90,12 +88,6 @@ enyo.kind({
     this.$[xy + "Ticks"].destroy();
     this.createComponent(axisKindObj);
   },
-  getAxisRange: function() {
-    return [
-      [this.currentRange.xMin, this.currentRange.xMax],
-      [this.currentRange.yMin, this.currentRange.yMax]
-    ]
-  },
   calculateSpacing: function() {
     var
       margin = this.decorMargin,
@@ -104,11 +96,11 @@ enyo.kind({
 
     this.set(
       "xSpacingFactor",
-      width / ((+this.currentRange.xMax || 0) - (+this.currentRange.xMin || 0))
+      width / ((+this.currentRange[0][1] || 0) - (+this.currentRange[0][0] || 0))
     );
     this.set(
       "ySpacingFactor",
-      height / ((+this.currentRange.yMax || 0) - (+this.currentRange.yMin || 0))
+      height / ((+this.currentRange[1][1] || 0) - (+this.currentRange[1][0] || 0))
     );
   },
   calculateMargins: function() {
@@ -158,10 +150,10 @@ enyo.kind({
       ctx = this.decorCtx,
       margin = this.decorMargin,
       range = this.currentRange || {},
-      xMin = range.xMin,
-      xMax = range.xMax,
-      yMin = range.yMin,
-      yMax = range.yMax,
+      xMin = range[0][0],
+      xMax = range[0][1],
+      yMin = range[1][0],
+      yMax = range[1][1],
       dataHeight = this.height - margin.top - margin.bottom,
       dataWidth  = this.width - margin.left - margin.right,
       offset, tick_i, ticks;
@@ -307,8 +299,8 @@ enyo.kind({
       return null;
     } else {
       return {
-        x: this.currentRange.xMin + coords.x / this.xSpacingFactor,
-        y: this.currentRange.yMax - coords.y / this.ySpacingFactor
+        x: this.currentRange[0][0] + coords.x / this.xSpacingFactor,
+        y: this.currentRange[1][1] - coords.y / this.ySpacingFactor
       };
     }
   },
@@ -317,8 +309,8 @@ enyo.kind({
       return null;
     } else {
       return {
-        x: (pointValue.x  - this.currentRange.xMin) * this.xSpacingFactor,
-        y: -(pointValue.y - this.currentRange.yMax) * this.ySpacingFactor
+        x: (pointValue.x  - this.currentRange[0][0]) * this.xSpacingFactor,
+        y: -(pointValue.y - this.currentRange[1][1]) * this.ySpacingFactor
       };
     }
   },
@@ -328,9 +320,9 @@ enyo.kind({
       name = params.name,
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
-      xMin = this.currentRange.xMin,
-      xMax = this.currentRange.xMax,
-      yMin = this.currentRange.yMin,
+      xMin = this.currentRange[0][0],
+      xMax = this.currentRange[0][1],
+      yMin = this.currentRange[1][0],
       m = params.m || 0,
       b = params.b || 0,
       x1 = xMin,
@@ -369,9 +361,9 @@ enyo.kind({
       name = params.name,
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
-      xMin = this.currentRange.xMin,
-      xMax = this.currentRange.xMax,
-      yMin = this.currentRange.yMin,
+      xMin = this.currentRange[0][0],
+      xMax = this.currentRange[0][1],
+      yMin = this.currentRange[1][0],
       a = params.a || 0,
       b = params.b || 0,
       c = params.c || 0,
@@ -415,6 +407,34 @@ enyo.kind({
   
     ctx.restore();
   },
+  autorangeAxis: function(inSender, inEvent) {
+    var
+      datasets = this.datasets || [],
+      equations = this.equations || [],
+      range = this.currentRange || {},
+      xMin = +range[0][0],
+      xMax = +range[0][1],
+      yMin = +range[1][0],
+      yMax = +range[1][1];
+    
+    //make sure we have a good x axis range
+    if (!isFinite(xMin + xMax)) {
+      if (datasets.length) {
+        range = this.getRangeFromData(datasets, 0);
+        xMin = isFinite(xMin) ? xMin : +range.min;
+        xMax = isFinite(xMax) ? xMax : +range.max;
+      }
+    }
+    
+    range = this.getRangeFromData(datasets, 1, {axis: 0, min: xMin, max: xMax});
+    
+    this.setAxisRange(null,{
+      range: [[xMin, xMax], [+range.min, +range.max]],
+      easingStart: enyo.perfNow()
+    });
+    
+    return true;
+  },
   draw: function() {
     var
       //make sure the datasets and equations are in arrays
@@ -422,10 +442,11 @@ enyo.kind({
       equations = this.equations || [],
       //and range values are numbers
       range = this.currentRange || {},
-      xMin = +range.xMin,
-      xMax = +range.xMax,
-      yMin = +range.yMin,
-      yMax = +range.yMax;
+      xMin = +range[0][0],
+      xMax = +range[0][1],
+      yMin = +range[1][0],
+      yMax = +range[1][1],
+      easeStart, easeProgress;
 
     //do any generic Chart setup
     this.inherited(arguments);
@@ -433,25 +454,36 @@ enyo.kind({
     if (!(datasets.length + equations.length)) {
       return;
     }
-
-    //make sure we have a valid range
-    if (!isFinite(xMin + xMax)) {
-      if (datasets.length) {
-        range = this.getRangeFromData(datasets, 0);
-        xMin = isFinite(xMin) ? xMin : +range.min;
-        xMax = isFinite(xMax) ? xMax : +range.max;
-        this.setAxisRange(this, {xMin: xMin, xMax: xMax});
-      }
-    }
     
-    if (!isFinite(yMin + yMax)) {
-      if (datasets.length) {
-        range = this.getRangeFromData(
-          datasets, 1, {axis: 0, min: xMin, max: xMax}
-        );
-        yMin = isFinite(yMin) ? yMin : +range.min;
-        yMax = isFinite(yMax) ? yMax : +range.max;
-        this.setAxisRange(this, {yMin: yMin, yMax: yMax});
+    //if we are currently easing the axis range, updated the current range
+    //based on how long it has been since we started the easing
+    if ((easeStart = this.targetRange.easingStart)) {
+      easeProgress = enyo.easedLerp(easeStart, 250, enyo.easing.cubicOut);
+      if (easeProgress > 0.9) {
+        //close enough, just jump to the targetRange
+        this.targetRange.easingStart = null;
+        this.currentRange = {
+          xMin: this.targetRange[0][0],
+          xMax: this.targetRange[0][1],
+          yMin: this.targetRange[1][0],
+          yMax: this.targetRange[1][1]
+        }
+      } else {
+        //console.log(this.targetRange , this.startRange, easeProgress);
+        this.currentRange = {
+          xMin:
+            this.startRange[0][0] +
+            ((this.targetRange[0][0] - this.startRange) * easeProgress),
+          xMax:
+            this.startRange[0][1] +
+            (this.targetRange[0][1] - this.startRange) * easeProgress,
+          yMin:
+            this.startRange[1][0] +
+            (this.targetRange[1][0] - this.startRange) * easeProgress,
+          yMax:
+            this.startRange[1][1] +
+            (this.targetRange[1][1] - this.startRange) * easeProgress
+        }
       }
     }
     
@@ -543,8 +575,8 @@ enyo.kind({
     var
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
-      xMin = this.currentRange.xMin,
-      yMin = this.currentRange.yMin;
+      xMin = this.currentRange[0][0],
+      yMin = this.currentRange[1][0];
     
     coords.forEach(function(pnt) {
       //'pnt' is a 2 element array: [x,y].
@@ -566,8 +598,8 @@ enyo.kind({
       xSpacingFactor = this.xSpacingFactor,
       ySpacingFactor = this.ySpacingFactor,
       onPath = false,
-      xMin = this.currentRange.xMin,
-      yMin = this.currentRange.yMin;
+      xMin = this.currentRange[0][0],
+      yMin = this.currentRange[1][0];
 
     ctx.save();
     

@@ -117,7 +117,7 @@ enyo.kind({
     this.$.chart.set("height", 400);
     
     this.$.chart.configurePlot({
-      axisRange: {xMin: -1, xMax: 1, yMin: -1, yMax: 1},
+      axisRange: [[-1, 1], [-1, 1]],
       datasets: this.datasets
     });
     

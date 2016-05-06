@@ -60,7 +60,8 @@ enyo.kind({
     ]
   },
   events: {
-    onNewRange: ""
+    onNewRange: "",
+    onAutorange: ""
   },
   rendered: function() {
     this.inherited(arguments);
@@ -526,9 +527,9 @@ enyo.kind({
           y: yMax
         });
 
-        this.doNewRange(
-          {xMin: start.x, xMax: end.x, yMin: start.y, yMax: end.y}
-        );
+        this.doNewRange({
+          range: [[start.x, end.x], [start.y, end.y]]
+        });
        
         //reset the box
         this.zoomboxCoords = null;
@@ -562,7 +563,7 @@ enyo.kind({
   },
   rangeFromZoom: function(zoom) {
     var
-      range = {},
+      range = [[], []],
       scaleX = zoom.scaleX,
       scaleY = zoom.scaleY,
       plotView = this.plotView || {},
@@ -572,29 +573,27 @@ enyo.kind({
     //y axis value (not pixel coordinate) of the cursor
     if (scaleY != 1) {
       center = zoom.centerValue.y;
-      min = (center - ((center - plotRange.yMin) * scaleY)) || 0;
-      max = (center + ((plotRange.yMax - center) * scaleY)) || 0;
+      min = (center - ((center - plotRange[1][0]) * scaleY)) || 0;
+      max = (center + ((plotRange[1][1] - center) * scaleY)) || 0;
     
-      range.yMin = min;
-      range.yMax = max;
+      range[1] = [min, max];
     }
 
     if (scaleX != 1) {
       center = zoom.centerValue.x;
-      min = center - ((center - plotRange.xMin) * scaleX);
-      max = center + ((plotRange.xMax - center) * scaleX);
+      min = center - ((center - plotRange[0][0]) * scaleX);
+      max = center + ((plotRange[0][1] - center) * scaleX);
       
-      if (min != plotRange.xMin || max != plotRange.xMax) {
-        range.xMin = min;
-        range.xMax = max;
+      if (min != plotRange[0][0] || max != plotRange[0][1]) {
+        range[0] = [min, max];
       }
     }
     
-    this.doNewRange(range);
+    this.doNewRange({range: range});
   },
   rangeFromPan: function(pan) {
     var
-      range = {},
+      range = [[], []],
       xDirection = pan.xDirection,
       yDirection = pan.yDirection,
       ddx = pan.ddx,
@@ -612,16 +611,19 @@ enyo.kind({
       deltaX, deltaY;
 
     deltaX = xDirection * (end.x - start.x);
-    range.xMin = plotRange.xMin - deltaX;
-    range.xMax = plotRange.xMax - deltaX;
+    range[0] = [
+      plotRange[0][0] - deltaX,
+      plotRange[0][1] - deltaX
+    ];
 
     if (!this.autoranging) {
       deltaY = yDirection * (end.y - start.y);
-      range.yMin = plotRange.yMin - deltaY;
-      range.yMax = plotRange.yMax - deltaY;
+      range[1] = [
+        plotRange[1][0] - deltaY,
+        plotRange[1][1] - deltaY
+      ];
     }
-
-    this.doNewRange(range);
+    this.doNewRange({range: range});
   },
   handleTap: function(inSender, inEvent) {
     var now = +(new Date());
@@ -659,7 +661,7 @@ enyo.kind({
     if (inSender.name === "dataRegion") {
       //double tapping the data region should trigger y axis autoranging.
       //do this by clearing any previously set y-axis range
-      this.doNewRange({yMin: NaN, yMax: NaN});
+      this.doAutorange("y");
     } else if (inSender.name === "bottomRegion") {
       this.openAxisSettings("x");
     } else if (inSender.name === "leftRegion") {
@@ -687,16 +689,16 @@ enyo.kind({
 
     this.$.axisSettings.set("showing", true);
     this.$.xMinInput.set(
-      "value", plotView.$.xTicks.createLabel(plotRange.xMin)
+      "value", plotView.$.xTicks.createLabel(plotRange[0][0])
     );
     this.$.xMaxInput.set(
-      "value", plotView.$.xTicks.createLabel(plotRange.xMax)
+      "value", plotView.$.xTicks.createLabel(plotRange[0][1])
     );
     this.$.yMinInput.set(
-      "value", plotView.$.yLeftTicks.createLabel(plotRange.yMin)
+      "value", plotView.$.yLeftTicks.createLabel(plotRange[1][0])
     );
     this.$.yMaxInput.set(
-      "value", plotView.$.yLeftTicks.createLabel(plotRange.yMax)
+      "value", plotView.$.yLeftTicks.createLabel(plotRange[1][1])
     );
     
   },
@@ -704,10 +706,16 @@ enyo.kind({
     var plotView = this.plotView;
 
     this.doNewRange({
-      xMin: plotView.$.xTicks.parseLabel(this.$.xMinInput.value),
-      xMax: plotView.$.xTicks.parseLabel(this.$.xMaxInput.value),
-      yMin: plotView.$.yLeftTicks.parseLabel(this.$.yMinInput.value),
-      yMax: plotView.$.yLeftTicks.parseLabel(this.$.yMaxInput.value)
+      range: [
+        [
+          plotView.$.xTicks.parseLabel(this.$.xMinInput.value),
+          plotView.$.xTicks.parseLabel(this.$.xMaxInput.value)
+        ],
+        [
+          plotView.$.yLeftTicks.parseLabel(this.$.yMinInput.value),
+          plotView.$.yLeftTicks.parseLabel(this.$.yMaxInput.value)
+        ]
+      ]
     });
     
     this.$.axisSettings.set("showing", false);
