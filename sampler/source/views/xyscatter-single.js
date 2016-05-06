@@ -2,9 +2,6 @@ enyo.kind({
   name: "XYScatterSingle",
   kind: "Scroller",
   classes: "chart-panel",
-  handlers: {
-    onNewRange: "setAxisRange",
-  },
   components: [
     {kind: "onyx.Toolbar", components: [
       {kind: "onyx.InputDecorator", components: [
@@ -326,10 +323,7 @@ enyo.kind({
     
     this.$.chart.configurePlot({
       title: this.$.title.value,
-      xMin: this.xMin,
-      xMax: this.xMax,
-      yMin: this.yMin,
-      yMax: this.yMax,
+      axisRange: [[this.xMin, this.xMax],[this.yMin, this.yMax]],
       datasets: datasets
     });
     

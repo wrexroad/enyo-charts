@@ -16,11 +16,13 @@ enyo.kind({
     decorCtx: null,
     exportCtx: null,
     formatters: null,
-    axisRange: null,
-    fullAxisRange: null,
     decorMargin: null,
     layers: null,
-    overlay: false
+    overlay: false,
+    startRange: null,
+    currentRange: null,
+    targetRange: null,
+    easingFunction: null
   },
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"},
@@ -315,9 +317,77 @@ enyo.kind({
     
     for (var opt in plotOptions) {
       if (plotOptions.hasOwnProperty(opt)) {
-        this.set(opt, plotOptions[opt]);
+        if (opt == "axisRange") {
+          this.setAxisRange(null, {range: plotOptions[opt]});
+        } else {
+          this.set(opt, plotOptions[opt]);
+        }
       }
     }
+  },
+  setAxisRange: function(inSender, inEvent) {
+    var
+      newRange = inEvent.range || [],
+      axis;
+    //make sure there is a valid range
+    if (!newRange.length) {
+      return;
+    }
+    
+    //set the targetRange
+    for (axis = 0; axis < newRange.length; axis++) {
+      if (newRange[axis].length) {
+        //make sure target range has been initialized for this axis
+        this.targetRange[axis] = [
+          isFinite(+newRange[axis][0]) ?
+            newRange[axis][0] :
+            (this.targetRange[axis] || [])[0],
+          isFinite(+newRange[axis][1]) ?
+            newRange[axis][1] :
+            (this.targetRange[axis] || [])[1]  
+        ];
+      }
+    }
+    
+    if (inEvent.easingStart) {
+      //we are going to start easing,
+      //remember the starting time...
+      this.targetRange.easingStart = inEvent.easingStart;
+      
+      //...and the current starting range
+      for (axis = 0; axis < this.currentRange.length; axis++) {
+        if (this.currentRange[axis].length) {
+          this.startRange[axis] = [
+            isFinite(+this.currentRange[axis][0]) ?
+              this.currentRange[axis][0] :
+              (this.startRange[axis] || [])[0],
+            isFinite(+this.currentRange[axis][1]) ?
+              this.currentRange[axis][1] :
+              (this.startRange[axis] || [])[1]  
+          ];
+        }
+      }
+    } else {
+      //not easing, copy the targetRange to the currentRange
+      for (axis = 0; axis < this.currentRange.length; axis++) {
+        this.currentRange[axis] = [
+          isFinite(+this.targetRange[axis][0]) ?
+            this.targetRange[axis][0] :
+            (this.currentRange[axis] || [])[0],
+          isFinite(+this.targetRange[axis][1]) ?
+            this.targetRange[axis][1] :
+            (this.currentRange[axis] || [])[1]  
+        ];
+      }
+    }
+    
+    console.log(this.startRange, this.currentRange, this.targetRange)
+    this.calculateSpacing();
+    
+    return true;
+  },
+  getAxisRange: function() {
+    return this.currentRange.xMin;
   },
   draw: function() {
     var
@@ -427,7 +497,6 @@ enyo.kind({
   drawLinear: function() {},
   drawParabola: function() {},
   drawData: function() {},
-  setAxisRange: function() {},
   calculateSpacing: function() {},
   calculateMargins: function() {},
   invertCoordinates: function() {},
