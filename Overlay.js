@@ -530,10 +530,10 @@ enyo.kind({
         this.doNewRange({
           range: [[start.x, end.x], [start.y, end.y]]
         });
-       
-        //reset the box
-        this.zoomboxCoords = null;
       }
+   
+      //reset the box
+      this.zoomboxCoords = null;   
     }
     
     return true;
