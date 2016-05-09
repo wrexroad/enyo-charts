@@ -22,7 +22,7 @@ enyo.kind({
     axes.x.name = "xTicks";
     axes.x.kind = axes.x.type + "Ticks";
     this.createComponent(axes.x);
-    
+      
     //try to get the left y axis. If its not defined,
     //default to looking for a generic y axis
     axes.yLeft = axes.yLeft || axes.y || {};
@@ -43,7 +43,6 @@ enyo.kind({
   },
   rendered: function() {
     this.inherited(arguments);
-    
     //turn on the overlay if it is set
     this.toggleOverlay(this.overlay);
   },
@@ -57,9 +56,9 @@ enyo.kind({
     this.currentRange = [[-5,5],[-5,5]];
   },
   toggleOverlay: function(activate) {
-    var overlay;
+    var overlay = this.$.overlay;
 
-    if (activate) {
+    if (activate && !overlay) {
       overlay = this.createComponent({
         kind: "CartesianOverlay", name: "overlay", plotview: this
       });
@@ -68,9 +67,10 @@ enyo.kind({
       this.binding({from: "width", to: "$.overlay.chartWidth"});
       
       overlay.render();
-    } else if ((overlay = this.$.overlay)) {
+    } else if (!activate && overlay) {
       overlay.destroyRegions();
       overlay.destroy();
+      this.overlay = false;
     }
   },
   
@@ -137,8 +137,8 @@ enyo.kind({
       left: this.decorCtx.measureText(testLabelLeft).width,
       right: this.decorCtx.measureText(testLabelRight).width,
     });
-    
-    if (this.overlay) {
+
+    if (this.overlay && this.$.overlay) {
      this.$.overlay.set("marginLeft", this.decorMargin.left); 
      this.$.overlay.set("marginRight", this.decorMargin.right);
      this.$.overlay.set("marginTop", this.decorMargin.top);
@@ -467,7 +467,6 @@ enyo.kind({
           [this.targetRange[1][0], this.targetRange[1][1]]
         ];
       } else {
-        console.log(this.targetRange, this.currentRange, this.startRange, easeProgress);
         this.currentRange = [
           [
             this.startRange[0][0] +
