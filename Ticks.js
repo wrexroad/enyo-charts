@@ -179,6 +179,7 @@ enyo.kind({
   kind: "Ticks",
   published: {
     timeZone: 0,
+    timeStandard: "jsTime",
     dateFormat: "",
     shortDateFormat: ""
   },
@@ -249,7 +250,7 @@ enyo.kind({
       dateObj.set("format", this.shortDateFormat || this.dateFormat); 
     }
     
-    this.$.date.set("jsTime", value);
+    this.$.date.set(this.timeStandard, value);
 
     dateObj.set("format", this.dateFormat);
     

@@ -376,13 +376,17 @@ enyo.kind({
             (this.currentRange[axis] || [])[0],
           isFinite(+this.targetRange[axis][1]) ?
             this.targetRange[axis][1] :
-            (this.currentRange[axis] || [])[1]  
+            (this.currentRange[axis] || [])[1]
         ];
       }
     }
     
-    console.log(this.startRange, this.currentRange, this.targetRange)
     this.calculateSpacing();
+    
+    //send out a signal for any other plots that need to sync with our range
+    enyo.Signals.send(
+      "onNewRange", {chartID: this.id, axisRange: inEvent.range}
+    );
     
     return true;
   },
