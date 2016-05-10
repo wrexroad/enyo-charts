@@ -22,7 +22,8 @@ enyo.kind({
     startRange: null,
     currentRange: null,
     targetRange: null,
-    easingFunction: null
+    easingFunction: null,
+    newRange: false
   },
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"},
@@ -387,6 +388,9 @@ enyo.kind({
     enyo.Signals.send(
       "onNewRange", {chartID: this.id, axisRange: inEvent.range}
     );
+    
+    //set a flag indicated the range has changed since the last draw event
+    this.newRange = true;
     
     return true;
   },

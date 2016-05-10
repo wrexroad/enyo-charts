@@ -4,14 +4,15 @@ enyo.kind({
 
   published: {
     xSpacingFactor: 1,
-    ySpacingFactor: 1
+    ySpacingFactor: 1,
+    autoranging: false
   },
   
   handlers: {
     onNewRange: "setAxisRange",
     onAutorange: "autorangeAxis"
   },
-
+  
   constructor: function(opts) {
     var axes = opts.axisTypes || {};
     this.inherited(arguments);
@@ -65,6 +66,9 @@ enyo.kind({
 
       this.binding({from: "height", to: "$.overlay.chartHeight"});
       this.binding({from: "width", to: "$.overlay.chartWidth"});
+      this.binding(
+        {from: "autoranging", to: "$.overlay.autoranging", oneWay: false}
+      );
       
       overlay.render();
     } else if (!activate && overlay) {
@@ -439,12 +443,6 @@ enyo.kind({
       //make sure the datasets and equations are in arrays
       datasets = this.datasets || [],
       equations = this.equations || [],
-      //and range values are numbers
-      range = this.currentRange || {},
-      xMin = +range[0][0],
-      xMax = +range[0][1],
-      yMin = +range[1][0],
-      yMax = +range[1][1],
       easeStart, easeProgress;
 
     //do any generic Chart setup
@@ -482,7 +480,11 @@ enyo.kind({
           ]
         ];
       }
+    } else if (this.autoranging && this.newRange) {
+      this.autorangeAxis();
     }
+    
+    this.newRange = false;
     
     //calculate the pixel spacing before anything else is done
     this.calculateSpacing();
