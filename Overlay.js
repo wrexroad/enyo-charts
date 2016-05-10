@@ -20,7 +20,8 @@ enyo.kind({
     marginLeft: 0,
     marginRight: 0,
     marginTop: 0,
-    marginBottom: 0
+    marginBottom: 0,
+    autoranging: false
   },
   components: [{
     name: "axisSettings", kind: "enyo.Popup",
@@ -416,7 +417,7 @@ enyo.kind({
     if (!cursorValue) {
       return true;
     }
-
+    
     this.rangeFromZoom({
       scaleX: zoomRegion !== "leftRegion" && zoomRegion !== "rightRegion" ?
         (inEvent.wheelDeltaY > 0 ? 0.9 : 1.1) : 1,
@@ -449,7 +450,7 @@ enyo.kind({
         ((coords.y - inEvent.dy) > (height >> 1) ? -2 : 2) *
         //proportion of axis scale factor 
         (inEvent.ddy / height);
-      
+     
     } else if (zoomRegion === "bottomRegion" && inEvent.ddx) {
       scaleX +=
         ((coords.x - inEvent.dx) > (width >> 1) ? -2 : 2) *
@@ -477,6 +478,9 @@ enyo.kind({
     if (!cursor) {
       return true;
     }
+
+    //turn off autoranging
+    this.set("autoranging", false);
 
     if ("moveenterleavedrag".indexOf(inEvent.type) > -1 ) {
       //set the new bounds to have the same t and l, but adjust the w and h
@@ -570,12 +574,15 @@ enyo.kind({
       plotRange = plotView.currentRange,
       center, min, max;
 
-    //y axis value (not pixel coordinate) of the cursor
     if (scaleY != 1) {
+      //y axis has manually been changed, turn off autoranging
+      this.set("autoranging", false);
+      
+      //y axis value (not pixel coordinate) of the cursor
       center = zoom.centerValue.y;
       min = (center - ((center - plotRange[1][0]) * scaleY)) || 0;
       max = (center + ((plotRange[1][1] - center) * scaleY)) || 0;
-    
+      
       range[1] = [min, max];
     }
 
@@ -597,7 +604,7 @@ enyo.kind({
       xDirection = pan.xDirection,
       yDirection = pan.yDirection,
       ddx = pan.ddx,
-      ddy = pan.ddy,
+      ddy = this.autoranging ? 0 : pan.ddy,
       x = pan.pageX,
       y = pan.pageY,
       plotView = this.plotView || {},
@@ -661,7 +668,8 @@ enyo.kind({
     if (inSender.name === "dataRegion") {
       //double tapping the data region should trigger y axis autoranging.
       //do this by clearing any previously set y-axis range
-      this.doAutorange("y");
+      this.doAutorange();
+      this.set("autoranging", true);
     } else if (inSender.name === "bottomRegion") {
       this.openAxisSettings("x");
     } else if (inSender.name === "leftRegion") {
