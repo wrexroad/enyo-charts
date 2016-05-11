@@ -72,7 +72,6 @@ enyo.kind({
       
       overlay.render();
     } else if (!activate && overlay) {
-      overlay.destroyRegions();
       overlay.destroy();
       this.overlay = false;
     }
