@@ -702,6 +702,8 @@ enyo.kind({
   },
   closeAxisSettings: function() {
     var plotView = this.plotView;
+    
+    this.set("autoranging", false);
 
     this.doNewRange({
       range: [
@@ -713,7 +715,9 @@ enyo.kind({
           plotView.$.yLeftTicks.parseLabel(this.$.yMinInput.value),
           plotView.$.yLeftTicks.parseLabel(this.$.yMaxInput.value)
         ]
-      ]
+      ],
+      easingStart: enyo.perfNow(),
+      easingAxes: [true, true]
     });
     
     this.$.axisSettings.set("showing", false);
