@@ -72,7 +72,6 @@ enyo.kind({
       
       overlay.render();
     } else if (!activate && overlay) {
-      overlay.destroyRegions();
       overlay.destroy();
       this.overlay = false;
     }
@@ -417,10 +416,13 @@ enyo.kind({
       equations = this.equations || [],
       range = this.currentRange || {},
       xMin = +range[0][0],
-      xMax = +range[0][1];
+      xMax = +range[0][1],
+      easingAxes = [false, true]; //ease only the y axis by default
     
     //If x axis range is not already set, get it from the data
     if (!isFinite(xMin + xMax)) {
+      easingAxes[0] = true;//also ease the x axis if it wasnt defined
+      
       if (datasets.length) {
         range = this.getRangeFromData(datasets, 0);
         xMin = isFinite(xMin) ? xMin : +range.min;
@@ -433,7 +435,8 @@ enyo.kind({
     
     this.setAxisRange(null,{
       range: [[xMin, xMax], [+range.min, +range.max]],
-      easingStart: enyo.perfNow()
+      easingStart: enyo.perfNow(),
+      easingAxes: easingAxes
     });
     
     return true;
@@ -443,7 +446,7 @@ enyo.kind({
       //make sure the datasets and equations are in arrays
       datasets = this.datasets || [],
       equations = this.equations || [],
-      easeStart, easeProgress;
+      easeStart, easeProgress, easeAxes;
 
     //do any generic Chart setup
     this.inherited(arguments);
@@ -465,18 +468,24 @@ enyo.kind({
           [this.targetRange[1][0], this.targetRange[1][1]]
         ];
       } else {
+        easeAxes = this.targetRange.easingAxes;
+        
         this.currentRange = [
           [
             this.startRange[0][0] +
-              ((this.targetRange[0][0] - this.startRange[0][0]) * easeProgress),
+              (this.targetRange[0][0] - this.startRange[0][0]) * 
+                (easeAxes[0] ? easeProgress : 1),
             this.startRange[0][1] +
-              (this.targetRange[0][1] - this.startRange[0][1]) * easeProgress
+              (this.targetRange[0][1] - this.startRange[0][1]) * 
+                (easeAxes[0] ? easeProgress : 1)
           ],
           [
             this.startRange[1][0] +
-              (this.targetRange[1][0] - this.startRange[1][0]) * easeProgress,
+              (this.targetRange[1][0] - this.startRange[1][0]) * 
+                (easeAxes[1] ? easeProgress : 1),
             this.startRange[1][1] +
-              (this.targetRange[1][1] - this.startRange[1][1]) * easeProgress
+              (this.targetRange[1][1] - this.startRange[1][1]) * 
+                (easeAxes[1] ? easeProgress : 1)
           ]
         ];
       }

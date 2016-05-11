@@ -329,7 +329,9 @@ enyo.kind({
   setAxisRange: function(inSender, inEvent) {
     var
       newRange = inEvent.range || [],
+      easingStart = inEvent.easingStart || 0,
       axis;
+      
     //make sure there is a valid range
     if (!newRange.length) {
       return;
@@ -352,10 +354,9 @@ enyo.kind({
     
     if (inEvent.easingStart) {
       //we are going to start easing,
-      //remember the starting time...
+      //remember the easing axes, starting time, and the current starting range
       this.targetRange.easingStart = inEvent.easingStart;
-      
-      //...and the current starting range
+      this.targetRange.easingAxes = inEvent.easingAxes;
       for (axis = 0; axis < this.currentRange.length; axis++) {
         if (this.currentRange[axis].length) {
           this.startRange[axis] = [
@@ -469,7 +470,7 @@ enyo.kind({
       dataset.data.range = [[],[]];
       dataset.data.range[axis][0] = Math.min.apply(this, vals);
       dataset.data.range[axis][1] = Math.max.apply(this, vals); 
-      
+
       //see if this dataset contains a global extreme
       if (dataset.data.range[axis][0] < min) {
         min = +dataset.data.range[axis][0];
@@ -489,7 +490,7 @@ enyo.kind({
     
     //we dont want the plot to have the min and max point pressed right up 
     //against the boarder, add a 10% buffer
-    buffer = (max - min) * 0.1;
+    buffer = (max - min) * 0.1 || 1;
     range = {
       min : min - buffer,
       max : max + buffer

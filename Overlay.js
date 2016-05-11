@@ -23,37 +23,63 @@ enyo.kind({
     marginBottom: 0,
     autoranging: false
   },
-  components: [{
-    name: "axisSettings", kind: "enyo.Popup",
-    modal: true, centered: true, classes: "popup",
-    components: [
-      {tag: "label", components: [
-        {content: "X-Axis:"},
-        {
-          name: "xMinInput", kind: "enyo.Input", type: "text",
-          classes: "enyo-selectable"
-        },
-        {
-          name: "xMaxInput", kind: "enyo.Input", type: "text",
-          classes: "enyo-selectable"
-        }
-      ]},
-      {tag: "label", components: [
-        {content: "Y-Axis:"},
-        {
-          name: "yMinInput", kind: "enyo.Input", type: "text",
-          classes: "enyo-selectable"
-        },
-        {
-          name: "yMaxInput", kind: "enyo.Input", type: "text",
-          classes: "enyo-selectable"
-        }
-      ]},
-      {components:[
-        {kind: "enyo.Button", content: "Set", ontap: "closeAxisSettings"}
-      ]}
-    ]
-  }],
+  components: [
+    {tag: "canvas", name: "dataRegion", classes: "plot-overlay",
+      onmove: "cursorMoved",
+      onenter: "cursorEntered",
+      onleave: "cursorLeft",
+      ontap: "handleTap",
+      onmousewheel: "zoomByWheel",
+      ondragfinish: "handleDrag",
+      ondrag: "handleDrag",
+      onholdpulse: "handlePulse",
+      onrelease: "handleRelease"
+    },
+    {tag: "canvas", name: "leftRegion", classes: "plot-overlay",
+      ondrag: "zoomByAxis",
+      onmousewheel: "zoomByWheel",
+      ontap: "handleTap"
+    },
+    {tag: "canvas", name: "rightRegion", classes: "plot-overlay",
+      ondrag: "zoomByAxis",
+      onmousewheel: "zoomByWheel",
+      ontap: "handleTap"
+    },
+    {tag: "canvas", name: "bottomRegion", classes: "plot-overlay",
+      ondrag: "zoomByAxis",
+      onmousewheel: "zoomByWheel",
+      ontap: "handleTap"
+    },
+    {kind: "enyo.Popup", name: "axisSettings", classes: "popup",
+      modal: true, centered: true, components: [
+        {tag: "label", components: [
+          {content: "X-Axis:"},
+          {
+            name: "xMinInput", kind: "enyo.Input", type: "text",
+            classes: "enyo-selectable"
+          },
+          {
+            name: "xMaxInput", kind: "enyo.Input", type: "text",
+            classes: "enyo-selectable"
+          }
+        ]},
+        {tag: "label", components: [
+          {content: "Y-Axis:"},
+          {
+            name: "yMinInput", kind: "enyo.Input", type: "text",
+            classes: "enyo-selectable"
+          },
+          {
+            name: "yMaxInput", kind: "enyo.Input", type: "text",
+            classes: "enyo-selectable"
+          }
+        ]},
+        {components:[
+          {kind: "enyo.Button", content: "Set", ontap: "closeAxisSettings"}
+        ]}
+      ]
+    }
+  ],
   observers: {
     resize: [
       "chartWidth", "chartHeight",
@@ -71,94 +97,58 @@ enyo.kind({
 
     //get the associated plotView
     this.plotView = this.owner;
-
     this.resize();
     this.refresh();
   },
-  resize: function(previous, current, property) {
-    var bounds, region, coords;
-
-    //check if anything really changed
-    if (
-      previous && current &&
-      previous.top == current.top && 
-      previous.bottom == current.bottom && 
-      previous.left == current.left && 
-      previous.right == current.right
-    ) {
-      return true;
-    }
-
-    //get rid of any current overlay regions
-    this.destroyRegions();
-
-    //figure out the new sizes of each region
-    bounds = this.calculateBounds();
-
+  resize: function() {
+    var 
+      bounds = this.calculateBounds(),
+      region;
+    
     if (bounds === null) {
       return null;
     }
-
-    //create data region
-    region = this.createRegion(bounds.dataRegion, "dataRegion").render();
-    region.onmove = "cursorMoved";
-    region.onenter = "cursorEntered";
-    region.onleave = "cursorLeft";
-    region.ontap = "handleTap";
-    region.onmousewheel = "zoomByWheel";
-    region.ondragfinish = "handleDrag";
-    region.ondrag = "handleDrag";
-    region.onholdpulse = "handlePulse";
-    region.onrelease = "handleRelease";
-
-    //create zoom margins
-    region = this.createRegion(bounds.leftRegion, "leftRegion");
-    region.ondrag = "zoomByAxis";
-    region.onmousewheel = "zoomByWheel";
-    region.ontap = "handleTap";
     
-    region = this.createRegion(bounds.rightRegion, "rightRegion");
-    region.ondrag = "zoomByAxis";
-    region.onmousewheel = "zoomByWheel";
-    region.ontap = "handleTap";
-
-    region = this.createRegion(bounds.bottomRegion, "bottomRegion");
-    region.ondrag = "zoomByAxis";
-    region.onmousewheel = "zoomByWheel";
-    region.ontap = "handleTap";
-    
-    return true;
-  },
-  createRegion: function(bounds, name) {
-    var region;
-
-    if (this.$[name]) {return;}
-
-    //create a canvas that we can use to draw over the plot
-    region = this.createComponent({
-      kind: "enyo.Canvas", name: name,
-      classes: "plot-overlay",
-      attributes: {
-        height: bounds.height,
-        width:  bounds.width
-      },
-      style: 
+    if ((region = this.$.dataRegion)) {
+      region.attributes.height = bounds.dataRegion.height;
+      region.attributes.width = bounds.dataRegion.width;
+      region.style =  
         "position: absolute;" +
-        "left:" + bounds.left + "px; " +
-        "top:" + bounds.top + "px; " +
-        "z-index: 99;"
-    });
-
-    region.render();
-    return region;
-  },
-  destroyRegions: function() {
-    //either get the overlay or an empty but destroyable object
-    (this.$.dataRegion || {destroy: function(){}}).destroy();
-    (this.$.leftRegion || {destroy: function(){}}).destroy();
-    (this.$.rightRegion || {destroy: function(){}}).destroy();
-    (this.$.bottomRegion || {destroy: function(){}}).destroy();
-    return true;
+        "left:" + bounds.dataRegion.left + "px; " +
+        "top:" + bounds.dataRegion.top + "px; " +
+        "z-index: 99;";
+      region.render();
+    }
+    if ((region = this.$.leftRegion)) {
+      region.attributes.height = bounds.leftRegion.height;
+      region.attributes.width = bounds.leftRegion.width;
+      region.style =  
+        "position: absolute;" +
+        "left:" + bounds.leftRegion.left + "px; " +
+        "top:" + bounds.leftRegion.top + "px; " +
+        "z-index: 99;";
+      region.render();
+    }
+    if ((region = this.$.rightRegion)) {
+      region.attributes.height = bounds.rightRegion.height;
+      region.attributes.width = bounds.rightRegion.width;
+      region.style =  
+        "position: absolute;" +
+        "left:" + bounds.rightRegion.left + "px; " +
+        "top:" + bounds.rightRegion.top + "px; " +
+        "z-index: 99;";
+      region.render();
+    }
+    if ((region = this.$.bottomRegion)) {
+      region.attributes.height = bounds.bottomRegion.height;
+      region.attributes.width = bounds.bottomRegion.width;
+      region.style =  
+        "position: absolute;" +
+        "left:" + bounds.bottomRegion.left + "px; " +
+        "top:" + bounds.bottomRegion.top + "px; " +
+        "z-index: 99;";
+      region.render();
+    }
   },
   calculateBounds: function() {
     var
@@ -604,7 +594,7 @@ enyo.kind({
       xDirection = pan.xDirection,
       yDirection = pan.yDirection,
       ddx = pan.ddx,
-      ddy = this.autoranging ? 0 : pan.ddy,
+      ddy = pan.ddy,
       x = pan.pageX,
       y = pan.pageY,
       plotView = this.plotView || {},
@@ -711,21 +701,37 @@ enyo.kind({
     
   },
   closeAxisSettings: function() {
-    var plotView = this.plotView;
+    var
+      plotView = this.plotView,
+      xMin = plotView.$.xTicks.parseLabel(this.$.xMinInput.value),
+      xMax = plotView.$.xTicks.parseLabel(this.$.xMaxInput.value),
+      yMin = plotView.$.yLeftTicks.parseLabel(this.$.yMinInput.value),
+      yMax = plotView.$.yLeftTicks.parseLabel(this.$.yMaxInput.value),
+      range = [[],[]];
+    
+    //bail out if nothing is set
+    if (!(xMin + xMax + yMin + yMin)) {
+      return true;
+    }
+    
+    //only set an axis range if min and max values are set
+    if ((xMin + xMax) && (xMin < xMax)) {
+      range[0] = [xMin, xMax]; 
+    }
+    if ((yMin + yMax) && (yMin < yMax)) {
+      range[1] = [yMin, yMax]; 
+    }
+    
+    this.set("autoranging", false);
 
     this.doNewRange({
-      range: [
-        [
-          plotView.$.xTicks.parseLabel(this.$.xMinInput.value),
-          plotView.$.xTicks.parseLabel(this.$.xMaxInput.value)
-        ],
-        [
-          plotView.$.yLeftTicks.parseLabel(this.$.yMinInput.value),
-          plotView.$.yLeftTicks.parseLabel(this.$.yMaxInput.value)
-        ]
-      ]
+      range: range,
+      easingStart: enyo.perfNow(),
+      easingAxes: [true, true]
     });
     
     this.$.axisSettings.set("showing", false);
+    
+    return true;
   }
 });
