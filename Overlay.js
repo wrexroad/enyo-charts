@@ -594,7 +594,7 @@ enyo.kind({
       xDirection = pan.xDirection,
       yDirection = pan.yDirection,
       ddx = pan.ddx,
-      ddy = this.autoranging ? 0 : pan.ddy,
+      ddy = pan.ddy,
       x = pan.pageX,
       y = pan.pageY,
       plotView = this.plotView || {},
