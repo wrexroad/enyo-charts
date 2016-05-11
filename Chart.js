@@ -470,7 +470,7 @@ enyo.kind({
       dataset.data.range = [[],[]];
       dataset.data.range[axis][0] = Math.min.apply(this, vals);
       dataset.data.range[axis][1] = Math.max.apply(this, vals); 
-      
+
       //see if this dataset contains a global extreme
       if (dataset.data.range[axis][0] < min) {
         min = +dataset.data.range[axis][0];
@@ -490,7 +490,7 @@ enyo.kind({
     
     //we dont want the plot to have the min and max point pressed right up 
     //against the boarder, add a 10% buffer
-    buffer = (max - min) * 0.1;
+    buffer = (max - min) * 0.1 || 1;
     range = {
       min : min - buffer,
       max : max + buffer
