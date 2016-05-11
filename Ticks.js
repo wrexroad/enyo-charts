@@ -250,14 +250,15 @@ enyo.kind({
       dateObj.set("format", this.shortDateFormat || this.dateFormat); 
     }
     
-    this.$.date.set(this.timeStandard, value);
+    dateObj.set(this.timeStandard, value);
 
     dateObj.set("format", this.dateFormat);
     
-    return this.$.date.formattedText;
+    return dateObj.formattedText;
   },
   parseLabel: function(value, opts) {
-    return this.$.date.stringToDateStamp(value);
+    var timeScale = this.timeStandard == "unixTime" ? 1000 : 1;
+    return this.$.date.stringToDateStamp(value) / timeScale;
   }
 });
 
