@@ -701,25 +701,37 @@ enyo.kind({
     
   },
   closeAxisSettings: function() {
-    var plotView = this.plotView;
+    var
+      plotView = this.plotView,
+      xMin = plotView.$.xTicks.parseLabel(this.$.xMinInput.value),
+      xMax = plotView.$.xTicks.parseLabel(this.$.xMaxInput.value),
+      yMin = plotView.$.yLeftTicks.parseLabel(this.$.yMinInput.value),
+      yMax = plotView.$.yLeftTicks.parseLabel(this.$.yMaxInput.value),
+      range = [[],[]];
+    
+    //bail out if nothing is set
+    if (!(xMin + xMax + yMin + yMin)) {
+      return true;
+    }
+    
+    //only set an axis range if min and max values are set
+    if ((xMin + xMax) && (xMin < xMax)) {
+      range[0] = [xMin, xMax]; 
+    }
+    if ((yMin + yMax) && (yMin < yMax)) {
+      range[1] = [yMin, yMax]; 
+    }
     
     this.set("autoranging", false);
 
     this.doNewRange({
-      range: [
-        [
-          plotView.$.xTicks.parseLabel(this.$.xMinInput.value),
-          plotView.$.xTicks.parseLabel(this.$.xMaxInput.value)
-        ],
-        [
-          plotView.$.yLeftTicks.parseLabel(this.$.yMinInput.value),
-          plotView.$.yLeftTicks.parseLabel(this.$.yMaxInput.value)
-        ]
-      ],
+      range: range,
       easingStart: enyo.perfNow(),
       easingAxes: [true, true]
     });
     
     this.$.axisSettings.set("showing", false);
+    
+    return true;
   }
 });
