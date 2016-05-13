@@ -98,7 +98,6 @@ enyo.kind({
     //get the associated plotView
     this.plotView = this.owner;
     this.resize();
-    this.refresh();
   },
   resize: function() {
     var 
@@ -305,9 +304,6 @@ enyo.kind({
       
       ctx.restore();
     }
-    
-    //do it again!
-    window.requestAnimationFrame(this.refresh.bind(this));
   },
   activateCrosshairs: function() {
     var dataRegion = this.$.dataRegion;

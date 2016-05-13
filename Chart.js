@@ -23,7 +23,10 @@ enyo.kind({
     currentRange: null,
     targetRange: null,
     easingFunction: null,
-    newRange: false
+    newRange: false,
+    lastDrawTime: 0,
+    fps: 0,
+    needsDraw: true
   },
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"},
@@ -314,7 +317,11 @@ enyo.kind({
     this.labels = null;
   },
   configurePlot: function(plotOptions) {
-    plotOptions = plotOptions || {};
+    if (typeof plotOptions != "object") {
+      return;
+    }
+    
+    this.needsDraw = true;
     
     for (var opt in plotOptions) {
       if (plotOptions.hasOwnProperty(opt)) {
@@ -352,10 +359,10 @@ enyo.kind({
       }
     }
     
-    if (inEvent.easingStart) {
+    if (easingStart) {
       //we are going to start easing,
       //remember the easing axes, starting time, and the current starting range
-      this.targetRange.easingStart = inEvent.easingStart;
+      this.targetRange.easingStart = easingStart;
       this.targetRange.easingAxes = inEvent.easingAxes;
       for (axis = 0; axis < this.currentRange.length; axis++) {
         if (this.currentRange[axis].length) {
@@ -393,6 +400,9 @@ enyo.kind({
     //set a flag indicated the range has changed since the last draw event
     this.newRange = true;
     
+    //set the flag for a plot redraw
+    this.needsDraw = true;
+    
     return true;
   },
   getAxisRange: function() {
@@ -405,12 +415,40 @@ enyo.kind({
       margin = this.decorMargin,
       dataWidth = decorWidth - margin.left - margin.right,
       dataHeight = decorHeight - margin.top - margin.bottom,
-      layer_i, canvas;
+      now = enyo.perfNow(),
+      layer_i, canvas, overlay;
+    
+    this.fps = 1000 / (now - this.lastDrawTime) || 0;
+    this.lastDrawTime = now;
 
     window.requestAnimationFrame(this.draw.bind(this));
+
+    //update the overlay if its showing
+    if ((overlay = this.$.overlay)) {
+      overlay.refresh();
+    }
+    
+    //if nothing has changed, dont redraw
+    if (!this.needsDraw) {
+      return false;
+    } else {
+      this.needsDraw = false;
+    }
+    
+    //if the plot has been hidden for some reason, there is no reason to draw
+    if (!this.showing) {
+      return false;
+    }
     
     //bail out if there is no decoration canvas
-    if (!decorWidth || !decorHeight) {return;}
+    if (!decorWidth || !decorHeight) {
+      return false;
+    }
+        
+    //make sure we actually have something to draw before continuing
+    if (!((this.datasets || []).length + (this.equations || []).length)) {
+      return false;
+    }
     
     //clear the canvases
     this.wipePlot();
@@ -434,6 +472,8 @@ enyo.kind({
       canvas.setAttribute("width", dataWidth);
       canvas.update();
     }
+    
+    return true;
   },
   decorate: function() {
     this.printTitle();

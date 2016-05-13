@@ -449,19 +449,19 @@ enyo.kind({
       easeStart, easeProgress, easeAxes;
 
     //do any generic Chart setup
-    this.inherited(arguments);
-    
-    if (!(datasets.length + equations.length)) {
-      return;
+    //if Chart decides we dont need to draw anything, abort.
+    if (!this.inherited(arguments)) {
+      return
     }
-    
+
     //if we are currently easing the axis range, updated the current range
     //based on how long it has been since we started the easing
     if ((easeStart = this.targetRange.easingStart)) {
       easeProgress = enyo.easedLerp(easeStart, 250, enyo.easing.cubicOut);
       
-      if (easeProgress > 0.9) {
-        //close enough, just jump to the targetRange
+      //if we have reached 90% of our target
+      //or fps has dropped below 10, cancel easing
+      if (easeProgress > 0.9 || this.fps < 10) {
         this.targetRange.easingStart = null;
         this.currentRange = [
           [this.targetRange[0][0], this.targetRange[0][1]],
@@ -488,6 +488,9 @@ enyo.kind({
                 (easeAxes[1] ? easeProgress : 1)
           ]
         ];
+        
+        //still easing so we need to draw again
+        this.needsDraw = true;
       }
     } else if (this.autoranging && this.newRange) {
       this.autorangeAxis();
