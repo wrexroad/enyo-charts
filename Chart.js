@@ -25,7 +25,8 @@ enyo.kind({
     easingFunction: null,
     newRange: false,
     lastDrawTime: 0,
-    fps: 0
+    fps: 0,
+    needsDraw: true
   },
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"},
@@ -316,7 +317,11 @@ enyo.kind({
     this.labels = null;
   },
   configurePlot: function(plotOptions) {
-    plotOptions = plotOptions || {};
+    if (typeof plotOptions != "object") {
+      return;
+    }
+    
+    this.needsDraw = true;
     
     for (var opt in plotOptions) {
       if (plotOptions.hasOwnProperty(opt)) {
@@ -414,6 +419,18 @@ enyo.kind({
     this.lastDrawTime = now;
 
     window.requestAnimationFrame(this.draw.bind(this));
+
+    //update the overlay if its showing
+    if ((overlay = this.$.overlay)) {
+      overlay.refresh();
+    }
+    
+    //if nothing has changed, dont redraw
+    if (!this.needsDraw) {
+      return false;
+    } else {
+      this.needsDraw = false;
+    }
     
     //if the plot has been hidden for some reason, there is no reason to draw
     if (!this.showing) {
@@ -451,11 +468,6 @@ enyo.kind({
       canvas.setAttribute("height", dataHeight);
       canvas.setAttribute("width", dataWidth);
       canvas.update();
-    }
-    
-    //update the overlay if its showing
-    if ((overlay = this.$.overlay)) {
-      overlay.refresh();
     }
     
     return true;
