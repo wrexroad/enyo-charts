@@ -456,16 +456,18 @@ enyo.kind({
     
     //adjust the size of each canvas
     this.calculateMargins();
-    canvas = this.$.decorCanvas;
-    canvas.setAttribute("height", this.height);
-    canvas.setAttribute("width", this.width);
-    canvas.update();
+    if ((canvas = this.$.decorCanvas)) {
+      canvas.setAttribute("height", this.height);
+      canvas.setAttribute("width", this.width);
+      canvas.update();
+    }
     
-    canvas = this.$.exportCanvas;
-    canvas.setAttribute("height", this.height);
-    canvas.setAttribute("width", this.width);
-    canvas.update();
-
+    if ((canvas = this.$.exportCanvas)) {
+      canvas.setAttribute("height", this.height);
+      canvas.setAttribute("width", this.width);
+      canvas.update();  
+    }
+    
     for (layer_i in this.layers) {
       canvas = this.layers[layer_i].canvas;
       canvas.setAttribute("height", dataHeight);
