@@ -408,7 +408,7 @@ enyo.kind({
       dataWidth = decorWidth - margin.left - margin.right,
       dataHeight = decorHeight - margin.top - margin.bottom,
       now = enyo.perfNow(),
-      layer_i, canvas;
+      layer_i, canvas, overlay;
     
     this.fps = 1000 / (now - this.lastDrawTime) || 0;
     this.lastDrawTime = now;
@@ -451,6 +451,11 @@ enyo.kind({
       canvas.setAttribute("height", dataHeight);
       canvas.setAttribute("width", dataWidth);
       canvas.update();
+    }
+    
+    //update the overlay if its showing
+    if ((overlay = this.$.overlay)) {
+      overlay.refresh();
     }
     
     return true;

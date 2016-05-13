@@ -305,9 +305,6 @@ enyo.kind({
       
       ctx.restore();
     }
-    
-    //do it again!
-    window.requestAnimationFrame(this.refresh.bind(this));
   },
   activateCrosshairs: function() {
     var dataRegion = this.$.dataRegion;
