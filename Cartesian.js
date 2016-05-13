@@ -460,8 +460,9 @@ enyo.kind({
     if ((easeStart = this.targetRange.easingStart)) {
       easeProgress = enyo.easedLerp(easeStart, 250, enyo.easing.cubicOut);
       
-      if (easeProgress > 0.9) {
-        //close enough, just jump to the targetRange
+      //if we have reached 90% of our target
+      //or fps has dropped below 10, cancel easing
+      if (easeProgress > 0.9 || this.fps < 10) {
         this.targetRange.easingStart = null;
         this.currentRange = [
           [this.targetRange[0][0], this.targetRange[0][1]],

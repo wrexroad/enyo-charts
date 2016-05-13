@@ -23,7 +23,9 @@ enyo.kind({
     currentRange: null,
     targetRange: null,
     easingFunction: null,
-    newRange: false
+    newRange: false,
+    lastDrawTime: 0,
+    fps: 0
   },
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"},
@@ -352,10 +354,10 @@ enyo.kind({
       }
     }
     
-    if (inEvent.easingStart) {
+    if (easingStart) {
       //we are going to start easing,
       //remember the easing axes, starting time, and the current starting range
-      this.targetRange.easingStart = inEvent.easingStart;
+      this.targetRange.easingStart = easingStart;
       this.targetRange.easingAxes = inEvent.easingAxes;
       for (axis = 0; axis < this.currentRange.length; axis++) {
         if (this.currentRange[axis].length) {
@@ -405,7 +407,11 @@ enyo.kind({
       margin = this.decorMargin,
       dataWidth = decorWidth - margin.left - margin.right,
       dataHeight = decorHeight - margin.top - margin.bottom,
+      now = enyo.perfNow(),
       layer_i, canvas;
+    
+    this.fps = 1000 / (now - this.lastDrawTime) || 0;
+    this.lastDrawTime = now;
 
     window.requestAnimationFrame(this.draw.bind(this));
     
