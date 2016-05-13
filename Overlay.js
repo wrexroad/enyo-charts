@@ -98,7 +98,6 @@ enyo.kind({
     //get the associated plotView
     this.plotView = this.owner;
     this.resize();
-    this.refresh();
   },
   resize: function() {
     var 
