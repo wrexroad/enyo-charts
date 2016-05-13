@@ -400,6 +400,9 @@ enyo.kind({
     //set a flag indicated the range has changed since the last draw event
     this.newRange = true;
     
+    //set the flag for a plot redraw
+    this.needsDraw = true;
+    
     return true;
   },
   getAxisRange: function() {

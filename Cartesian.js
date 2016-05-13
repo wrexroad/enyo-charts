@@ -488,6 +488,9 @@ enyo.kind({
                 (easeAxes[1] ? easeProgress : 1)
           ]
         ];
+        
+        //still easing so we need to draw again
+        this.needsDraw = true;
       }
     } else if (this.autoranging && this.newRange) {
       this.autorangeAxis();
