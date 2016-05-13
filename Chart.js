@@ -415,8 +415,20 @@ enyo.kind({
 
     window.requestAnimationFrame(this.draw.bind(this));
     
+    //if the plot has been hidden for some reason, there is no reason to draw
+    if (!this.showing) {
+      return false;
+    }
+    
     //bail out if there is no decoration canvas
-    if (!decorWidth || !decorHeight) {return;}
+    if (!decorWidth || !decorHeight) {
+      return false;
+    }
+        
+    //make sure we actually have something to draw before continuing
+    if (!((this.datasets || []).length + (this.equations || []).length)) {
+      return false;
+    }
     
     //clear the canvases
     this.wipePlot();
@@ -440,6 +452,8 @@ enyo.kind({
       canvas.setAttribute("width", dataWidth);
       canvas.update();
     }
+    
+    return true;
   },
   decorate: function() {
     this.printTitle();

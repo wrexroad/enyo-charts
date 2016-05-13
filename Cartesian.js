@@ -449,12 +449,11 @@ enyo.kind({
       easeStart, easeProgress, easeAxes;
 
     //do any generic Chart setup
-    this.inherited(arguments);
-    
-    if (!(datasets.length + equations.length)) {
-      return;
+    //if Chart decides we dont need to draw anything, abort.
+    if (!this.inherited(arguments)) {
+      return
     }
-    
+
     //if we are currently easing the axis range, updated the current range
     //based on how long it has been since we started the easing
     if ((easeStart = this.targetRange.easingStart)) {
