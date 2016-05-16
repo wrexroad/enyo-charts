@@ -26,7 +26,8 @@ enyo.kind({
     newRange: false,
     lastDrawTime: 0,
     fps: 0,
-    needsDraw: true
+    needsDraw: true,
+    crosshairs: true
   },
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"},
@@ -424,7 +425,7 @@ enyo.kind({
     window.requestAnimationFrame(this.draw.bind(this));
 
     //update the overlay if its showing
-    if ((overlay = this.$.overlay)) {
+    if ((overlay = this.$.overlay) && (this.crosshairs || this.needsDraw)) {
       overlay.refresh();
     }
     

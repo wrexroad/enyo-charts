@@ -66,6 +66,7 @@ enyo.kind({
 
       this.binding({from: "height", to: "$.overlay.chartHeight"});
       this.binding({from: "width", to: "$.overlay.chartWidth"});
+      this.binding({from: "crosshairs", to: "$.overlay.showCrosshairs"});
       this.binding(
         {from: "autoranging", to: "$.overlay.autoranging", oneWay: false}
       );

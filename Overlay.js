@@ -375,6 +375,10 @@ enyo.kind({
     return true;
   },
   markPlot: function(inSender, inEvent) {
+    if (!this.showCrosshairs) {
+      return true;
+    }
+    
     if (!this.trendlineCoords) {
       //no marks have been set yet
       this.trendlineCoords = {
