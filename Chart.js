@@ -498,8 +498,13 @@ enyo.kind({
     
     datasets.forEach(function(dataset) {
       //no range was given, so dig through the coordinates and figure it out
-      vals = [];
-      dataset.data.coords.forEach(function(coord) {
+      var
+        data = dataset.data || {},
+        vals = [];
+
+      if (!data.coords) { return; }
+
+      data.coords.forEach(function(coord) {
         if (!(boundRange &&
           (+coord[bounds.axis] > bounds.max ||
           bounds.min > +coord[bounds.axis])
@@ -507,16 +512,16 @@ enyo.kind({
           if (isFinite(+coord[axis])) {vals.push(+coord[axis]);}
         }
       });
-      dataset.data.range = [[],[]];
-      dataset.data.range[axis][0] = Math.min.apply(this, vals);
-      dataset.data.range[axis][1] = Math.max.apply(this, vals); 
+      data.range = [[],[]];
+      data.range[axis][0] = Math.min.apply(this, vals);
+      data.range[axis][1] = Math.max.apply(this, vals);
 
       //see if this dataset contains a global extreme
-      if (dataset.data.range[axis][0] < min) {
-        min = +dataset.data.range[axis][0];
+      if (data.range[axis][0] < min) {
+        min = +data.range[axis][0];
       }
-      if (dataset.data.range[axis][1] > max) {
-        max = +dataset.data.range[axis][1];
+      if (data.range[axis][1] > max) {
+        max = +data.range[axis][1];
       }
     }, this);
     
