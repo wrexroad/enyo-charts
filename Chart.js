@@ -485,6 +485,7 @@ enyo.kind({
     var
       min = Number.POSITIVE_INFINITY,
       max = Number.NEGATIVE_INFINITY,
+      badRange = false,
       boundRange, buffer, vals, range;
     
     //we can indicate that only datapoints within a range of a cetrain axis
@@ -501,8 +502,13 @@ enyo.kind({
     
     datasets.forEach(function(dataset) {
       //no range was given, so dig through the coordinates and figure it out
-      vals = [];
-      dataset.data.coords.forEach(function(coord) {
+      var
+        data = dataset.data || {},
+        vals = [];
+
+      if (!(data.coords || []).length) { return null; }
+
+      data.coords.forEach(function(coord) {
         if (!(boundRange &&
           (+coord[bounds.axis] > bounds.max ||
           bounds.min > +coord[bounds.axis])
@@ -510,16 +516,16 @@ enyo.kind({
           if (isFinite(+coord[axis])) {vals.push(+coord[axis]);}
         }
       });
-      dataset.data.range = [[],[]];
-      dataset.data.range[axis][0] = Math.min.apply(this, vals);
-      dataset.data.range[axis][1] = Math.max.apply(this, vals); 
+      data.range = [[],[]];
+      data.range[axis][0] = Math.min.apply(this, vals);
+      data.range[axis][1] = Math.max.apply(this, vals);
 
       //see if this dataset contains a global extreme
-      if (dataset.data.range[axis][0] < min) {
-        min = +dataset.data.range[axis][0];
+      if (data.range[axis][0] < min) {
+        min = +data.range[axis][0];
       }
-      if (dataset.data.range[axis][1] > max) {
-        max = +dataset.data.range[axis][1];
+      if (data.range[axis][1] > max) {
+        max = +data.range[axis][1];
       }
     }, this);
     
@@ -529,6 +535,7 @@ enyo.kind({
       range = this.getRangeFromData(datasets, axis);
       min = range.min;
       max = range.max;
+      badRange = range.badRange;
     }
     
     //we dont want the plot to have the min and max point pressed right up 
@@ -536,14 +543,15 @@ enyo.kind({
     buffer = (max - min) * 0.1 || 1;
     range = {
       min : min - buffer,
-      max : max + buffer
+      max : max + buffer,
+      badRange: badRange
     };
     
     //if we still dont have a good range, just make something up
     if (!isFinite(range.min + range.max)) {
-      range = {min: -10, max: 10};
+      range = {min: -10, max: 10, badRange: true};
     }
-    
+
     return range;
   },
   drawLinear: function() {},

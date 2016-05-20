@@ -423,6 +423,7 @@ enyo.kind({
       
       if (datasets.length) {
         range = this.getRangeFromData(datasets, 0);
+        console.log(range)
         xMin = isFinite(xMin) ? xMin : +range.min;
         xMax = isFinite(xMax) ? xMax : +range.max;
       }
@@ -430,10 +431,10 @@ enyo.kind({
     
     //get the y axis range from the datapoints in the x axis range
     range = this.getRangeFromData(datasets, 1, {axis: 0, min: xMin, max: xMax});
-    
-    this.setAxisRange(null,{
+
+    this.setAxisRange(null, {
       range: [[xMin, xMax], [+range.min, +range.max]],
-      easingStart: enyo.perfNow(),
+      easingStart: range.badRange? 0 : enyo.perfNow(),
       easingAxes: easingAxes
     });
     
@@ -449,7 +450,7 @@ enyo.kind({
     //do any generic Chart setup
     //if Chart decides we dont need to draw anything, abort.
     if (!this.inherited(arguments)) {
-      return
+      return;
     }
 
     //if we are currently easing the axis range, updated the current range
@@ -501,7 +502,7 @@ enyo.kind({
     
     //draw each dataset and equation
     datasets.forEach(function(dataset) {
-      var name = (dataset.data || {}).name;
+      var name = dataset.name || (dataset.data || {}).name;
       
       //if this dataset doesnt have a name, just give it the layer number
       if (!name) {
