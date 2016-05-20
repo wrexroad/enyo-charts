@@ -482,6 +482,7 @@ enyo.kind({
     var
       min = Number.POSITIVE_INFINITY,
       max = Number.NEGATIVE_INFINITY,
+      badRange = false,
       boundRange, buffer, vals, range;
     
     //we can indicate that only datapoints within a range of a cetrain axis
@@ -502,7 +503,7 @@ enyo.kind({
         data = dataset.data || {},
         vals = [];
 
-      if (!data.coords) { return; }
+      if (!(data.coords || []).length) { return null; }
 
       data.coords.forEach(function(coord) {
         if (!(boundRange &&
@@ -531,6 +532,7 @@ enyo.kind({
       range = this.getRangeFromData(datasets, axis);
       min = range.min;
       max = range.max;
+      badRange = range.badRange;
     }
     
     //we dont want the plot to have the min and max point pressed right up 
@@ -538,14 +540,15 @@ enyo.kind({
     buffer = (max - min) * 0.1 || 1;
     range = {
       min : min - buffer,
-      max : max + buffer
+      max : max + buffer,
+      badRange: badRange
     };
     
     //if we still dont have a good range, just make something up
     if (!isFinite(range.min + range.max)) {
-      range = {min: -10, max: 10};
+      range = {min: -10, max: 10, badRange: true};
     }
-    
+
     return range;
   },
   drawLinear: function() {},
