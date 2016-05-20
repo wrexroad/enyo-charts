@@ -503,7 +503,7 @@ enyo.kind({
     
     //draw each dataset and equation
     datasets.forEach(function(dataset) {
-      var name = (dataset.data || {}).name;
+      var name = dataset.name || (dataset.data || {}).name;
       
       //if this dataset doesnt have a name, just give it the layer number
       if (!name) {
