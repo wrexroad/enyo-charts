@@ -89,7 +89,9 @@ enyo.kind({
     axisKindObj.type = axisKindObj.type || "Linear";
     axisKindObj.kind = axisKindObj.type + "Ticks";
     
-    this.$[xy + "Ticks"].destroy();
+    if (this.$[xy + "Ticks"]) {
+      this.$[xy + "Ticks"].destroy();
+    }
     this.createComponent(axisKindObj);
   },
   calculateSpacing: function() {
@@ -423,7 +425,6 @@ enyo.kind({
       
       if (datasets.length) {
         range = this.getRangeFromData(datasets, 0);
-        console.log(range)
         xMin = isFinite(xMin) ? xMin : +range.min;
         xMax = isFinite(xMax) ? xMax : +range.max;
       }
