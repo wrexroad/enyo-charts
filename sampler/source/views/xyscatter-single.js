@@ -22,12 +22,12 @@ enyo.kind({
         },
         yRight: {
           type: "Discrete",
-          stops: [
-            {label: "Upper Critical", value: 80, color: "red"},
-            {label: "Upper Warning", value: 60, color: "yellow"},
-            {label: "Lower Warning", value: 40, color: "yellow"},
-            {label: "Lower Critical", value: 20, color: "red"},
-          ],
+          stops: {
+            "Upper Critical": {value: 80, color: "red"},
+            "Upper Warning": {value: 60, color: "yellow"},
+            "Lower Warning": {value: 40, color: "yellow"},
+            "Lower Critical": {value: 20, color: "red"},
+          },
           fullLength: true
         },
         x: {
