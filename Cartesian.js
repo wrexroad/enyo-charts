@@ -120,9 +120,9 @@ enyo.kind({
     yRightTicks = this.$.yRightTicks || {labelWidth: function(){return 0;}};
     
     //figure out the width of the y tick mark labels
-    yLeftTicksWidth = yLeftTicks.labelWidth();
-    yRightTicksWidth = yRightTicks.labelWidth();
-    
+    yLeftTicksWidth = yLeftTicks.innerLabel? 0 : yLeftTicks.labelWidth();
+    yRightTicksWidth = yRightTicks.innerLabel? 0 : yRightTicks.labelWidth();
+
     //create the longest label possible containing either the number of
     // characters in the tick label or 10 characters, whichever is larget
     testLabelLeft =
@@ -162,7 +162,7 @@ enyo.kind({
       yMax = range[1][1],
       dataHeight = this.height - margin.top - margin.bottom,
       dataWidth  = this.width - margin.left - margin.right,
-      offset, tick_i, ticks, axis;
+      labelOffset, tickOffset, tick_i, ticks, axis;
 
     //make sure the x and y ranges are valid
     if(!(xMax - xMin) || !(yMax - yMin)) {
@@ -173,7 +173,6 @@ enyo.kind({
 
     //configure the drawing context
     ctx.save();
-    ctx.textAlign = "end";
     ctx.font = this.fontSize + "px " + this.font;
 
     //fill background
@@ -193,6 +192,15 @@ enyo.kind({
       );
       
       ctx.save();
+      
+      if (axis.innerLabel) {
+        ctx.textAlign = "start";
+        labelOffset = 15;
+      } else {
+        ctx.textAlign = "end";
+        labelOffset = -5;
+      }
+      
       ctx.translate(margin.left, dataHeight + margin.top);
       ticks = axis.ticks;
       for (tick_i = 0; tick_i < ticks.length; tick_i++) {
@@ -201,18 +209,18 @@ enyo.kind({
           ticks[tick_i].color || ticks.color || this.borderColor;
        
         //get the formatted label and make sure it doesnt isnt a duplicate
-        offset = -(ticks[tick_i].value - yMin) * this.ySpacingFactor;
+        tickOffset = -(ticks[tick_i].value - yMin) * this.ySpacingFactor;
         if (ticks[tick_i].label) {
-          ctx.fillText(ticks[tick_i].label, -5, offset + 5);
+          ctx.fillText(ticks[tick_i].label, labelOffset, tickOffset + 5);
         }      
         ctx.beginPath();
-        ctx.moveTo(0, offset);
+        ctx.moveTo(0, tickOffset);
         if (ticks[tick_i].minor) {
-          ctx.lineTo(5, offset);
-        } else if (!axis.fullLength) {
-          ctx.lineTo(15, offset);
+          ctx.lineTo(5, tickOffset);
+        } else if (axis.fullLength || ticks[tick_i].fullLength) {
+          ctx.lineTo(dataWidth, tickOffset);
         } else {
-          ctx.lineTo(dataWidth, offset);
+          ctx.lineTo(15, tickOffset);
         }
         ctx.stroke();
       }
@@ -227,7 +235,14 @@ enyo.kind({
       );
       
       ctx.save();
-      ctx.textAlign = "start";
+      if (axis.innerLabel) {
+        ctx.textAlign = "end";
+        labelOffset = -15;
+      } else {
+        ctx.textAlign = "start";
+        labelOffset = 5;
+      }
+      
       ctx.translate(margin.left + dataWidth, dataHeight + margin.top);
       ticks = axis.ticks;
       for (tick_i = 0; tick_i < ticks.length; tick_i++) {
@@ -235,18 +250,25 @@ enyo.kind({
           ticks[tick_i].color || axis.color || this.borderColor;
           
         //get the formatted label and make sure it doesnt isnt a duplicate
-        offset = -(ticks[tick_i].value - yMin) * this.ySpacingFactor;
+        tickOffset = -(ticks[tick_i].value - yMin) * this.ySpacingFactor;
         if (ticks[tick_i].label) {
-          ctx.fillText(ticks[tick_i].label, 5, offset + 5);
+          if ((axis.fullLength||ticks[tick_i].fullLength) && axis.innerLabel) {
+            ctx.textBaseline = "top";
+            ctx.fillText(
+              ticks[tick_i].label, labelOffset, tickOffset - this.fontSize
+            );
+          } else {
+            ctx.fillText(ticks[tick_i].label, labelOffset, tickOffset + 5); 
+          }
         }      
         ctx.beginPath();
-        ctx.moveTo(0, offset);
+        ctx.moveTo(0, tickOffset);
         if (ticks[tick_i].minor) {
-          ctx.lineTo(-5, offset);
-        } else if (!axis.fullLength) {
-          ctx.lineTo(-15, offset);
+          ctx.lineTo(-5, tickOffset);
+        } else if (axis.fullLength || ticks[tick_i].fullLength) {
+          ctx.lineTo(-dataWidth, tickOffset);
         } else {
-          ctx.lineTo(-dataWidth, offset);
+          ctx.lineTo(-15, tickOffset);
         }
         ctx.stroke();
       }
@@ -268,27 +290,34 @@ enyo.kind({
       ctx.save();
       ctx.translate(margin.left, this.height - margin.bottom);
       ctx.textAlign = "center";
-      ctx.textBaseline = "top";
+      if (axis.innerLabel) {
+        ctx.textBaseline = "bottom";
+        labelOffset = -15 - this.fontSize;
+      } else {
+        ctx.textBaseline = "top";
+        labelOffset = this.fontSize;
+      }
+
       ticks = axis.ticks;
 
       for (tick_i = 0; tick_i < ticks.length; tick_i++) {
         ctx.strokeStyle =
           ticks[tick_i].color || axis.color || this.borderColor;
           
-        offset = (ticks[tick_i].value - xMin) * this.xSpacingFactor;
+        tickOffset = (ticks[tick_i].value - xMin) * this.xSpacingFactor;
         if (ticks[tick_i].label) {
-          ctx.fillText(ticks[tick_i].label, offset, this.fontSize);
+          ctx.fillText(ticks[tick_i].label, tickOffset, labelOffset);
         }
         ctx.beginPath();
         if (ticks[tick_i].minor) {
-          ctx.moveTo(offset, -5);
+          ctx.moveTo(tickOffset, -5);
         } else if (!axis.fullLength) {
-          ctx.moveTo(offset, -15);
+          ctx.moveTo(tickOffset, -15);
         } else {
-          ctx.moveTo(offset, -dataHeight);
+          ctx.moveTo(tickOffset, -dataHeight);
         }
         
-        ctx.lineTo(offset, 0);
+        ctx.lineTo(tickOffset, 0);
         ctx.stroke();
       }
       

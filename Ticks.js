@@ -8,7 +8,8 @@ enyo.kind({
     type: "",
     ticks: null,
     tickCount: 10,
-    minorTickCount: 5
+    minorTickCount: 5,
+    innerLabel: false
   },
   constructor: function() {
     this.inherited(arguments);
