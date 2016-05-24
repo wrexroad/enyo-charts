@@ -66,6 +66,7 @@ enyo.kind({
 
       this.binding({from: "height", to: "$.overlay.chartHeight"});
       this.binding({from: "width", to: "$.overlay.chartWidth"});
+      this.binding({from: "crosshairs", to: "$.overlay.showCrosshairs"});
       this.binding(
         {from: "autoranging", to: "$.overlay.autoranging", oneWay: false}
       );
@@ -88,7 +89,9 @@ enyo.kind({
     axisKindObj.type = axisKindObj.type || "Linear";
     axisKindObj.kind = axisKindObj.type + "Ticks";
     
-    this.$[xy + "Ticks"].destroy();
+    if (this.$[xy + "Ticks"]) {
+      this.$[xy + "Ticks"].destroy();
+    }
     this.createComponent(axisKindObj);
   },
   calculateSpacing: function() {
@@ -117,9 +120,9 @@ enyo.kind({
     yRightTicks = this.$.yRightTicks || {labelWidth: function(){return 0;}};
     
     //figure out the width of the y tick mark labels
-    yLeftTicksWidth = yLeftTicks.labelWidth();
-    yRightTicksWidth = yRightTicks.labelWidth();
-    
+    yLeftTicksWidth = yLeftTicks.innerLabel? 0 : yLeftTicks.labelWidth();
+    yRightTicksWidth = yRightTicks.innerLabel? 0 : yRightTicks.labelWidth();
+
     //create the longest label possible containing either the number of
     // characters in the tick label or 10 characters, whichever is larget
     testLabelLeft =
@@ -159,7 +162,7 @@ enyo.kind({
       yMax = range[1][1],
       dataHeight = this.height - margin.top - margin.bottom,
       dataWidth  = this.width - margin.left - margin.right,
-      offset, tick_i, ticks;
+      labelOffset, tickOffset, tick_i, ticks, axis;
 
     //make sure the x and y ranges are valid
     if(!(xMax - xMin) || !(yMax - yMin)) {
@@ -170,7 +173,6 @@ enyo.kind({
 
     //configure the drawing context
     ctx.save();
-    ctx.textAlign = "end";
     ctx.font = this.fontSize + "px " + this.font;
 
     //fill background
@@ -182,52 +184,43 @@ enyo.kind({
     ctx.fillStyle = this.borderColor;
     ctx.strokeRect(margin.left, margin.top, dataWidth, dataHeight);
 
-    //get the tick mark locations and labels for this range
-    this.$.xTicks.setRange(xMin, xMax);
-    this.$.xTicks.set("tickCount",
-      +this.$.xTicks.tickCount ||
-      (dataWidth / (
-        ctx.measureText(
-          new Array(this.$.xTicks.labelWidth() || 0).join("W")
-        ).width
-      ))
-    );
-
-    this.$.yLeftTicks.setRange(yMin, yMax);
-    this.$.yLeftTicks.set("tickCount",
-      +this.$.yLeftTicks.ticktickCount || this.height / (2 * this.fontSize)
-    );
-    
-    if (this.$.yRightTicks) {
-      this.$.yRightTicks.setRange(yMin, yMax);
-      this.$.yRightTicks.set("tickCount",
-        +this.$.yRightTicks.tickCount || this.height / (2 * this.fontSize)
-      );
-    }
-    
     //draw the left hand y axis tics and labels
-    if (this.$.yLeftTicks) {
+    if ((axis = this.$.yLeftTicks)) {
+      axis.setRange(yMin, yMax);
+      axis.set("tickCount",
+        +axis.tickCount || this.height / (2 * this.fontSize)
+      );
+      
       ctx.save();
+      
+      if (axis.innerLabel) {
+        ctx.textAlign = "start";
+        labelOffset = 15;
+      } else {
+        ctx.textAlign = "end";
+        labelOffset = -5;
+      }
+      
       ctx.translate(margin.left, dataHeight + margin.top);
-      ticks = this.$.yLeftTicks.ticks;
+      ticks = axis.ticks;
       for (tick_i = 0; tick_i < ticks.length; tick_i++) {
         //set the color for this tick, or for this axis, or the default color
         ctx.strokeStyle =
           ticks[tick_i].color || ticks.color || this.borderColor;
        
         //get the formatted label and make sure it doesnt isnt a duplicate
-        offset = -(ticks[tick_i].value - yMin) * this.ySpacingFactor;
+        tickOffset = -(ticks[tick_i].value - yMin) * this.ySpacingFactor;
         if (ticks[tick_i].label) {
-          ctx.fillText(ticks[tick_i].label, -5, offset + 5);
+          ctx.fillText(ticks[tick_i].label, labelOffset, tickOffset + 5);
         }      
         ctx.beginPath();
-        ctx.moveTo(0, offset);
+        ctx.moveTo(0, tickOffset);
         if (ticks[tick_i].minor) {
-          ctx.lineTo(5, offset);
-        } else if (!this.$.yLeftTicks.fullLength) {
-          ctx.lineTo(15, offset);
+          ctx.lineTo(5, tickOffset);
+        } else if (axis.fullLength || ticks[tick_i].fullLength) {
+          ctx.lineTo(dataWidth, tickOffset);
         } else {
-          ctx.lineTo(dataWidth, offset);
+          ctx.lineTo(15, tickOffset);
         }
         ctx.stroke();
       }
@@ -235,28 +228,47 @@ enyo.kind({
     }
     
     //draw the right hand y axis tics and labels
-    if (this.$.yRightTicks) {
+    if ((axis = this.$.yRightTicks)) {
+      axis.setRange(yMin, yMax);
+      axis.set("tickCount",
+        +axis.tickCount || this.height / (2 * this.fontSize)
+      );
+      
       ctx.save();
-      ctx.textAlign = "start";
+      if (axis.innerLabel) {
+        ctx.textAlign = "end";
+        labelOffset = -15;
+      } else {
+        ctx.textAlign = "start";
+        labelOffset = 5;
+      }
+      
       ctx.translate(margin.left + dataWidth, dataHeight + margin.top);
-      ticks = this.$.yRightTicks.ticks;
+      ticks = axis.ticks;
       for (tick_i = 0; tick_i < ticks.length; tick_i++) {
         ctx.strokeStyle =
-          ticks[tick_i].color || this.$.yRightTicks.color || this.borderColor;
+          ticks[tick_i].color || axis.color || this.borderColor;
           
         //get the formatted label and make sure it doesnt isnt a duplicate
-        offset = -(ticks[tick_i].value - yMin) * this.ySpacingFactor;
+        tickOffset = -(ticks[tick_i].value - yMin) * this.ySpacingFactor;
         if (ticks[tick_i].label) {
-          ctx.fillText(ticks[tick_i].label, 5, offset + 5);
+          if ((axis.fullLength||ticks[tick_i].fullLength) && axis.innerLabel) {
+            ctx.textBaseline = "top";
+            ctx.fillText(
+              ticks[tick_i].label, labelOffset, tickOffset - this.fontSize
+            );
+          } else {
+            ctx.fillText(ticks[tick_i].label, labelOffset, tickOffset + 5); 
+          }
         }      
         ctx.beginPath();
-        ctx.moveTo(0, offset);
+        ctx.moveTo(0, tickOffset);
         if (ticks[tick_i].minor) {
-          ctx.lineTo(-5, offset);
-        } else if (!this.$.yRightTicks.fullLength) {
-          ctx.lineTo(-15, offset);
+          ctx.lineTo(-5, tickOffset);
+        } else if (axis.fullLength || ticks[tick_i].fullLength) {
+          ctx.lineTo(-dataWidth, tickOffset);
         } else {
-          ctx.lineTo(-dataWidth, offset);
+          ctx.lineTo(-15, tickOffset);
         }
         ctx.stroke();
       }
@@ -264,31 +276,48 @@ enyo.kind({
     }
     
     //print the x ticks
-    if (this.$.xTicks) {
+    if ((axis = this.$.xTicks)) {
+      axis.setRange(xMin, xMax);
+      axis.set("tickCount",
+        +axis.tickCount ||
+        (dataWidth / (
+          ctx.measureText(
+            new Array(axis.labelWidth() || 0).join("W")
+          ).width
+        ))
+      );
+      
       ctx.save();
       ctx.translate(margin.left, this.height - margin.bottom);
       ctx.textAlign = "center";
-      ctx.textBaseline = "top";
-      ticks = this.$.xTicks.ticks;
+      if (axis.innerLabel) {
+        ctx.textBaseline = "bottom";
+        labelOffset = -15 - this.fontSize;
+      } else {
+        ctx.textBaseline = "top";
+        labelOffset = this.fontSize;
+      }
+
+      ticks = axis.ticks;
 
       for (tick_i = 0; tick_i < ticks.length; tick_i++) {
         ctx.strokeStyle =
-          ticks[tick_i].color || this.$.xTicks.color || this.borderColor;
+          ticks[tick_i].color || axis.color || this.borderColor;
           
-        offset = (ticks[tick_i].value - xMin) * this.xSpacingFactor;
+        tickOffset = (ticks[tick_i].value - xMin) * this.xSpacingFactor;
         if (ticks[tick_i].label) {
-          ctx.fillText(ticks[tick_i].label, offset, this.fontSize);
+          ctx.fillText(ticks[tick_i].label, tickOffset, labelOffset);
         }
         ctx.beginPath();
         if (ticks[tick_i].minor) {
-          ctx.moveTo(offset, -5);
-        } else if (!this.$.xTicks.fullLength) {
-          ctx.moveTo(offset, -15);
+          ctx.moveTo(tickOffset, -5);
+        } else if (!axis.fullLength) {
+          ctx.moveTo(tickOffset, -15);
         } else {
-          ctx.moveTo(offset, -dataHeight);
+          ctx.moveTo(tickOffset, -dataHeight);
         }
         
-        ctx.lineTo(offset, 0);
+        ctx.lineTo(tickOffset, 0);
         ctx.stroke();
       }
       
@@ -425,7 +454,6 @@ enyo.kind({
       
       if (datasets.length) {
         range = this.getRangeFromData(datasets, 0);
-        console.log(range)
         xMin = isFinite(xMin) ? xMin : +range.min;
         xMax = isFinite(xMax) ? xMax : +range.max;
       }

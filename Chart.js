@@ -26,7 +26,8 @@ enyo.kind({
     newRange: false,
     lastDrawTime: 0,
     fps: 0,
-    needsDraw: true
+    needsDraw: true,
+    crosshairs: true
   },
   components: [
     {name: "decorCanvas", kind: "enyo.Canvas"},
@@ -424,7 +425,7 @@ enyo.kind({
     window.requestAnimationFrame(this.draw.bind(this));
 
     //update the overlay if its showing
-    if ((overlay = this.$.overlay)) {
+    if ((overlay = this.$.overlay) && (this.crosshairs || this.needsDraw)) {
       overlay.refresh();
     }
     
@@ -456,16 +457,18 @@ enyo.kind({
     
     //adjust the size of each canvas
     this.calculateMargins();
-    canvas = this.$.decorCanvas;
-    canvas.setAttribute("height", this.height);
-    canvas.setAttribute("width", this.width);
-    canvas.update();
+    if ((canvas = this.$.decorCanvas)) {
+      canvas.setAttribute("height", this.height);
+      canvas.setAttribute("width", this.width);
+      canvas.update();
+    }
     
-    canvas = this.$.exportCanvas;
-    canvas.setAttribute("height", this.height);
-    canvas.setAttribute("width", this.width);
-    canvas.update();
-
+    if ((canvas = this.$.exportCanvas)) {
+      canvas.setAttribute("height", this.height);
+      canvas.setAttribute("width", this.width);
+      canvas.update();  
+    }
+    
     for (layer_i in this.layers) {
       canvas = this.layers[layer_i].canvas;
       canvas.setAttribute("height", dataHeight);

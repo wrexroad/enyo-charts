@@ -8,7 +8,8 @@ enyo.kind({
     type: "",
     ticks: null,
     tickCount: 10,
-    minorTickCount: 5
+    minorTickCount: 5,
+    innerLabel: false
   },
   constructor: function() {
     this.inherited(arguments);
@@ -283,27 +284,33 @@ enyo.kind({
     this.setStops(opts.stops);
   },
   setStops: function(newStops) {
-    this.stops = [].concat(newStops || []);
-    this.set("tickCount", this.stops.length);
+    this.stops = newStops || {};
+    this.set("tickCount", Object.keys(this.stops).length);
   },
   labelWidth: function() {
+    var name;
+    
     var maxWidth = 0;
-    this.stops.forEach(function(stop_i) {
-      var stopLabelLength = (stop_i.label || "").length;
+    for (name in this.stops) {
+      var stopLabelLength = (name || "").length;
       maxWidth = stopLabelLength > maxWidth ? stopLabelLength : maxWidth;
-    }, this);
+    }
     return maxWidth;
   },
   generateTicks: function() {
+    var stop, name;
+    
     this.ticks = [];
-    this.stops.forEach(function(stop_i) {
-      if (this.min <= stop_i.value && this.max >= stop_i.value) {
-       this.ticks.push({
-         label: stop_i.label,
-         value: stop_i.value,
-         color: stop_i.color
-       }); 
+    for (name in this.stops) {
+      stop = this.stops[name];
+      
+      if (this.min <= stop.value && this.max >= stop.value) {
+        this.ticks.push({
+          label: name,
+          value: stop.value,
+          color: stop.color
+        }); 
       }
-    }, this);
+    }
   }
 });
